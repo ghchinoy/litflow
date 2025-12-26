@@ -20,12 +20,12 @@ export class LitMinimap extends (SignalWatcher as <T extends Constructor<LitElem
     :host {
       display: block;
       position: absolute;
-      right: 10px;
-      bottom: 10px;
+      right: 16px;
+      bottom: 16px;
       z-index: 5;
       background: var(--md-sys-color-surface);
       border: 1px solid var(--md-sys-color-outline-variant);
-      border-radius: var(--md-sys-shape-corner-extra-small);
+      border-radius: var(--md-sys-shape-corner-small);
       box-shadow: var(--md-sys-elevation-1);
       overflow: hidden;
     }
@@ -37,7 +37,7 @@ export class LitMinimap extends (SignalWatcher as <T extends Constructor<LitElem
     .minimap-node {
       fill: var(--md-sys-color-surface-variant);
       stroke: var(--md-sys-color-outline-variant);
-      stroke-width: 1;
+      stroke-width: 0.5;
     }
 
     .minimap-mask {

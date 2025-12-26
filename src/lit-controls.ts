@@ -11,22 +11,22 @@ export class LitControls extends (SignalWatcher as <T extends Constructor<LitEle
     :host {
       display: block;
       position: absolute;
-      left: 10px;
-      bottom: 10px;
+      left: 16px;
+      bottom: 16px;
       z-index: 5;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       background: var(--md-sys-color-surface);
       padding: 4px;
-      border-radius: var(--md-sys-shape-corner-extra-small);
+      border-radius: var(--md-sys-shape-corner-small);
       box-shadow: var(--md-sys-elevation-1);
       border: 1px solid var(--md-sys-color-outline-variant);
     }
 
     button {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -35,17 +35,18 @@ export class LitControls extends (SignalWatcher as <T extends Constructor<LitEle
       border-radius: var(--md-sys-shape-corner-extra-small);
       cursor: pointer;
       padding: 0;
-      color: var(--md-sys-color-on-surface);
-      transition: background-color 0.2s ease;
+      color: var(--md-sys-color-on-surface-variant);
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     button:hover {
-      background: var(--md-sys-color-surface-variant);
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
     }
 
     button svg {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       fill: currentColor;
     }
   `;
