@@ -46,12 +46,10 @@ One of the most significant differences between the React and Lit implementation
 React Flow uses `zustand` for state management. While highly efficient, React's top-down rendering model often means that a change in one part of the graph (like moving a node) can trigger re-renders or reconciliation checks across many components unless carefully optimized with `memo` and specific selectors.
 
 ### Lit + xyflow (Lit Signals)
-By using `@lit-labs/signals`, we can achieve **fine-grained reactivity**:
-- **Direct Subscriptions**: A `<lit-node>` can subscribe directly to its specific position signal. When that node moves, *only* that node and its connected edges re-render.
-- **Viewport Optimization**: The viewport transform can be a signal. UI overlays (like a MiniMap or Zoom controls) can react to this signal without triggering a re-render of the entire node/edge canvas.
-- **No Prop Drilling**: Signals can be accessed from a shared store, eliminating the need to pass state through multiple layers of components.
-
-This model closely mirrors how `xyflow`'s core works internally, making the integration more natural and performant for extremely large datasets.
+By using `@lit-labs/signals`, we achieve **fine-grained reactivity**:
+- **Direct Subscriptions**: Components subscribe directly to specific data signals. When a node moves, *only* that node and its connected edges re-render.
+- **Viewport Optimization**: UI overlays (like MiniMap or Zoom controls) react to the transform signal without triggering a re-render of the entire canvas.
+- **Light DOM Strategy**: By using Light DOM for child components, we maintain high performance and full compatibility with `@xyflow/system`'s native DOM utilities (like `elementFromPoint` for connection targets).
 
 ---
 
@@ -59,15 +57,15 @@ This model closely mirrors how `xyflow`'s core works internally, making the inte
 
 ### Lit + xyflow
 **Pros:**
-- **Portability**: Build once, use anywhere.
+- **Portability**: Build once, use anywhere (React, Vue, Angular, or plain HTML).
 - **Speed**: Extremely fast boot time and low memory footprint.
-- **Standards-based**: Leverages native browser features.
-- **Clean API**: Consumers just use HTML attributes and properties.
+- **Fine-Grained Reactivity**: Signals minimize unnecessary re-renders in large graphs.
+- **Standards-based**: Leverages native browser features (WebComponents).
 
 **Cons:**
-- **Manual Setup**: You have to manually wire up `XYPanZoom`, `XYDrag`, and state syncing.
+- **Manual Setup**: Requires manual orchestration of `XYPanZoom` and `XYDrag`.
+- **Styling Complexity**: Light DOM children require styles to be managed in the parent ShadowRoot or globally.
 - **Smaller Community**: Fewer pre-built "custom node" libraries compared to React Flow.
-- **SSR Complexity**: While possible, SSR for WebComponents requires more setup than React.
 
 ### React Flow
 **Pros:**

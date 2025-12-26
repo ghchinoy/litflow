@@ -29,7 +29,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
   - `examples/multiple-handles/`: Nodes with multiple input/output ports.
   - `examples/dynamic-interactivity/`: Adding/removing nodes and edges at runtime.
 - **`<lit-flow>`**: The root component. It initializes the `XYPanZoom` instance for the viewport and manages the collection of nodes and edges.
-- **`<lit-node>`**: A reactive Lit component for individual nodes. Uses **Light DOM** for seamless integration with xyflow's system utilities.
+- **`<lit-node>`**: A reactive Lit component for individual nodes. Uses **Light DOM** to ensure compatibility with xyflow's system utilities (like hit-testing).
 - **`<lit-handle>`**: A connection port component. Also uses **Light DOM** to ensure discoverability during connection dragging.
 - **`<lit-controls>`**: A UI overlay providing zoom and fit-view controls.
 - **`<lit-minimap>`**: A live overview of the flow with viewport tracking.
@@ -42,6 +42,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 - **Controls & MiniMap**: Built-in utility components for navigation and overview.
 - **Reactive Updates**: Powered by `@lit-labs/signals` for efficient, targeted re-renders.
 - **Light DOM Architecture**: Optimized for `@xyflow/system` compatibility while maintaining Lit's reactive benefits.
+- **Custom Node Support**: Easily build complex nodes with internal state and custom Lit templates.
 
 ## 📖 Documentation
 - [Lit vs React for xyflow](./LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.

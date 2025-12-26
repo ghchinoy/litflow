@@ -19,35 +19,23 @@ This project uses **bd (beads)** for issue tracking.
 - **Language**: TypeScript is used for core logic and components.
 - **Framework**: [Lit](https://lit.dev/) for WebComponents.
 - **Issue Tracking**: Use `bd` (beads) for all task management.
-- **State Management**: Use `@lit-labs/signals` for fine-grained reactivity (nodes, edges, transform) to avoid unnecessary full-graph re-renders.
-- **Styling**: Adhere to **Material 3** design principles. Use M3 design tokens for colors, typography, and elevation.
-- **Dynamic Components**: Use `lit/static-html.js` (`unsafeStatic`) when rendering components based on dynamic `nodeTypes` to allow user-defined WebComponents.
-- **Handle Measurement**: Always measure handles in the `_updateNodeDimensions` cycle and store them in `node.internals.handleBounds`. This ensures edges connect correctly to specific ports.
-- **Shell Scripts**: Provide `.sh` scripts for common developer tasks (e.g., starting servers, running tests) to improve DX.
-- **Example Structure**: Each example should reside in its own subdirectory within `examples/` and include an `index.html` or a dedicated entry point.
+- **State Management**: Use `@lit-labs/signals` for fine-grained reactivity. Components must use the `SignalWatcher` mixin.
+- **DOM Strategy**: Use **Light DOM** for child components (`<lit-node>`, `<lit-handle>`) by overriding `createRenderRoot`. This ensures compatibility with `@xyflow/system` utilities like `elementFromPoint`.
+- **Styling**: Define styles for Light DOM children within the parent `<lit-flow>` ShadowRoot or via global CSS variables (design tokens).
+- **Handle Measurement**: Always measure handles in the `_updateNodeDimensions` cycle and store them in `node.internals.handleBounds`.
+- **Shell Scripts**: Provide `.sh` scripts for common developer tasks to improve DX.
 
 ### Technical Insights & Lessons Learned
 - **Headless Core**: `@xyflow/system` is truly headless but requires manual orchestration of `XYPanZoom` and `XYDrag`.
-- **Light DOM for Children**: Child components like `<lit-node>` and `<lit-handle>` should use **Light DOM** (override `createRenderRoot() { return this; }`). This ensures they are discoverable by `@xyflow/system` utilities (like `elementFromPoint` and `querySelectorAll`) which often operate within a single ShadowRoot or the document.
-- **Styling Light DOM**: When children use Light DOM, their styles must be defined in the parent component's ShadowRoot (e.g., `<lit-flow>`) or globally. `:host` styles do not apply to Light DOM components.
-- **Event Propagation**: To prevent node dragging when interacting with handles, stop propagation of `mousedown` and `touchstart` events within the `<lit-handle>` component.
-- **Manual Connections**: Use `XYHandle.onPointerDown` to initiate connections. A `connectionInProgress` signal in the store is essential for rendering the "live" connection line during a drag.
-- **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support with `@lit-labs/signals`.
-- **Unwrapping Signals**: Always unwrap signals (e.g., `this._state.nodes.get()`) when passing state to `@xyflow/system` instances like `XYDrag` or `XYPanZoom`, as they expect raw values.
-- **Attribute Mapping**: Use `attribute: 'kebab-case'` in `@property` decorators to ensure HTML attributes (e.g., `show-controls`) correctly sync with camelCase properties.
-- **Dimension Tracking**: Use `ResizeObserver` on the host component to track its own dimensions and provide them to child components (like MiniMap) that require absolute pixel values.
-- **Host Styling**: Always include `display: block` (or similar) in `:host` styles for custom elements to ensure they occupy space correctly in the layout.
-- **Node & Handle Measurement**: Accurate dragging and edge positioning depend on `measured` dimensions. Use `ResizeObserver` for nodes and manual measurement for handles to populate `node.internals.handleBounds`.
-- **Shadow DOM Timing**: When measuring elements inside Shadow DOM (like handles), always `await element.updateComplete` to ensure Lit has finished rendering before measurement occurs.
-- **Edge Rendering**: Custom elements (like `<lit-edge>`) do not render correctly inside `<svg>` tags. Use Lit's `svg` template literal directly within the parent component to render `<path>` elements in the correct namespace.
-- **Edge Positioning**: Use `getHandlePosition` from `@xyflow/system` combined with `handleBounds` to calculate precise connection points for edges.
-- **Selection Management**: Selection state (toggling `node.selected`) is currently handled manually in the `<lit-flow>` wrapper via click listeners.
-- **State Syncing**: Sync `measured` dimensions and `position` data back from internal lookups to the user-facing `nodes` array. This prevents data loss when `adoptUserNodes` is called (which clears internal state).
-- **Non-Destructive Updates**: Use `updateAbsolutePositions` for routine updates (like resizing or dragging) instead of `adoptUserNodes` to avoid clearing the internal node lookup.
-- **Dynamic Cleanup**: When removing nodes, the `edges` signal must be manually filtered to remove connections to the deleted nodes.
-- **DOM Management**: `XYDrag` requires direct DOM references; use Lit's `@query` or `shadowRoot` to provide these after the first render.
-- **SVG Layering**: Edges must be rendered in an SVG element that is a sibling to the nodes container within the viewport div to ensure correct coordinate alignment.
-- **DX (Developer Experience)**: Use Vite for fast development and hot module replacement. Provide a `start-server.sh` (using `pnpm`) for quick access.
+- **Light DOM Necessity**: Child components must be in Light DOM for `@xyflow/system` to perform hit-testing and handle discovery across the graph.
+- **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support.
+- **Unwrapping Signals**: Always unwrap signals (e.g., `this._state.nodes.get()`) when passing state to `@xyflow/system` instances.
+- **Shadow DOM Timing**: When measuring elements (especially in Light DOM children), always `await element.updateComplete` to ensure rendering is finished.
+- **Edge Rendering**: Use Lit's `svg` template literal directly within the parent component to render `<path>` elements in the correct SVG namespace.
+- **State Syncing**: Sync `measured` dimensions and `position` data back from internal lookups to user-facing node objects to prevent data loss during `adoptUserNodes` calls.
+- **Non-Destructive Updates**: Use `updateAbsolutePositions` for routine updates (resizing/dragging) instead of `adoptUserNodes` to avoid clearing the internal node lookup.
+- **Event Propagation**: Stop propagation of `mousedown` and `touchstart` in `<lit-handle>` to prevent node dragging during connection attempts.
+- **DX (Developer Experience)**: Use Vite for fast development. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
 ### Proposed Components
 - `<lit-flow>`: The main viewport and container.
