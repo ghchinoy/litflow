@@ -13,6 +13,8 @@ export class LitHandle extends LitElement {
       border: 1px solid white;
       border-radius: 50%;
       z-index: 10;
+      pointer-events: all;
+      cursor: crosshair;
     }
 
     :host([type="source"]) {

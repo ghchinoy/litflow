@@ -1,3 +1,4 @@
+import { Signal, signal } from '@lit-labs/signals';
 import {
   type NodeBase,
   type EdgeBase,
@@ -11,8 +12,8 @@ import {
 } from '@xyflow/system';
 
 export interface FlowState {
-  nodes: NodeBase[];
-  edges: EdgeBase[];
+  nodes: Signal<NodeBase[]>;
+  edges: Signal<EdgeBase[]>;
   nodeLookup: Map<string, InternalNodeBase>;
   parentLookup: Map<string, Map<string, InternalNodeBase>>;
   nodeExtent: CoordinateExtent;
@@ -20,7 +21,7 @@ export interface FlowState {
   snapToGrid: boolean;
   nodeOrigin: NodeOrigin;
   multiSelectionActive: boolean;
-  transform: Transform;
+  transform: Signal<Transform>;
   autoPanOnNodeDrag: boolean;
   nodesDraggable: boolean;
   selectNodesOnDrag: boolean;
@@ -31,8 +32,8 @@ export interface FlowState {
 
 export function createInitialState(): FlowState {
   return {
-    nodes: [],
-    edges: [],
+    nodes: signal([]),
+    edges: signal([]),
     nodeLookup: new Map(),
     parentLookup: new Map(),
     nodeExtent: infiniteExtent,
@@ -40,7 +41,7 @@ export function createInitialState(): FlowState {
     snapToGrid: false,
     nodeOrigin: [0, 0],
     multiSelectionActive: false,
-    transform: [0, 0, 1],
+    transform: signal([0, 0, 1]),
     autoPanOnNodeDrag: true,
     nodesDraggable: true,
     selectNodesOnDrag: true,

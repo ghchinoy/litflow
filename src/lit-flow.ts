@@ -1,6 +1,7 @@
 import { LitElement, css } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { SignalWatcher } from '@lit-labs/signals';
 import {
   XYPanZoom,
   XYDrag,
@@ -17,7 +18,7 @@ import './lit-node';
 import './lit-edge';
 
 @customElement('lit-flow')
-export class LitFlow extends LitElement {
+export class LitFlow extends SignalWatcher(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -94,21 +95,25 @@ export class LitFlow extends LitElement {
 
   @property({ type: Array })
   set nodes(nodes: NodeBase[]) {
-    const oldNodes = this._state.nodes;
-    this._state.nodes = nodes;
+    this._state.nodes.set(nodes);
     adoptUserNodes(nodes, this._state.nodeLookup, this._state.parentLookup, {
       nodeOrigin: this._state.nodeOrigin,
       nodeExtent: this._state.nodeExtent,
     });
-    this.requestUpdate('nodes', oldNodes);
   }
 
   get nodes() {
-    return this._state.nodes;
+    return this._state.nodes.get();
   }
 
   @property({ type: Array })
-  edges: any[] = [];
+  set edges(edges: any[]) {
+    this._state.edges.set(edges);
+  }
+
+  get edges() {
+    return this._state.edges.get();
+  }
 
   @property({ type: Object })
   viewport: Viewport = { x: 0, y: 0, zoom: 1 };
@@ -138,7 +143,7 @@ export class LitFlow extends LitElement {
     const node = this._state.nodeLookup.get(id);
     if (node) {
       const { width, height } = element.getBoundingClientRect();
-      const zoom = this._state.transform[2];
+      const zoom = this._state.transform.get()[2];
       node.measured = {
         width: width / zoom,
         height: height / zoom,
@@ -178,7 +183,8 @@ export class LitFlow extends LitElement {
         nodeOrigin: this._state.nodeOrigin,
         nodeExtent: this._state.nodeExtent,
       });
-      this.requestUpdate();
+      // Trigger update via signal
+      this._state.nodes.set([...this.nodes]);
     }
   }
 
@@ -196,7 +202,7 @@ export class LitFlow extends LitElement {
         onDraggingChange: () => {},
         onPanZoom: (_, { x, y, zoom }) => {
           this.viewport = { x, y, zoom };
-          this._state.transform = [x, y, zoom];
+          this._state.transform.set([x, y, zoom]);
           if (this._viewport) {
             this._viewport.style.transform = `translate(${x}px,${y}px) scale(${zoom})`;
           }
@@ -242,8 +248,10 @@ export class LitFlow extends LitElement {
           const dragInstance = XYDrag({
             getStoreItems: () => ({
               ...this._state,
+              transform: this._state.transform.get(),
               panBy: async (delta) => {
-                const { transform, panZoom, nodeExtent } = this._state;
+                const { panZoom, nodeExtent } = this._state;
+                const transform = this._state.transform.get();
                 if (!panZoom) return false;
                 const nextViewport = await panZoom.setViewportConstrained(
                   {
@@ -261,12 +269,13 @@ export class LitFlow extends LitElement {
                   const node = this._state.nodeLookup.get(id);
                   if (node) {
                     node.position = item.position;
-                    // Also update the user-facing nodes array if possible
+                    node.internals.positionAbsolute = item.internals.positionAbsolute;
                     const userNode = this.nodes.find(n => n.id === id);
                     if (userNode) userNode.position = item.position;
                   }
                 });
-                this.requestUpdate();
+                // Trigger update via signal
+                this._state.nodes.set([...this.nodes]);
               },
               unselectNodesAndEdges: () => {},
             }),
@@ -282,11 +291,12 @@ export class LitFlow extends LitElement {
   }
 
   render() {
+    const transform = this._state.transform.get();
     return html`
       <div class="xyflow__renderer">
         <div
           class="xyflow__viewport"
-          style="transform: translate(${this.viewport.x}px, ${this.viewport.y}px) scale(${this.viewport.zoom})"
+          style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"
         >
           <svg class="xyflow__edges">
             ${this.edges.map((edge) => {
@@ -345,3 +355,4 @@ export class LitFlow extends LitElement {
     `;
   }
 }
+

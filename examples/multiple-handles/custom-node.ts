@@ -27,7 +27,7 @@ export class MultipleHandlesNode extends LitElement {
       justify-content: space-between;
       align-items: center;
       position: relative;
-      padding: 5px 0;
+      padding: 5px 10px;
     }
 
     .label {
