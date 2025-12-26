@@ -30,6 +30,9 @@ This project uses **bd (beads)** for issue tracking.
 - **Headless Core**: `@xyflow/system` is truly headless but requires manual orchestration of `XYPanZoom` and `XYDrag`.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support with `@lit-labs/signals`.
 - **Unwrapping Signals**: Always unwrap signals (e.g., `this._state.nodes.get()`) when passing state to `@xyflow/system` instances like `XYDrag` or `XYPanZoom`, as they expect raw values.
+- **Attribute Mapping**: Use `attribute: 'kebab-case'` in `@property` decorators to ensure HTML attributes (e.g., `show-controls`) correctly sync with camelCase properties.
+- **Dimension Tracking**: Use `ResizeObserver` on the host component to track its own dimensions and provide them to child components (like MiniMap) that require absolute pixel values.
+- **Host Styling**: Always include `display: block` (or similar) in `:host` styles for custom elements to ensure they occupy space correctly in the layout.
 - **Node & Handle Measurement**: Accurate dragging and edge positioning depend on `measured` dimensions. Use `ResizeObserver` for nodes and manual measurement for handles to populate `node.internals.handleBounds`.
 - **Shadow DOM Timing**: When measuring elements inside Shadow DOM (like handles), always `await element.updateComplete` to ensure Lit has finished rendering before measurement occurs.
 - **Edge Rendering**: Custom elements (like `<lit-edge>`) do not render correctly inside `<svg>` tags. Use Lit's `svg` template literal directly within the parent component to render `<path>` elements in the correct namespace.

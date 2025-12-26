@@ -28,13 +28,15 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
   - `examples/basic/`: A simple graph implementation.
 - **`<lit-flow>`**: The root component. It initializes the `XYPanZoom` instance for the viewport and manages the collection of nodes and edges.
 - **`<lit-node>`**: A reactive Lit component for individual nodes. It handles its own styling and selection state.
-- **`<lit-edge>`**: An SVG-based component that uses xyflow's path utilities (like `getBezierPath`) to render connections.
-- **`store.ts`**: A state container that bridges Lit's reactivity with xyflow's internal data structures. *Note: This is transitioning to use `@lit-labs/signals` for fine-grained reactivity.*
+- **`<lit-controls>`**: A UI overlay providing zoom and fit-view controls.
+- **`<lit-minimap>`**: A live overview of the flow with viewport tracking.
+- **`store.ts`**: A state container using `@lit-labs/signals` for fine-grained reactivity.
 
 ## 🛠️ Key Features
 - **Panning & Zooming**: Full support for viewport manipulation via d3-zoom (via xyflow).
 - **Node Dragging**: Individual nodes can be dragged, with positions synced back to the state.
-- **Reactive Updates**: Changing the `nodes` or `edges` properties on `<lit-flow>` automatically updates the UI.
+- **Controls & MiniMap**: Built-in utility components for navigation and overview.
+- **Reactive Updates**: Powered by `@lit-labs/signals` for high-performance UI updates.
 - **Shadow DOM Encapsulation**: Styles are scoped to the components, preventing leaks.
 
 ## 📖 Documentation

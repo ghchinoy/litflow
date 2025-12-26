@@ -81,7 +81,9 @@ export class LitFlow extends SignalWatcher(LitElement) {
   @query('.xyflow__viewport')
   _viewport?: HTMLElement;
 
+  @state()
   private _panZoom?: PanZoomInstance;
+
   private _drags = new Map<string, XYDragInstance>();
   private _resizeObserver?: ResizeObserver;
 
@@ -94,6 +96,18 @@ export class LitFlow extends SignalWatcher(LitElement) {
     input: 'lit-node',
     output: 'lit-node',
   };
+
+  @property({ type: Boolean, attribute: 'show-controls', reflect: true })
+  showControls = false;
+
+  @property({ type: Boolean, attribute: 'show-minimap', reflect: true })
+  showMinimap = false;
+
+  @state()
+  private _width = 0;
+
+  @state()
+  private _height = 0;
 
   @property({ type: Array })
   set nodes(nodes: NodeBase[]) {
@@ -124,7 +138,10 @@ export class LitFlow extends SignalWatcher(LitElement) {
     super.connectedCallback();
     this._resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        if (entry.target === this._renderer) {
+        if (entry.target === this) {
+          this._width = entry.contentRect.width;
+          this._height = entry.contentRect.height;
+        } else if (entry.target === this._renderer) {
           // Handle renderer resize if needed
         } else {
           const id = (entry.target as HTMLElement).dataset.id;
@@ -134,6 +151,7 @@ export class LitFlow extends SignalWatcher(LitElement) {
         }
       }
     });
+    this._resizeObserver.observe(this);
   }
 
   disconnectedCallback() {
@@ -398,6 +416,21 @@ export class LitFlow extends SignalWatcher(LitElement) {
           </div>
         </div>
       </div>
+      ${this.showControls
+        ? html`<lit-controls .panZoom="${this._panZoom}"></lit-controls>`
+        : ''}
+      ${this.showMinimap
+        ? html`
+            <lit-minimap
+              .panZoom="${this._panZoom}"
+              .nodeLookup="${this._state.nodeLookup}"
+              .transform="${this._state.transform.get()}"
+              .translateExtent="${this._state.nodeExtent}"
+              .width="${this._width}"
+              .height="${this._height}"
+            ></lit-minimap>
+          `
+        : ''}
     `;
   }
 }
