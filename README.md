@@ -1,5 +1,8 @@
 # LitFlow: xyflow + Lit WebComponents
 
+[![npm version](https://img.shields.io/npm/v/@ghchinoy/litflow.svg)](https://www.npmjs.com/package/@ghchinoy/litflow)
+[![license](https://img.shields.io/npm/l/@ghchinoy/litflow.svg)](https://github.com/ghchinoy/litflow/blob/main/LICENSE)
+
 LitFlow is a demonstration and starter kit for using the [xyflow](https://xyflow.com/) core system with [Lit](https://lit.dev/) WebComponents. It provides a lightweight, framework-agnostic way to build node-based UIs.
 
 ## 🚀 Quick Start
