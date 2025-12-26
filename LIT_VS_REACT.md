@@ -25,18 +25,13 @@ This makes Lit an excellent choice for building a flow editor that needs to be e
 - **Scoped Styles**: Shadow DOM ensures that flow styles don't leak out and external styles don't break the flow UI.
 - **DOM Isolation**: The internal structure of the flow is hidden, providing a clean API to the consumer.
 
+### 4. Documentation & Static Usage
+One of the standout use cases for the Lit implementation is **embedded documentation**.
+- **Read-Only Mode**: By simply setting attributes like `nodes-draggable="false"` and `pan-on-drag="false"`, you can turn a complex editor into a static diagram.
+- **Zero-Config Embedding**: Since it's a WebComponent, you can drop a `<lit-flow>` tag into a Markdown-based documentation site (like Docusaurus, VitePress, or Hugo) without needing a complex React build pipeline for that specific page.
+- **Clean Aesthetic**: The ability to toggle the grid (`show-grid="false"`) allows the graph to blend seamlessly into the document's background.
+
 ---
-
-## 📊 Comparison Table
-
-| Feature | Lit + xyflow | React Flow |
-| :--- | :--- | :--- |
-| **Bundle Size** | Very Small | Medium |
-| **Ecosystem** | Emerging | Mature (Plugins, Hooks) |
-| **Ease of Use** | Requires manual orchestration | High (Out-of-the-box) |
-| **Interoperability** | Excellent (Standard WC) | Limited to React |
-| **Styling** | Scoped (Shadow DOM) | CSS Modules / Global / CSS-in-JS |
-| **State Management** | Flexible (Signals, Stores) | Deeply integrated with Zustand |
 
 ## ⚡ State Management & Lit Signals
 
@@ -52,6 +47,24 @@ By using `@lit-labs/signals`, we achieve **fine-grained reactivity**:
 - **Light DOM Strategy**: By using Light DOM for child components, we maintain high performance and full compatibility with `@xyflow/system`'s native DOM utilities (like `elementFromPoint` for connection targets).
 
 ---
+
+## 🛠️ Declarative vs. Imperative Interactivity
+
+### React Flow
+Interactivity is largely declarative through props. If you want to disable dragging, you pass `nodesDraggable={false}`. React Flow handles the internal state and event listener cleanup.
+
+### Lit + xyflow
+The Lit implementation mirrors this declarative approach with attributes (`nodes-draggable="false"`), but it also provides a more **imperative-friendly API**. Because the component is a real DOM element, you can interact with it directly via JavaScript:
+```javascript
+const flow = document.querySelector('lit-flow');
+flow.nodes = [...]; // Direct property access
+flow.addEventListener('connect', (e) => { ... }); // Standard DOM events
+```
+This makes it much easier to integrate with non-React tools or legacy systems.
+
+---
+
+## 📊 Comparison Table
 
 ## ✅ Pros & ❌ Cons
 
