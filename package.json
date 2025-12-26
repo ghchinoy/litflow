@@ -2,12 +2,19 @@
   "name": "@ghchinoy/litflow",
   "version": "0.1.0",
   "description": "xyflow core integrated with Lit WebComponents",
+  "license": "MIT",
+  "author": "G. Hussain Chinoy",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghchinoy/litflow.git"
+  },
   "main": "./dist/litflow.js",
   "module": "./dist/litflow.js",
   "types": "./dist/index.d.ts",
   "type": "module",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "exports": {
     ".": {
