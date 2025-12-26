@@ -1,1 +1,23 @@
+# Dependencies
+node_modules/
+.pnpm-debug.log*
+
+# Build output
+dist/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
 firebase-debug.log
+
+# Genkit
+.genkit/
+
+# OS files
+.DS_Store
+Thumbs.db
