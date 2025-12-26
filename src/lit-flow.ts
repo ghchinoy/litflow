@@ -1,4 +1,4 @@
-import { LitElement, css } from 'lit';
+import { LitElement, css, svg } from 'lit';
 import { html, unsafeStatic } from 'lit/static-html.js';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
@@ -11,7 +11,9 @@ import {
   type Viewport,
   type NodeBase,
   adoptUserNodes,
+  updateAbsolutePositions,
   getHandlePosition,
+  getBezierPath,
 } from '@xyflow/system';
 import { createInitialState, type FlowState } from './store';
 import './lit-node';
@@ -139,9 +141,14 @@ export class LitFlow extends SignalWatcher(LitElement) {
     this._resizeObserver?.disconnect();
   }
 
-  private _updateNodeDimensions(id: string, element: HTMLElement) {
+  private async _updateNodeDimensions(id: string, element: HTMLElement) {
     const node = this._state.nodeLookup.get(id);
     if (node) {
+      // Wait for Lit element to finish rendering its shadow DOM
+      if ('updateComplete' in element) {
+        await (element as any).updateComplete;
+      }
+
       const { width, height } = element.getBoundingClientRect();
       const zoom = this._state.transform.get()[2];
       node.measured = {
@@ -149,9 +156,15 @@ export class LitFlow extends SignalWatcher(LitElement) {
         height: height / zoom,
       };
 
+      // Sync back to user node to preserve dimensions across adoptUserNodes calls
+      const userNode = this.nodes.find((n) => n.id === id);
+      if (userNode) {
+        userNode.measured = node.measured;
+      }
+
       // Update handle bounds
       const handles = element.shadowRoot?.querySelectorAll('lit-handle');
-      if (handles) {
+      if (handles && handles.length > 0) {
         const sourceBounds: any[] = [];
         const targetBounds: any[] = [];
 
@@ -178,20 +191,36 @@ export class LitFlow extends SignalWatcher(LitElement) {
         };
       }
 
-      // Update absolute positions after dimension change
-      adoptUserNodes(this.nodes, this._state.nodeLookup, this._state.parentLookup, {
+      // Update absolute positions without clearing the lookup
+      updateAbsolutePositions(this._state.nodeLookup, this._state.parentLookup, {
         nodeOrigin: this._state.nodeOrigin,
         nodeExtent: this._state.nodeExtent,
       });
+
       // Trigger update via signal
       this._state.nodes.set([...this.nodes]);
     }
+  }
+
+  private _selectNode(id: string, multi: boolean) {
+    const newNodes = this.nodes.map((node) => {
+      if (node.id === id) {
+        return { ...node, selected: !node.selected };
+      }
+      return multi ? node : { ...node, selected: false };
+    });
+    this.nodes = newNodes;
   }
 
   firstUpdated() {
     if (this._renderer) {
       this._state.domNode = this._renderer;
       this._resizeObserver?.observe(this._renderer);
+
+      // Clear selection on background click
+      this._renderer.onclick = () => {
+        this.nodes = this.nodes.map(n => ({ ...n, selected: false }));
+      };
 
       this._panZoom = XYPanZoom({
         domNode: this._renderer,
@@ -244,10 +273,19 @@ export class LitFlow extends SignalWatcher(LitElement) {
       const id = (el as HTMLElement).dataset.id;
       if (id) {
         this._resizeObserver?.observe(el);
+        
+        // Add click listener for selection
+        (el as HTMLElement).onclick = (e) => {
+          e.stopPropagation();
+          this._selectNode(id, e.shiftKey || e.metaKey);
+        };
+
         if (!this._drags.has(id)) {
           const dragInstance = XYDrag({
             getStoreItems: () => ({
               ...this._state,
+              nodes: this._state.nodes.get(),
+              edges: this._state.edges.get(),
               transform: this._state.transform.get(),
               panBy: async (delta) => {
                 const { panZoom, nodeExtent } = this._state;
@@ -290,6 +328,43 @@ export class LitFlow extends SignalWatcher(LitElement) {
     });
   }
 
+  private _renderEdge(edge: any) {
+    const sourceNode = this._state.nodeLookup.get(edge.source);
+    const targetNode = this._state.nodeLookup.get(edge.target);
+    if (!sourceNode || !targetNode) return null;
+
+    const sourceHandle = (sourceNode.internals.handleBounds?.source || []).find(
+      (h: any) => h.id === (edge.sourceHandle || null)
+    ) || sourceNode.internals.handleBounds?.source?.[0];
+
+    const targetHandle = (targetNode.internals.handleBounds?.target || []).find(
+      (h: any) => h.id === (edge.targetHandle || null)
+    ) || targetNode.internals.handleBounds?.target?.[0];
+
+    if (!sourceHandle || !targetHandle) return null;
+
+    const sPos = getHandlePosition(sourceNode, sourceHandle, sourceHandle.position, true);
+    const tPos = getHandlePosition(targetNode, targetHandle, targetHandle.position, true);
+
+    const [path] = getBezierPath({
+      sourceX: sPos.x,
+      sourceY: sPos.y,
+      sourcePosition: sourceHandle.position,
+      targetX: tPos.x,
+      targetY: tPos.y,
+      targetPosition: targetHandle.position,
+    });
+
+    return svg`
+      <path
+        d="${path}"
+        fill="none"
+        stroke="${edge.selected ? '#555' : '#b1b1b7'}"
+        stroke-width="2"
+      />
+    `;
+  }
+
   render() {
     const transform = this._state.transform.get();
     return html`
@@ -299,36 +374,7 @@ export class LitFlow extends SignalWatcher(LitElement) {
           style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"
         >
           <svg class="xyflow__edges">
-            ${this.edges.map((edge) => {
-              const sourceNode = this._state.nodeLookup.get(edge.source);
-              const targetNode = this._state.nodeLookup.get(edge.target);
-              if (!sourceNode || !targetNode) return null;
-
-              const sourceHandle = (sourceNode.internals.handleBounds?.source || []).find(
-                (h: any) => h.id === (edge.sourceHandle || null)
-              ) || sourceNode.internals.handleBounds?.source?.[0];
-
-              const targetHandle = (targetNode.internals.handleBounds?.target || []).find(
-                (h: any) => h.id === (edge.targetHandle || null)
-              ) || targetNode.internals.handleBounds?.target?.[0];
-
-              if (!sourceHandle || !targetHandle) return null;
-
-              const sPos = getHandlePosition(sourceNode, sourceHandle, sourceHandle.position, true);
-              const tPos = getHandlePosition(targetNode, targetHandle, targetHandle.position, true);
-
-              return html`
-                <lit-edge
-                  .sourceX="${sPos.x}"
-                  .sourceY="${sPos.y}"
-                  .targetX="${tPos.x}"
-                  .targetY="${tPos.y}"
-                  .sourcePosition="${sourceHandle.position}"
-                  .targetPosition="${targetHandle.position}"
-                  ?selected="${edge.selected}"
-                ></lit-edge>
-              `;
-            })}
+            ${this.edges.map((edge) => this._renderEdge(edge))}
           </svg>
           <div class="xyflow__nodes">
             ${this.nodes.map((node) => {

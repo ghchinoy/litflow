@@ -1,9 +1,10 @@
 import { LitElement, css, svg } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { SignalWatcher } from '@lit-labs/signals';
 import { getBezierPath, Position } from '@xyflow/system';
 
 @customElement('lit-edge')
-export class LitEdge extends LitElement {
+export class LitEdge extends SignalWatcher(LitElement) {
   static styles = css`
     :host {
       display: contents;

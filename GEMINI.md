@@ -28,12 +28,18 @@ This project uses **bd (beads)** for issue tracking.
 
 ### Technical Insights & Lessons Learned
 - **Headless Core**: `@xyflow/system` is truly headless but requires manual orchestration of `XYPanZoom` and `XYDrag`.
+- **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support with `@lit-labs/signals`.
+- **Unwrapping Signals**: Always unwrap signals (e.g., `this._state.nodes.get()`) when passing state to `@xyflow/system` instances like `XYDrag` or `XYPanZoom`, as they expect raw values.
 - **Node & Handle Measurement**: Accurate dragging and edge positioning depend on `measured` dimensions. Use `ResizeObserver` for nodes and manual measurement for handles to populate `node.internals.handleBounds`.
-- **Edge Positioning**: Use `getHandlePosition` from `@xyflow/system` combined with `handleBounds` to calculate precise connection points for edges, especially when multiple handles are present.
-- **State Syncing**: Lit's `@state` and `@property` must be carefully synced with `adoptUserNodes` and internal lookups. Transitioning to Signals will simplify this by allowing direct subscriptions.
+- **Shadow DOM Timing**: When measuring elements inside Shadow DOM (like handles), always `await element.updateComplete` to ensure Lit has finished rendering before measurement occurs.
+- **Edge Rendering**: Custom elements (like `<lit-edge>`) do not render correctly inside `<svg>` tags. Use Lit's `svg` template literal directly within the parent component to render `<path>` elements in the correct namespace.
+- **Edge Positioning**: Use `getHandlePosition` from `@xyflow/system` combined with `handleBounds` to calculate precise connection points for edges.
+- **Selection Management**: Selection state (toggling `node.selected`) is currently handled manually in the `<lit-flow>` wrapper via click listeners.
+- **State Syncing**: Sync `measured` dimensions and `position` data back from internal lookups to the user-facing `nodes` array. This prevents data loss when `adoptUserNodes` is called (which clears internal state).
+- **Non-Destructive Updates**: Use `updateAbsolutePositions` for routine updates (like resizing or dragging) instead of `adoptUserNodes` to avoid clearing the internal node lookup.
+- **Dynamic Cleanup**: When removing nodes, the `edges` signal must be manually filtered to remove connections to the deleted nodes.
 - **DOM Management**: `XYDrag` requires direct DOM references; use Lit's `@query` or `shadowRoot` to provide these after the first render.
 - **SVG Layering**: Edges must be rendered in an SVG element that is a sibling to the nodes container within the viewport div to ensure correct coordinate alignment.
-- **Event Handling**: `XYPanZoom` handles its own event listeners on the provided `domNode`, but `XYDrag` instances must be created/updated for each node element.
 - **DX (Developer Experience)**: Use Vite for fast development and hot module replacement. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
 ### Proposed Components

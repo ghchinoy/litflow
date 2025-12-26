@@ -1,8 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { SignalWatcher } from '@lit-labs/signals';
 
 @customElement('lit-node')
-export class LitNode extends LitElement {
+export class LitNode extends SignalWatcher(LitElement) {
   static styles = css`
     :host {
       display: block;
@@ -16,8 +17,9 @@ export class LitNode extends LitElement {
     }
 
     :host([selected]) {
-      border-color: #555;
-      box-shadow: 0 0 0 0.5px #1a192b;
+      border-color: #0041d0;
+      border-width: 2px;
+      box-shadow: 0 0 0 1px #0041d0;
     }
 
     :host([type="input"]) {
@@ -26,6 +28,11 @@ export class LitNode extends LitElement {
 
     :host([type="output"]) {
       border-color: #ff0072;
+    }
+
+    :host([selected][type="output"]) {
+      border-color: #ff0072;
+      box-shadow: 0 0 0 1px #ff0072;
     }
 
     .label {
@@ -45,14 +52,14 @@ export class LitNode extends LitElement {
 
   render() {
     return html`
+      <div class="label">${this.label}</div>
+      <slot></slot>
       ${this.type === 'input' || this.type === 'default'
         ? html`<lit-handle type="source" position="bottom"></lit-handle>`
         : ''}
       ${this.type === 'output' || this.type === 'default'
         ? html`<lit-handle type="target" position="top"></lit-handle>`
         : ''}
-      <div class="label">${this.label}</div>
-      <slot></slot>
     `;
   }
 }

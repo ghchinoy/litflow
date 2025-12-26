@@ -10,41 +10,53 @@ export class LitHandle extends LitElement {
       width: 8px;
       height: 8px;
       background: #555;
-      border: 1px solid white;
+      border: 4px solid transparent;
+      background-clip: padding-box;
       border-radius: 50%;
       z-index: 10;
       pointer-events: all;
-      cursor: crosshair;
+      cursor: pointer;
+    }
+
+    :host::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 1px solid white;
+      border-radius: 50%;
     }
 
     :host([type="source"]) {
-      background: #555;
+      background-color: #555;
     }
 
     :host([type="target"]) {
-      background: #555;
+      background-color: #555;
     }
 
     :host([position="top"]) {
-      top: -4px;
+      top: -8px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     :host([position="bottom"]) {
-      bottom: -4px;
+      bottom: -8px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     :host([position="left"]) {
-      left: -4px;
+      left: -8px;
       top: 50%;
       transform: translateY(-50%);
     }
 
     :host([position="right"]) {
-      right: -4px;
+      right: -8px;
       top: 50%;
       transform: translateY(-50%);
     }

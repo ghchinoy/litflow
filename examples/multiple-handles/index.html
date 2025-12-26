@@ -11,30 +11,45 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
+        font-family: sans-serif;
       }
       #app {
         width: 100vw;
         height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .toolbar {
+        padding: 10px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+      }
+      .flow-container {
+        flex-grow: 1;
+        position: relative;
       }
       .back-link {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        z-index: 10;
-        background: white;
-        padding: 5px 10px;
-        border-radius: 4px;
+        display: flex;
+        align-items: center;
         text-decoration: none;
         color: #333;
-        font-size: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0 10px;
       }
     </style>
   </head>
   <body>
-    <a href="/examples/index.html" class="back-link">← Back to Examples</a>
     <div id="app">
-      <lit-flow id="my-flow"></lit-flow>
+      <div class="toolbar">
+        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+      </div>
+      <div class="flow-container">
+        <lit-flow id="my-flow"></lit-flow>
+      </div>
     </div>
     <script type="module">
       import '../../src/index.ts';
