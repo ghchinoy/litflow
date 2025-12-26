@@ -8,6 +8,7 @@ import {
   type SnapGrid,
   type Transform,
   type PanZoomInstance,
+  type ConnectionInProgress,
   infiniteExtent,
 } from '@xyflow/system';
 
@@ -28,6 +29,7 @@ export interface FlowState {
   nodeDragThreshold: number;
   panZoom: PanZoomInstance | null;
   domNode: Element | null;
+  connectionInProgress: ReturnType<typeof signal<ConnectionInProgress | null>>;
 }
 
 export function createInitialState(): FlowState {
@@ -48,5 +50,6 @@ export function createInitialState(): FlowState {
     nodeDragThreshold: 0,
     panZoom: null,
     domNode: null,
+    connectionInProgress: signal(null),
   };
 }

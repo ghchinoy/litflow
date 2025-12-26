@@ -28,6 +28,10 @@ This project uses **bd (beads)** for issue tracking.
 
 ### Technical Insights & Lessons Learned
 - **Headless Core**: `@xyflow/system` is truly headless but requires manual orchestration of `XYPanZoom` and `XYDrag`.
+- **Light DOM for Children**: Child components like `<lit-node>` and `<lit-handle>` should use **Light DOM** (override `createRenderRoot() { return this; }`). This ensures they are discoverable by `@xyflow/system` utilities (like `elementFromPoint` and `querySelectorAll`) which often operate within a single ShadowRoot or the document.
+- **Styling Light DOM**: When children use Light DOM, their styles must be defined in the parent component's ShadowRoot (e.g., `<lit-flow>`) or globally. `:host` styles do not apply to Light DOM components.
+- **Event Propagation**: To prevent node dragging when interacting with handles, stop propagation of `mousedown` and `touchstart` events within the `<lit-handle>` component.
+- **Manual Connections**: Use `XYHandle.onPointerDown` to initiate connections. A `connectionInProgress` signal in the store is essential for rendering the "live" connection line during a drag.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support with `@lit-labs/signals`.
 - **Unwrapping Signals**: Always unwrap signals (e.g., `this._state.nodes.get()`) when passing state to `@xyflow/system` instances like `XYDrag` or `XYPanZoom`, as they expect raw values.
 - **Attribute Mapping**: Use `attribute: 'kebab-case'` in `@property` decorators to ensure HTML attributes (e.g., `show-controls`) correctly sync with camelCase properties.

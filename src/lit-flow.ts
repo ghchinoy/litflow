@@ -5,6 +5,8 @@ import { SignalWatcher } from '@lit-labs/signals';
 import {
   XYPanZoom,
   XYDrag,
+  XYHandle,
+  ConnectionMode,
   PanOnScrollMode,
   type PanZoomInstance,
   type XYDragInstance,
@@ -68,10 +70,105 @@ export class LitFlow extends SignalWatcher(LitElement) {
       pointer-events: all;
       cursor: grab;
       user-select: none;
+      display: block;
+      background: white;
+      border: 1px solid #1a192b;
+      padding: 10px;
+      border-radius: 3px;
+      min-width: 100px;
+      text-align: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      box-sizing: border-box;
+    }
+
+    .xyflow__node[selected] {
+      border-color: #0041d0;
+      border-width: 2px;
+      box-shadow: 0 0 0 1px #0041d0;
+    }
+
+    .xyflow__node[type="input"] {
+      border-color: #0041d0;
+    }
+
+    .xyflow__node[type="output"] {
+      border-color: #ff0072;
+    }
+
+    .xyflow__node[selected][type="output"] {
+      border-color: #ff0072;
+      box-shadow: 0 0 0 1px #ff0072;
     }
 
     .xyflow__node:active {
       cursor: grabbing;
+    }
+
+    .lit-flow__handle {
+      display: block;
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #555;
+      border-radius: 50%;
+      z-index: 10;
+      pointer-events: all;
+      cursor: pointer;
+      border: 4px solid transparent;
+      background-clip: padding-box;
+      box-sizing: content-box;
+    }
+
+    .lit-flow__handle::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border: 1px solid white;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .lit-flow__handle.source {
+      background-color: #555;
+    }
+
+    .lit-flow__handle.target {
+      background-color: #0041d0;
+    }
+
+    .lit-flow__handle[data-handlepos="top"] {
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .lit-flow__handle[data-handlepos="bottom"] {
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .lit-flow__handle[data-handlepos="left"] {
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .lit-flow__handle[data-handlepos="right"] {
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .xyflow__connection-path {
+      fill: none;
+      stroke: #b1b1b7;
+      stroke-width: 2;
+      stroke-dasharray: 5,5;
+      pointer-events: none;
     }
   `;
 
@@ -181,7 +278,8 @@ export class LitFlow extends SignalWatcher(LitElement) {
       }
 
       // Update handle bounds
-      const handles = element.shadowRoot?.querySelectorAll('lit-handle');
+      // Since lit-node is now light-DOM, we look in the element itself, not shadowRoot
+      const handles = element.querySelectorAll('lit-handle');
       if (handles && handles.length > 0) {
         const sourceBounds: any[] = [];
         const targetBounds: any[] = [];
@@ -207,6 +305,7 @@ export class LitFlow extends SignalWatcher(LitElement) {
           source: sourceBounds,
           target: targetBounds,
         };
+        console.log(`Node ${id} handleBounds:`, node.internals.handleBounds);
       }
 
       // Update absolute positions without clearing the lookup
@@ -383,8 +482,104 @@ export class LitFlow extends SignalWatcher(LitElement) {
     `;
   }
 
+  private _onHandlePointerDown(e: CustomEvent) {
+    const { event, handleId, nodeId, type, handleDomNode } = e.detail;
+    const isTarget = type === 'target';
+
+    // Prevent starting a new connection if one is already in progress
+    if (this._state.connectionInProgress.get()) {
+      return;
+    }
+
+    const bounds = handleDomNode.getBoundingClientRect();
+    const nodeRect = handleDomNode.parentElement?.getBoundingClientRect();
+    const zoom = this._state.transform.get()[2];
+
+    const fromHandle = {
+      id: handleId,
+      nodeId,
+      type,
+      position: handleDomNode.position,
+      x: (bounds.left - (nodeRect?.left ?? 0)) / zoom,
+      y: (bounds.top - (nodeRect?.top ?? 0)) / zoom,
+      width: bounds.width / zoom,
+      height: bounds.height / zoom,
+    };
+
+    XYHandle.onPointerDown(event, {
+      handleId,
+      nodeId,
+      isTarget,
+      domNode: this._renderer as HTMLDivElement,
+      handleDomNode,
+      nodeLookup: this._state.nodeLookup,
+      connectionMode: ConnectionMode.Strict,
+      lib: 'lit',
+      autoPanOnConnect: true,
+      flowId: 'lit-flow',
+      dragThreshold: 0,
+      panBy: async (delta) => {
+        const viewport = this._panZoom?.getViewport();
+        if (!viewport) return false;
+        await this._panZoom?.setViewport({
+          x: viewport.x + delta.x,
+          y: viewport.y + delta.y,
+          zoom: viewport.zoom,
+        });
+        return true;
+      },
+      getTransform: () => this._state.transform.get(),
+      getFromHandle: () => fromHandle,
+      updateConnection: (conn) => {
+        if (conn.inProgress) {
+          this._state.connectionInProgress.set(conn);
+        } else {
+          this._state.connectionInProgress.set(null);
+        }
+      },
+      cancelConnection: () => {
+        this._state.connectionInProgress.set(null);
+      },
+      onConnect: (connection) => {
+        this.dispatchEvent(new CustomEvent('connect', {
+          detail: connection
+        }));
+        // Default behavior: add the edge
+        const id = `e-${connection.source}${connection.sourceHandle || ''}-${connection.target}${connection.targetHandle || ''}`;
+        this.edges = [...this.edges, { ...connection, id }];
+      },
+      connectionRadius: 20,
+    });
+  }
+
+  private _renderConnectionLine(conn: any) {
+    if (!conn) return null;
+
+    const [path] = getBezierPath({
+      sourceX: conn.from.x,
+      sourceY: conn.from.y,
+      sourcePosition: conn.fromPosition,
+      targetX: conn.to.x,
+      targetY: conn.to.y,
+      targetPosition: conn.toPosition,
+    });
+
+    return svg`
+      <path
+        class="xyflow__connection-path"
+        d="${path}"
+        fill="none"
+        stroke="#b1b1b7"
+        stroke-width="2"
+        stroke-dasharray="5,5"
+      />
+    `;
+  }
+
   render() {
     const transform = this._state.transform.get();
+    const connectionInProgress = this._state.connectionInProgress.get();
+
     return html`
       <div class="xyflow__renderer">
         <div
@@ -393,8 +588,9 @@ export class LitFlow extends SignalWatcher(LitElement) {
         >
           <svg class="xyflow__edges">
             ${this.edges.map((edge) => this._renderEdge(edge))}
+            ${this._renderConnectionLine(connectionInProgress)}
           </svg>
-          <div class="xyflow__nodes">
+          <div class="xyflow__nodes" @handle-pointer-down="${this._onHandlePointerDown}">
             ${this.nodes.map((node) => {
               const internalNode = this._state.nodeLookup.get(node.id);
               const pos = internalNode?.position || node.position;
@@ -405,6 +601,7 @@ export class LitFlow extends SignalWatcher(LitElement) {
                 <${tag}
                   class="xyflow__node"
                   data-id="${node.id}"
+                  .nodeId="${node.id}"
                   style="transform: translate(${pos.x}px, ${pos.y}px)"
                   .label="${(node.data as any).label}"
                   .type="${node.type || 'default'}"
