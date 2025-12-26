@@ -42,6 +42,13 @@ This project uses **bd (beads)** for issue tracking.
 - **Event Propagation**: Stop propagation of `mousedown` and `touchstart` in `<lit-handle>` to prevent node dragging during connection attempts.
 - **DX (Developer Experience)**: Use Vite for fast development. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
+### Publishing Workflow
+To release a new version of `@ghchinoy/litflow`:
+1. **Version Bump**: `pnpm version patch` (or minor/major).
+2. **Build**: `pnpm run build` (generates `dist/` and types).
+3. **Publish**: `pnpm publish --access public`.
+*Note: The `prepublishOnly` script in `package.json` ensures a fresh build before every publish.*
+
 ### Proposed Components
 - `<lit-flow>`: The main viewport and container.
 - `<lit-node>`: Base component for nodes.

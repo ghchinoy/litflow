@@ -64,6 +64,19 @@ This makes it much easier to integrate with non-React tools or legacy systems.
 
 ---
 
+## 📦 Publishing & Distribution
+
+### React Flow
+Distributing a React-based flow component usually requires the consumer to also be using React. If you want to share it with a team using Vue, you often have to build a complex wrapper or maintain multiple versions of the same logic.
+
+### Lit + xyflow
+Because LitFlow is a standard WebComponent, it can be published as a single, minified JS bundle.
+- **Universal Consumption**: A developer can `npm install @ghchinoy/litflow` and use it in a static HTML page, a Hugo blog, or a complex Angular enterprise app.
+- **No Build Step for Consumers**: For simple use cases, consumers don't even need a bundler; they can just include the script tag.
+- **Type Safety**: By shipping `.d.ts` files, we provide a first-class developer experience for TypeScript users, regardless of their framework choice.
+
+---
+
 ## 📊 Comparison Table
 
 ## ✅ Pros & ❌ Cons
