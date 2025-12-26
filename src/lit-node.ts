@@ -45,6 +45,12 @@ export class LitNode extends LitElement {
 
   render() {
     return html`
+      ${this.type === 'input' || this.type === 'default'
+        ? html`<lit-handle type="source" position="bottom"></lit-handle>`
+        : ''}
+      ${this.type === 'output' || this.type === 'default'
+        ? html`<lit-handle type="target" position="top"></lit-handle>`
+        : ''}
       <div class="label">${this.label}</div>
       <slot></slot>
     `;

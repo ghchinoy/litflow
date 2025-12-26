@@ -10,7 +10,7 @@ LitFlow is a demonstration and starter kit for using the [xyflow](https://xyflow
 
 ### Installation
 ```bash
-npm install
+pnpm install
 ```
 
 ### Development
@@ -29,7 +29,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 - **`<lit-flow>`**: The root component. It initializes the `XYPanZoom` instance for the viewport and manages the collection of nodes and edges.
 - **`<lit-node>`**: A reactive Lit component for individual nodes. It handles its own styling and selection state.
 - **`<lit-edge>`**: An SVG-based component that uses xyflow's path utilities (like `getBezierPath`) to render connections.
-- **`store.ts`**: A minimal state container that bridges Lit's reactivity with xyflow's internal data structures.
+- **`store.ts`**: A state container that bridges Lit's reactivity with xyflow's internal data structures. *Note: This is transitioning to use `@lit-labs/signals` for fine-grained reactivity.*
 
 ## 🛠️ Key Features
 - **Panning & Zooming**: Full support for viewport manipulation via d3-zoom (via xyflow).

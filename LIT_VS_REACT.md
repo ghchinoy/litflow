@@ -38,6 +38,21 @@ This makes Lit an excellent choice for building a flow editor that needs to be e
 | **Styling** | Scoped (Shadow DOM) | CSS Modules / Global / CSS-in-JS |
 | **State Management** | Flexible (Signals, Stores) | Deeply integrated with Zustand |
 
+## ⚡ State Management & Lit Signals
+
+One of the most significant differences between the React and Lit implementations is how state changes propagate through the graph.
+
+### React Flow (Zustand)
+React Flow uses `zustand` for state management. While highly efficient, React's top-down rendering model often means that a change in one part of the graph (like moving a node) can trigger re-renders or reconciliation checks across many components unless carefully optimized with `memo` and specific selectors.
+
+### Lit + xyflow (Lit Signals)
+By using `@lit-labs/signals`, we can achieve **fine-grained reactivity**:
+- **Direct Subscriptions**: A `<lit-node>` can subscribe directly to its specific position signal. When that node moves, *only* that node and its connected edges re-render.
+- **Viewport Optimization**: The viewport transform can be a signal. UI overlays (like a MiniMap or Zoom controls) can react to this signal without triggering a re-render of the entire node/edge canvas.
+- **No Prop Drilling**: Signals can be accessed from a shared store, eliminating the need to pass state through multiple layers of components.
+
+This model closely mirrors how `xyflow`'s core works internally, making the integration more natural and performant for extremely large datasets.
+
 ---
 
 ## ✅ Pros & ❌ Cons

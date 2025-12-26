@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiple Handles - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
+      .back-link {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #333;
+        font-size: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+    <div id="app">
+      <lit-flow id="my-flow"></lit-flow>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      import './custom-node.ts';
+
+      const flow = document.getElementById('my-flow');
+      
+      flow.nodeTypes = {
+        ...flow.nodeTypes,
+        'special': 'multiple-handles-node'
+      };
+
+      flow.nodes = [
+        { id: '1', type: 'input', position: { x: 50, y: 50 }, data: { label: 'Source A' } },
+        { id: '2', type: 'input', position: { x: 50, y: 150 }, data: { label: 'Source B' } },
+        { id: '3', type: 'special', position: { x: 300, y: 100 }, data: { label: 'Logic Gate' } },
+        { id: '4', type: 'output', position: { x: 550, y: 125 }, data: { label: 'Result' } },
+      ];
+
+      flow.edges = [
+        { id: 'e1-3a', source: '1', target: '3', targetHandle: 'a' },
+        { id: 'e2-3b', source: '2', target: '3', targetHandle: 'b' },
+        { id: 'e3-4', source: '3', sourceHandle: 'out', target: '4' },
+      ];
+    </script>
+  </body>
+</html>

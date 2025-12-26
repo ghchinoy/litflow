@@ -1,4 +1,5 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, css } from 'lit';
+import { html, unsafeStatic } from 'lit/static-html.js';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   XYPanZoom,
@@ -9,6 +10,7 @@ import {
   type Viewport,
   type NodeBase,
   adoptUserNodes,
+  getHandlePosition,
 } from '@xyflow/system';
 import { createInitialState, type FlowState } from './store';
 import './lit-node';
@@ -83,6 +85,13 @@ export class LitFlow extends LitElement {
   @state()
   private _state: FlowState = createInitialState();
 
+  @property({ type: Object })
+  nodeTypes: Record<string, string> = {
+    default: 'lit-node',
+    input: 'lit-node',
+    output: 'lit-node',
+  };
+
   @property({ type: Array })
   set nodes(nodes: NodeBase[]) {
     const oldNodes = this._state.nodes;
@@ -134,6 +143,36 @@ export class LitFlow extends LitElement {
         width: width / zoom,
         height: height / zoom,
       };
+
+      // Update handle bounds
+      const handles = element.shadowRoot?.querySelectorAll('lit-handle');
+      if (handles) {
+        const sourceBounds: any[] = [];
+        const targetBounds: any[] = [];
+
+        handles.forEach((h: any) => {
+          const bounds = h.getBoundingClientRect();
+          const nodeRect = element.getBoundingClientRect();
+          const handleData = {
+            id: h.handleId || null,
+            type: h.type,
+            position: h.position,
+            x: (bounds.left - nodeRect.left) / zoom,
+            y: (bounds.top - nodeRect.top) / zoom,
+            width: bounds.width / zoom,
+            height: bounds.height / zoom,
+          };
+
+          if (h.type === 'source') sourceBounds.push(handleData);
+          else targetBounds.push(handleData);
+        });
+
+        node.internals.handleBounds = {
+          source: sourceBounds,
+          target: targetBounds,
+        };
+      }
+
       // Update absolute positions after dimension change
       adoptUserNodes(this.nodes, this._state.nodeLookup, this._state.parentLookup, {
         nodeOrigin: this._state.nodeOrigin,
@@ -255,36 +294,27 @@ export class LitFlow extends LitElement {
               const targetNode = this._state.nodeLookup.get(edge.target);
               if (!sourceNode || !targetNode) return null;
 
-              const sPos = sourceNode.sourcePosition || 'right';
-              const tPos = targetNode.targetPosition || 'left';
+              const sourceHandle = (sourceNode.internals.handleBounds?.source || []).find(
+                (h: any) => h.id === (edge.sourceHandle || null)
+              ) || sourceNode.internals.handleBounds?.source?.[0];
 
-              // Calculate handle positions based on node dimensions and positions
-              let sX = sourceNode.internals.positionAbsolute.x;
-              let sY = sourceNode.internals.positionAbsolute.y;
-              if (sPos === 'right') {
-                sX += sourceNode.measured.width || 0;
-                sY += (sourceNode.measured.height || 0) / 2;
-              } else if (sPos === 'bottom') {
-                sX += (sourceNode.measured.width || 0) / 2;
-                sY += sourceNode.measured.height || 0;
-              }
+              const targetHandle = (targetNode.internals.handleBounds?.target || []).find(
+                (h: any) => h.id === (edge.targetHandle || null)
+              ) || targetNode.internals.handleBounds?.target?.[0];
 
-              let tX = targetNode.internals.positionAbsolute.x;
-              let tY = targetNode.internals.positionAbsolute.y;
-              if (tPos === 'left') {
-                tY += (targetNode.measured.height || 0) / 2;
-              } else if (tPos === 'top') {
-                tX += (targetNode.measured.width || 0) / 2;
-              }
+              if (!sourceHandle || !targetHandle) return null;
+
+              const sPos = getHandlePosition(sourceNode, sourceHandle, sourceHandle.position, true);
+              const tPos = getHandlePosition(targetNode, targetHandle, targetHandle.position, true);
 
               return html`
                 <lit-edge
-                  .sourceX="${sX}"
-                  .sourceY="${sY}"
-                  .targetX="${tX}"
-                  .targetY="${tY}"
-                  .sourcePosition="${sPos}"
-                  .targetPosition="${tPos}"
+                  .sourceX="${sPos.x}"
+                  .sourceY="${sPos.y}"
+                  .targetX="${tPos.x}"
+                  .targetY="${tPos.y}"
+                  .sourcePosition="${sourceHandle.position}"
+                  .targetPosition="${targetHandle.position}"
                   ?selected="${edge.selected}"
                 ></lit-edge>
               `;
@@ -294,8 +324,11 @@ export class LitFlow extends LitElement {
             ${this.nodes.map((node) => {
               const internalNode = this._state.nodeLookup.get(node.id);
               const pos = internalNode?.position || node.position;
+              const tagName = this.nodeTypes[node.type || 'default'] || this.nodeTypes.default;
+              const tag = unsafeStatic(tagName);
+
               return html`
-                <lit-node
+                <${tag}
                   class="xyflow__node"
                   data-id="${node.id}"
                   style="transform: translate(${pos.x}px, ${pos.y}px)"
@@ -303,7 +336,7 @@ export class LitFlow extends LitElement {
                   .type="${node.type || 'default'}"
                   ?selected="${node.selected}"
                 >
-                </lit-node>
+                </${tag}>
               `;
             })}
           </div>

@@ -12,26 +12,35 @@ This project uses **bd (beads)** for issue tracking.
 - `bd close <id>` - Complete work
 - `bd sync` - Sync with git (run at session end)
 
+## Package Management
+- **Package Manager**: [pnpm](https://pnpm.io/) is used for dependency management. Use `pnpm install` and `pnpm dev`.
+
 ### Coding Conventions
 - **Language**: TypeScript is used for core logic and components.
 - **Framework**: [Lit](https://lit.dev/) for WebComponents.
 - **Issue Tracking**: Use `bd` (beads) for all task management.
+- **State Management**: Use `@lit-labs/signals` for fine-grained reactivity (nodes, edges, transform) to avoid unnecessary full-graph re-renders.
+- **Styling**: Adhere to **Material 3** design principles. Use M3 design tokens for colors, typography, and elevation.
+- **Dynamic Components**: Use `lit/static-html.js` (`unsafeStatic`) when rendering components based on dynamic `nodeTypes` to allow user-defined WebComponents.
+- **Handle Measurement**: Always measure handles in the `_updateNodeDimensions` cycle and store them in `node.internals.handleBounds`. This ensures edges connect correctly to specific ports.
 - **Shell Scripts**: Provide `.sh` scripts for common developer tasks (e.g., starting servers, running tests) to improve DX.
 - **Example Structure**: Each example should reside in its own subdirectory within `examples/` and include an `index.html` or a dedicated entry point.
 
 ### Technical Insights & Lessons Learned
 - **Headless Core**: `@xyflow/system` is truly headless but requires manual orchestration of `XYPanZoom` and `XYDrag`.
-- **Node Measurement**: Accurate dragging and edge positioning depend on `measured` dimensions. Use `ResizeObserver` to track node size changes and update the `nodeLookup` accordingly.
-- **State Syncing**: Lit's `@state` and `@property` must be carefully synced with `adoptUserNodes` and internal lookups. Ensure `updateNodePositions` updates both internal internals and user-facing node objects to maintain reactivity.
+- **Node & Handle Measurement**: Accurate dragging and edge positioning depend on `measured` dimensions. Use `ResizeObserver` for nodes and manual measurement for handles to populate `node.internals.handleBounds`.
+- **Edge Positioning**: Use `getHandlePosition` from `@xyflow/system` combined with `handleBounds` to calculate precise connection points for edges, especially when multiple handles are present.
+- **State Syncing**: Lit's `@state` and `@property` must be carefully synced with `adoptUserNodes` and internal lookups. Transitioning to Signals will simplify this by allowing direct subscriptions.
 - **DOM Management**: `XYDrag` requires direct DOM references; use Lit's `@query` or `shadowRoot` to provide these after the first render.
 - **SVG Layering**: Edges must be rendered in an SVG element that is a sibling to the nodes container within the viewport div to ensure correct coordinate alignment.
 - **Event Handling**: `XYPanZoom` handles its own event listeners on the provided `domNode`, but `XYDrag` instances must be created/updated for each node element.
-- **DX (Developer Experience)**: Use Vite for fast development and hot module replacement. Provide a `start-server.sh` for quick access.
+- **DX (Developer Experience)**: Use Vite for fast development and hot module replacement. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
 ### Proposed Components
 - `<lit-flow>`: The main viewport and container.
 - `<lit-node>`: Base component for nodes.
 - `<lit-edge>`: Base component for edges.
+- `<lit-handle>`: Connection port component for nodes.
 
 ### Development Plan (Phased Examples)
 The project follows a phased approach to mirror `xyflow` examples for Lit:
