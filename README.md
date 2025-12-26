@@ -36,10 +36,15 @@ import '@ghchinoy/litflow';
 Then use the `<lit-flow>` component in your HTML or framework template:
 
 ```html
-<lit-flow id="my-flow" show-controls show-minimap></lit-flow>
+<lit-flow id="my-flow" show-controls show-minimap show-grid="false"></lit-flow>
 
 <script>
   const flow = document.getElementById('my-flow');
+  
+  // Interactivity controls
+  flow.nodesDraggable = false;
+  flow.panOnDrag = false;
+  flow.showGrid = false;
   
   flow.nodes = [
     { id: '1', position: { x: 100, y: 100 }, data: { label: 'Hello' } },
@@ -52,7 +57,20 @@ Then use the `<lit-flow>` component in your HTML or framework template:
 </script>
 ```
 
-### 3. Custom Nodes
+### 3. Interactivity & Display
+You can control the flow's behavior using attributes or properties:
+
+| Attribute | Property | Default | Description |
+|-----------|----------|---------|-------------|
+| `show-controls` | `showControls` | `false` | Show zoom/fit controls |
+| `show-minimap` | `showMinimap` | `false` | Show the minimap |
+| `show-grid` | `showGrid` | `true` | Show the background grid |
+| `nodes-draggable` | `nodesDraggable` | `true` | Allow dragging nodes |
+| `nodes-connectable` | `nodesConnectable` | `true` | Allow creating new edges |
+| `pan-on-drag` | `panOnDrag` | `true` | Allow panning the canvas |
+| `zoom-on-scroll` | `zoomOnScroll` | `true` | Allow zooming with mouse wheel |
+
+### 4. Custom Nodes
 To create a custom node, define a Lit component using **Light DOM** and register it with the flow:
 
 ```javascript

@@ -27,6 +27,11 @@ import './lit-edge';
 
 type Constructor<T> = new (...args: any[]) => T;
 
+const boolConverter = {
+  fromAttribute: (value: string | null) => value !== 'false' && value !== null,
+  toAttribute: (value: boolean) => (value ? '' : null),
+};
+
 @customElement('lit-flow')
 export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
   static styles = [
@@ -49,6 +54,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       position: absolute;
       top: 0;
       left: 0;
+    }
+
+    .xyflow__renderer.has-grid {
       background-image: radial-gradient(var(--md-sys-color-outline-variant) 1px, transparent 0);
       background-size: 20px 20px;
     }
@@ -209,8 +217,29 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: Boolean, attribute: 'show-controls', reflect: true })
   showControls = false;
 
-  @property({ type: Boolean, attribute: 'show-minimap', reflect: true })
+  @property({ type: Boolean, attribute: 'show-minimap', reflect: true, converter: boolConverter })
   showMinimap = false;
+
+  @property({ type: Boolean, attribute: 'show-grid', reflect: true, converter: boolConverter })
+  showGrid = true;
+
+  @property({ type: Boolean, attribute: 'nodes-draggable', reflect: true, converter: boolConverter })
+  nodesDraggable = true;
+
+  @property({ type: Boolean, attribute: 'nodes-connectable', reflect: true, converter: boolConverter })
+  nodesConnectable = true;
+
+  @property({ type: Boolean, attribute: 'pan-on-drag', reflect: true, converter: boolConverter })
+  panOnDrag = true;
+
+  @property({ type: Boolean, attribute: 'zoom-on-scroll', reflect: true, converter: boolConverter })
+  zoomOnScroll = true;
+
+  @property({ type: Boolean, attribute: 'zoom-on-pinch', reflect: true, converter: boolConverter })
+  zoomOnPinch = true;
+
+  @property({ type: Boolean, attribute: 'zoom-on-double-click', reflect: true, converter: boolConverter })
+  zoomOnDoubleClick = true;
 
   @state()
   private _width = 0;
@@ -376,13 +405,13 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         noPanClassName: 'nopan',
         preventScrolling: true,
         panOnScroll: false,
-        panOnDrag: true,
+        panOnDrag: this.panOnDrag,
         panOnScrollMode: PanOnScrollMode.Free,
         panOnScrollSpeed: 0.5,
         userSelectionActive: false,
-        zoomOnPinch: true,
-        zoomOnScroll: true,
-        zoomOnDoubleClick: true,
+        zoomOnPinch: this.zoomOnPinch,
+        zoomOnScroll: this.zoomOnScroll,
+        zoomOnDoubleClick: this.zoomOnDoubleClick,
         zoomActivationKeyPressed: false,
         lib: 'lit',
         onTransformChange: () => {},
@@ -395,8 +424,34 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   }
 
   updated(changedProperties: Map<string, any>) {
-    if (changedProperties.has('nodes')) {
+    if (changedProperties.has('nodes') || changedProperties.has('nodesDraggable')) {
       this._setupDrags();
+    }
+
+    if (this._panZoom && (
+      changedProperties.has('panOnDrag') ||
+      changedProperties.has('zoomOnScroll') ||
+      changedProperties.has('zoomOnPinch') ||
+      changedProperties.has('zoomOnDoubleClick')
+    )) {
+      this._panZoom.update({
+        noWheelClassName: 'nowheel',
+        noPanClassName: 'nopan',
+        preventScrolling: true,
+        panOnScroll: false,
+        panOnDrag: this.panOnDrag,
+        panOnScrollMode: PanOnScrollMode.Free,
+        panOnScrollSpeed: 0.5,
+        userSelectionActive: false,
+        zoomOnPinch: this.zoomOnPinch,
+        zoomOnScroll: this.zoomOnScroll,
+        zoomOnDoubleClick: this.zoomOnDoubleClick,
+        zoomActivationKeyPressed: false,
+        lib: 'lit',
+        onTransformChange: () => {},
+        connectionInProgress: false,
+        paneClickDistance: 0,
+      });
     }
   }
 
@@ -415,6 +470,14 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
           e.stopPropagation();
           this._selectNode(id, e.shiftKey || e.metaKey);
         };
+
+        // Update cursor based on draggability
+        (el as HTMLElement).style.cursor = this.nodesDraggable ? 'grab' : 'default';
+
+        if (!this.nodesDraggable) {
+          this._drags.delete(id);
+          return;
+        }
 
         let dragInstance = this._drags.get(id);
         if (!dragInstance) {
@@ -560,8 +623,8 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const { event, handleId, nodeId, type, handleDomNode } = e.detail;
     const isTarget = type === 'target';
 
-    // Prevent starting a new connection if one is already in progress
-    if (this._state.connectionInProgress.get()) {
+    // Prevent starting a new connection if one is already in progress or if connectable is false
+    if (this._state.connectionInProgress.get() || !this.nodesConnectable) {
       return;
     }
 
@@ -655,7 +718,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const connectionInProgress = this._state.connectionInProgress.get();
 
     return html`
-      <div class="xyflow__renderer">
+      <div class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}">
         <div
           class="xyflow__viewport"
           style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"
@@ -719,4 +782,3 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     `;
   }
 }
-

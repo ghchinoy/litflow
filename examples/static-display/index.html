@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LitFlow - Static Documentation Display</title>
+  <style>
+    body { margin: 0; padding: 20px; font-family: sans-serif; background: #f5f5f5; }
+    .container { 
+      max-width: 800px; 
+      margin: 0 auto; 
+      background: white; 
+      padding: 40px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .flow-wrapper { 
+      width: 100%; 
+      height: 400px; 
+      border: 1px solid #eee; 
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    h1 { color: #333; }
+    p { line-height: 1.6; color: #666; }
+    code { background: #eee; padding: 2px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Static Documentation Display</h1>
+    <p>
+      This example demonstrates how to use <code>lit-flow</code> as a read-only graph for documentation.
+      Interactions like <strong>panning</strong>, <strong>zooming</strong>, and <strong>dragging</strong> are disabled.
+    </p>
+    <p>
+      However, <strong>custom interactivity</strong> like the Group A collapse/expand toggle still works, 
+      allowing users to explore the hierarchy without accidentally moving nodes.
+    </p>
+
+    <div class="flow-wrapper">
+      <lit-flow 
+        id="static-flow"
+        show-grid="false"
+        nodes-draggable="false"
+        nodes-connectable="false"
+        pan-on-drag="false"
+        zoom-on-scroll="false"
+        zoom-on-pinch="false"
+        zoom-on-double-click="false"
+      ></lit-flow>
+    </div>
+
+    <p>
+      To achieve this, we set the following properties on the <code>&lt;lit-flow&gt;</code> element:
+    </p>
+    <pre><code>&lt;lit-flow 
+  show-grid="false"
+  nodes-draggable="false"
+  nodes-connectable="false"
+  pan-on-drag="false"
+  zoom-on-scroll="false"
+  zoom-on-pinch="false"
+  zoom-on-double-click="false"
+&gt;&lt;/lit-flow&gt;</code></pre>
+  </div>
+
+  <script type="module">
+    import '../../src/index.ts';
+    import '../subflows/group-node.ts';
+
+    const flow = document.getElementById('static-flow');
+
+    flow.nodeTypes = {
+      ...flow.nodeTypes,
+      'group': 'group-node'
+    };
+
+    flow.nodes = [
+      {
+        id: 'A',
+        type: 'group',
+        data: { label: 'System Architecture', collapsedLabel: 'Architecture Overview', collapsed: false },
+        position: { x: 50, y: 50 },
+        width: 400,
+        height: 250,
+        zIndex: 0,
+      },
+      {
+        id: 'A-1',
+        data: { label: 'Frontend (Lit)' },
+        position: { x: 50, y: 60 },
+        parentId: 'A',
+        extent: 'parent',
+        zIndex: 1,
+      },
+      {
+        id: 'A-2',
+        data: { label: 'Core Logic' },
+        position: { x: 220, y: 120 },
+        parentId: 'A',
+        extent: 'parent',
+        zIndex: 1,
+      },
+      {
+        id: 'B',
+        data: { label: 'External API' },
+        position: { x: 550, y: 150 },
+        zIndex: 1,
+      },
+    ];
+
+    flow.edges = [
+      { id: 'eA1-A2', source: 'A-1', target: 'A-2', type: 'smoothstep' },
+      { id: 'eA2-B', source: 'A-2', target: 'B', type: 'smoothstep' },
+    ];
+
+    // Handle group collapse
+    flow.addEventListener('group-collapse', (e) => {
+      const { id, collapsed } = e.detail;
+      
+      flow.nodes = flow.nodes.map(node => {
+        if (node.id === id) {
+          return { 
+            ...node, 
+            data: { ...node.data, collapsed },
+            width: collapsed ? 180 : 400, 
+            height: collapsed ? 100 : 250 
+          };
+        }
+        if (node.parentId === id) {
+          return { ...node, hidden: collapsed };
+        }
+        return node;
+      });
+
+      // Re-route edges if collapsed
+      if (collapsed) {
+        flow.edges = flow.edges.map(edge => {
+          if (edge.source === 'A-2') return { ...edge, source: 'A' };
+          return edge;
+        });
+      } else {
+        flow.edges = flow.edges.map(edge => {
+          if (edge.source === 'A' && edge.target === 'B') return { ...edge, source: 'A-2' };
+          return edge;
+        });
+      }
+    });
+  </script>
+</body>
+</html>
