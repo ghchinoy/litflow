@@ -134,5 +134,30 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 - [Creating Custom Nodes](./CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
 - [GEMINI.md](./GEMINI.md): Project conventions and technical insights for AI agents.
 
+## 🛠️ Development & Publishing
+
+### Build
+To build the library and generate type definitions:
+```bash
+pnpm run build
+```
+This will output the compiled files and types to the `dist/` directory.
+
+### Publishing to npm
+The package is published under the `@ghchinoy` scope. To publish a new version:
+
+1. **Update the version**:
+   ```bash
+   pnpm version patch # or minor, major
+   ```
+2. **Build the project**:
+   ```bash
+   pnpm run build
+   ```
+3. **Publish**:
+   ```bash
+   pnpm publish --access public
+   ```
+
 ## 🤝 Contributing
 This project is an exploration of xyflow's headless capabilities. Feel free to open issues or submit PRs to improve the Lit integration!

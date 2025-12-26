@@ -30,6 +30,7 @@
     "dev": "vite",
     "build": "vite build && pnpm build:types",
     "build:types": "tsc --project tsconfig.types.json",
+    "prepublishOnly": "pnpm run build",
     "preview": "vite preview"
   },
   "dependencies": {
