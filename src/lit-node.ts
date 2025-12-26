@@ -14,6 +14,9 @@ export class LitNode extends SignalWatcher(LitElement) {
   @property({ type: String, reflect: true })
   type = 'default';
 
+  @property({ type: Object })
+  data: any = {};
+
   @property({ type: Boolean, reflect: true })
   selected = false;
 

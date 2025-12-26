@@ -55,6 +55,11 @@ This project uses **bd (beads)** for issue tracking.
 - `<lit-edge>`: Base component for edges.
 - `<lit-handle>`: Connection port component for nodes.
 
+## 📖 Documentation
+- [Lit vs React for xyflow](./LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
+- [Creating Custom Nodes](./CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
+- [GEMINI.md](./GEMINI.md): Project conventions and technical insights for AI agents.
+
 ### Development Plan (Phased Examples)
 The project follows a phased approach to mirror `xyflow` examples for Lit:
 
@@ -73,6 +78,7 @@ The project follows a phased approach to mirror `xyflow` examples for Lit:
 - **Subflows** (`litflow-2lt`): Parent-child relationships.
 - **Drag & Drop** (`litflow-lyd`): Sidebar to canvas interaction.
 - **Node Resizer & Toolbar** (`litflow-p3c`): Utility components.
+- **Gemini AI Nodes** (`litflow-ln0`): Prompt and Image generation nodes.
 
 ### Phase 4: Logic & Persistence
 - **Save & Restore** (`litflow-tfx`): JSON serialization.

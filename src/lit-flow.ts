@@ -603,6 +603,7 @@ export class LitFlow extends SignalWatcher(LitElement) {
                   data-id="${node.id}"
                   .nodeId="${node.id}"
                   style="transform: translate(${pos.x}px, ${pos.y}px)"
+                  .data="${node.data}"
                   .label="${(node.data as any).label}"
                   .type="${node.type || 'default'}"
                   ?selected="${node.selected}"

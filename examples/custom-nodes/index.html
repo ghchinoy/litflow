@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Nodes - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .toolbar {
+        padding: 10px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+      }
+      .flow-container {
+        flex-grow: 1;
+        position: relative;
+      }
+      .back-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="toolbar">
+        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+        <div style="flex-grow: 1"></div>
+        <div style="font-size: 12px; color: #666;">
+          Custom nodes with internal state and data-binding.
+        </div>
+      </div>
+      <div class="flow-container">
+        <lit-flow id="custom-flow" show-controls show-minimap></lit-flow>
+      </div>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      import './color-picker-node.ts';
+
+      const flow = document.getElementById('custom-flow');
+      
+      flow.nodeTypes = {
+        ...flow.nodeTypes,
+        'colorPicker': 'color-picker-node'
+      };
+
+      flow.nodes = [
+        { 
+          id: '1', 
+          type: 'input', 
+          position: { x: 250, y: 50 }, 
+          data: { label: 'Source Node' } 
+        },
+        { 
+          id: '2', 
+          type: 'colorPicker', 
+          position: { x: 100, y: 150 }, 
+          data: { label: 'Picker A', color: '#ff0072' } 
+        },
+        { 
+          id: '3', 
+          type: 'colorPicker', 
+          position: { x: 400, y: 150 }, 
+          data: { label: 'Picker B', color: '#0041d0' } 
+        },
+        { 
+          id: '4', 
+          type: 'output', 
+          position: { x: 250, y: 300 }, 
+          data: { label: 'Result Node' } 
+        },
+      ];
+
+      flow.edges = [
+        { id: 'e1-2', source: '1', target: '2' },
+        { id: 'e1-3', source: '1', target: '3' },
+        { id: 'e2-4', source: '2', target: '4' },
+        { id: 'e3-4', source: '3', target: '4' },
+      ];
+
+      // Handle data changes from custom nodes
+      flow.addEventListener('node-data-change', (e) => {
+        const { id, data } = e.detail;
+        console.log(`Node ${id} data changed:`, data);
+        
+        flow.nodes = flow.nodes.map(node => {
+          if (node.id === id) {
+            return { ...node, data: { ...node.data, ...data } };
+          }
+          return node;
+        });
+      });
+    </script>
+  </body>
+</html>
