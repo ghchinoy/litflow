@@ -28,7 +28,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm build:types && vite build",
+    "build": "vite build && pnpm build:types",
     "build:types": "tsc --project tsconfig.types.json",
     "preview": "vite preview"
   },
