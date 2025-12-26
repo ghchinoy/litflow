@@ -1,0 +1,28 @@
+{
+  "name": "litflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@xyflow/system": "^0.0.74",
+    "d3-drag": "^3.0.0",
+    "d3-interpolate": "^3.0.1",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
+    "lit": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-zoom": "^3.0.8",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
+  }
+}

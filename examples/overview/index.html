@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Overview - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
+      .back-link {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #333;
+        font-size: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+    <div id="app">
+      <lit-flow id="overview-flow"></lit-flow>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      const flow = document.getElementById('overview-flow');
+      
+      const nodes = [
+        {
+          id: 'annotation-1',
+          type: 'input',
+          data: { label: 'Built with Lit & xyflow' },
+          position: { x: 150, y: -50 },
+          style: { backgroundColor: 'rgba(255, 0, 114, 0.05)', width: 200 },
+        },
+        {
+          id: '1',
+          type: 'input',
+          data: { label: 'Welcome to LitFlow!' },
+          position: { x: 250, y: 0 },
+        },
+        {
+          id: '2',
+          data: { label: 'This is a default node' },
+          position: { x: 100, y: 100 },
+        },
+        {
+          id: '3',
+          data: { label: 'This one is also default' },
+          position: { x: 400, y: 100 },
+        },
+        {
+          id: '4',
+          position: { x: 250, y: 200 },
+          data: { label: 'And a custom node can go here' },
+        },
+        {
+          id: '5',
+          data: { label: 'Output node' },
+          type: 'output',
+          position: { x: 250, y: 325 },
+        },
+        {
+          id: '6',
+          type: 'output',
+          data: { label: 'Another output node' },
+          position: { x: 525, y: 325 },
+        },
+      ];
+
+      const edges = [
+        { id: 'e1-2', source: '1', target: '2', label: 'to the left' },
+        { id: 'e1-3', source: '1', target: '3', label: 'to the right' },
+        { id: 'e2-4', source: '2', target: '4', label: 'edge label' },
+        { id: 'e3-4', source: '3', target: '4' },
+        { id: 'e4-5', source: '4', target: '5' },
+        { id: 'e4-6', source: '4', target: '6' },
+      ];
+
+      flow.nodes = nodes;
+      flow.edges = edges;
+    </script>
+  </body>
+</html>
