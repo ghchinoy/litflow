@@ -12,8 +12,10 @@ import {
   type Transform,
 } from '@xyflow/system';
 
+type Constructor<T> = new (...args: any[]) => T;
+
 @customElement('lit-minimap')
-export class LitMinimap extends SignalWatcher(LitElement) {
+export class LitMinimap extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
   static styles = css`
     :host {
       display: block;

@@ -52,28 +52,12 @@ This project uses **bd (beads)** for issue tracking.
 - [Creating Custom Nodes](./CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
 - [GEMINI.md](./GEMINI.md): Project conventions and technical insights for AI agents.
 
-### Development Plan (Phased Examples)
-The project follows a phased approach to mirror `xyflow` examples for Lit:
+### Development Plan (High-Level)
+The project follows a phased approach to replicate and extend `xyflow` capabilities for Lit:
+- **Phase 1: Core Infrastructure**: Basic nodes, edges, and viewport management.
+- **Phase 2: Interactivity**: Selection, dragging, and manual connections.
+- **Phase 3: Advanced Features**: Subflows, custom nodes, and utility components (MiniMap/Controls).
+- **Phase 4: Visual Polish & DX**: Material 3 styling, packaging for reuse, and AI-specific nodes.
+- **Phase 5: Integration**: Graphviz parsing and persistence.
 
-### Phase 1: Core Infrastructure
-- **Setup** (`litflow-8oj`): Create `examples/` directory and base runner.
-- **Basic Flow** (`litflow-xzk`): Standard nodes and edges.
-- **Overview** (`litflow-59h`): Comprehensive example with controls and minimap.
-
-### Phase 2: Customization
-- **Custom Nodes** (`litflow-aop`): Lit-based node templates.
-- **Edge Types** (`litflow-8zz`): Step, SmoothStep, etc.
-- **Multiple Handles** (`litflow-e6c`): Nodes with multiple ports.
-- **Controls & MiniMap** (`litflow-04c`): Reusable Lit components.
-
-### Phase 3: Advanced Features
-- **Subflows** (`litflow-2lt`): Parent-child relationships.
-- **Drag & Drop** (`litflow-lyd`): Sidebar to canvas interaction.
-- **Node Resizer & Toolbar** (`litflow-p3c`): Utility components.
-- **Gemini AI Nodes** (`litflow-ln0`): Prompt and Image generation nodes.
-
-### Phase 4: Logic & Persistence
-- **Save & Restore** (`litflow-tfx`): JSON serialization.
-- **Validation** (`litflow-2fr`): Connection logic.
-- **Graphviz to LitFlow** (`litflow-48p`): DOT file parsing and layout.
-- **Interactivity** (`litflow-4bd`): Dynamic add/remove.
+*Detailed task tracking is managed via `bd` (beads).*

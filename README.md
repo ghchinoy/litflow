@@ -19,6 +19,72 @@ pnpm install
 ```
 This will start the Vite development server and open the examples runner.
 
+## 📖 Usage Guide
+
+### 1. Installation
+```bash
+pnpm add @ghchinoy/litflow
+```
+
+### 2. Basic Usage
+Import the library in your main entry point to register the custom elements:
+
+```javascript
+import '@ghchinoy/litflow';
+```
+
+Then use the `<lit-flow>` component in your HTML or framework template:
+
+```html
+<lit-flow id="my-flow" show-controls show-minimap></lit-flow>
+
+<script>
+  const flow = document.getElementById('my-flow');
+  
+  flow.nodes = [
+    { id: '1', position: { x: 100, y: 100 }, data: { label: 'Hello' } },
+    { id: '2', position: { x: 300, y: 100 }, data: { label: 'World' } }
+  ];
+  
+  flow.edges = [
+    { id: 'e1-2', source: '1', target: '2' }
+  ];
+</script>
+```
+
+### 3. Custom Nodes
+To create a custom node, define a Lit component using **Light DOM** and register it with the flow:
+
+```javascript
+import { LitElement, html } from 'lit';
+import { customElement } from 'lit/decorators.js';
+
+@customElement('my-custom-node')
+class MyNode extends LitElement {
+  createRenderRoot() { return this; } // Required for xyflow compatibility
+  render() {
+    return html`<div>${this.data.label}</div>`;
+  }
+}
+
+// Register the type
+const flow = document.querySelector('lit-flow');
+flow.nodeTypes = {
+  ...flow.nodeTypes,
+  'special': 'my-custom-node'
+};
+```
+
+### 4. Styling (Material 3)
+LitFlow comes with a built-in Material 3 theme. You can import the design tokens and apply them to your flow:
+
+```javascript
+import { m3Tokens } from '@ghchinoy/litflow/theme';
+
+// These tokens are automatically applied to <lit-flow>
+// but you can also use them in your own custom nodes.
+```
+
 ## 🏗️ Architecture
 
 LitFlow leverages `@xyflow/system`, the same headless core that powers React Flow and Svelte Flow.

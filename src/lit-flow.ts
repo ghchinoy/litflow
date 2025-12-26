@@ -25,8 +25,10 @@ import { m3Tokens } from './theme';
 import './lit-node';
 import './lit-edge';
 
+type Constructor<T> = new (...args: any[]) => T;
+
 @customElement('lit-flow')
-export class LitFlow extends SignalWatcher(LitElement) {
+export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
   static styles = [
     m3Tokens,
     css`

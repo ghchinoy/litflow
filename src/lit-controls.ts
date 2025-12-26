@@ -3,8 +3,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
 import { type PanZoomInstance } from '@xyflow/system';
 
+type Constructor<T> = new (...args: any[]) => T;
+
 @customElement('lit-controls')
-export class LitControls extends SignalWatcher(LitElement) {
+export class LitControls extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
   static styles = css`
     :host {
       display: block;

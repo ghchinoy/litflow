@@ -1,12 +1,28 @@
 {
-  "name": "litflow",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@ghchinoy/litflow",
+  "version": "0.1.0",
+  "description": "xyflow core integrated with Lit WebComponents",
+  "main": "./dist/litflow.js",
+  "module": "./dist/litflow.js",
+  "types": "./dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/litflow.js"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.ts",
+      "import": "./dist/theme.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "pnpm build:types && vite build",
+    "build:types": "tsc --project tsconfig.types.json",
     "preview": "vite preview"
   },
   "dependencies": {

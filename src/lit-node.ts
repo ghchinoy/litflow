@@ -2,8 +2,10 @@ import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
 
+type Constructor<T> = new (...args: any[]) => T;
+
 @customElement('lit-node')
-export class LitNode extends SignalWatcher(LitElement) {
+export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
   createRenderRoot() {
     return this;
   }
