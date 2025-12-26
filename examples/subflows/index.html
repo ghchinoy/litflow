@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subflows - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .toolbar {
+        padding: 10px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+      }
+      .flow-container {
+        flex-grow: 1;
+        position: relative;
+      }
+      .back-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="toolbar">
+        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+        <div style="flex-grow: 1"></div>
+        <div style="font-size: 12px; color: #666;">
+          Nested nodes and parent-child relationships.
+        </div>
+      </div>
+      <div class="flow-container">
+        <lit-flow id="subflow-flow" show-controls show-minimap></lit-flow>
+      </div>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      import './group-node.ts';
+
+      const flow = document.getElementById('subflow-flow');
+      
+      flow.nodeTypes = {
+        ...flow.nodeTypes,
+        'group': 'group-node'
+      };
+
+      flow.nodes = [
+        {
+          id: 'A',
+          type: 'group',
+          data: { label: 'Group A', collapsedLabel: 'Group A is hidden', collapsed: false },
+          position: { x: 0, y: 0 },
+          width: 400,
+          height: 200,
+          zIndex: 0,
+        },
+        {
+          id: 'A-1',
+          data: { label: 'Child Node 1' },
+          position: { x: 50, y: 50 },
+          parentId: 'A',
+          extent: 'parent',
+          zIndex: 1,
+        },
+        {
+          id: 'A-2',
+          data: { label: 'Child Node 2' },
+          position: { x: 200, y: 100 },
+          parentId: 'A',
+          extent: 'parent',
+          zIndex: 1,
+        },
+        {
+          id: 'B',
+          data: { label: 'Standalone Node' },
+          position: { x: 450, y: 50 },
+          zIndex: 1,
+        },
+      ];
+
+      flow.edges = [
+        { id: 'eA1-A2', source: 'A-1', target: 'A-2' },
+        { id: 'eA2-B', source: 'A-2', target: 'B' },
+      ];
+
+      // Handle group collapse
+      flow.addEventListener('group-collapse', (e) => {
+        const { id, collapsed } = e.detail;
+        
+        // Hide/Show child nodes and resize group
+        flow.nodes = flow.nodes.map(node => {
+          if (node.id === id) {
+            return { 
+              ...node, 
+              data: { ...node.data, collapsed },
+              width: collapsed ? 150 : 400, 
+              height: collapsed ? 80 : 200 
+            };
+          }
+          if (node.parentId === id) {
+            return { ...node, hidden: collapsed };
+          }
+          return node;
+        });
+        
+        // Re-route edges
+        flow.edges = flow.edges.map(edge => {
+          const sourceNode = flow.nodes.find(n => n.id === edge.source);
+          const targetNode = flow.nodes.find(n => n.id === edge.target);
+          
+          if (collapsed) {
+            // If both source and target are children of the collapsed group, hide the edge
+            if (sourceNode?.parentId === id && targetNode?.parentId === id) {
+              return { ...edge, hidden: true };
+            }
+
+            // If only source is a child, point from the group instead
+            let newEdge = { ...edge };
+            if (sourceNode?.parentId === id) {
+              newEdge._originalSource = edge._originalSource || edge.source;
+              newEdge.source = id;
+            }
+            // If only target is a child, point to the group instead
+            if (targetNode?.parentId === id) {
+              newEdge._originalTarget = edge._originalTarget || edge.target;
+              newEdge.target = id;
+            }
+            return newEdge;
+          } else {
+            // Restore original source/target and show the edge
+            let newEdge = { ...edge, hidden: false };
+            if (edge._originalSource) {
+              newEdge.source = edge._originalSource;
+              delete newEdge._originalSource;
+            }
+            if (edge._originalTarget) {
+              newEdge.target = edge._originalTarget;
+              delete newEdge._originalTarget;
+            }
+            return newEdge;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -14,35 +14,36 @@ export class LitControls extends SignalWatcher(LitElement) {
       z-index: 5;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      background: white;
-      padding: 5px;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      border: 1px solid #ccc;
+      gap: 4px;
+      background: var(--md-sys-color-surface);
+      padding: 4px;
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      box-shadow: var(--md-sys-elevation-1);
+      border: 1px solid var(--md-sys-color-outline-variant);
     }
 
     button {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       background: none;
-      border: 1px solid #eee;
-      border-radius: 3px;
+      border: none;
+      border-radius: var(--md-sys-shape-corner-extra-small);
       cursor: pointer;
       padding: 0;
-      color: #333;
+      color: var(--md-sys-color-on-surface);
+      transition: background-color 0.2s ease;
     }
 
     button:hover {
-      background: #f4f4f4;
+      background: var(--md-sys-color-surface-variant);
     }
 
     button svg {
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
       fill: currentColor;
     }
   `;

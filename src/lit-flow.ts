@@ -8,6 +8,7 @@ import {
   XYHandle,
   ConnectionMode,
   PanOnScrollMode,
+  Position,
   type PanZoomInstance,
   type XYDragInstance,
   type Viewport,
@@ -16,22 +17,28 @@ import {
   updateAbsolutePositions,
   getHandlePosition,
   getBezierPath,
+  getSmoothStepPath,
+  getStraightPath,
 } from '@xyflow/system';
 import { createInitialState, type FlowState } from './store';
+import { m3Tokens } from './theme';
 import './lit-node';
 import './lit-edge';
 
 @customElement('lit-flow')
 export class LitFlow extends SignalWatcher(LitElement) {
-  static styles = css`
+  static styles = [
+    m3Tokens,
+    css`
     :host {
       display: block;
       width: 100%;
       height: 100%;
       overflow: hidden;
       position: relative;
-      background-color: #f8f8f8;
-      font-family: sans-serif;
+      background-color: var(--md-sys-color-background);
+      color: var(--md-sys-color-on-background);
+      font-family: var(--md-sys-typescale-body-medium-font);
     }
 
     .xyflow__renderer {
@@ -40,7 +47,7 @@ export class LitFlow extends SignalWatcher(LitElement) {
       position: absolute;
       top: 0;
       left: 0;
-      background-image: radial-gradient(#e1e1e1 1px, transparent 0);
+      background-image: radial-gradient(var(--md-sys-color-outline-variant) 1px, transparent 0);
       background-size: 20px 20px;
     }
 
@@ -71,33 +78,43 @@ export class LitFlow extends SignalWatcher(LitElement) {
       cursor: grab;
       user-select: none;
       display: block;
-      background: white;
-      border: 1px solid #1a192b;
-      padding: 10px;
-      border-radius: 3px;
-      min-width: 100px;
+      background: var(--lit-flow-node-bg);
+      border: 1px solid var(--lit-flow-node-border);
+      padding: 12px;
+      border-radius: var(--md-sys-shape-corner-small);
+      min-width: 120px;
       text-align: center;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      box-shadow: var(--md-sys-elevation-1);
       box-sizing: border-box;
+      color: var(--lit-flow-node-text);
+      font-size: var(--md-sys-typescale-body-medium-size);
+      transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    }
+
+    .xyflow__node[type="group"] {
+      padding: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    .xyflow__node[type="group"] > * {
+      pointer-events: all;
     }
 
     .xyflow__node[selected] {
-      border-color: #0041d0;
+      border-color: var(--lit-flow-node-selected-border);
       border-width: 2px;
-      box-shadow: 0 0 0 1px #0041d0;
+      box-shadow: var(--md-sys-elevation-2);
     }
 
     .xyflow__node[type="input"] {
-      border-color: #0041d0;
+      border-top: 4px solid var(--md-sys-color-primary);
     }
 
     .xyflow__node[type="output"] {
-      border-color: #ff0072;
-    }
-
-    .xyflow__node[selected][type="output"] {
-      border-color: #ff0072;
-      box-shadow: 0 0 0 1px #ff0072;
+      border-bottom: 4px solid var(--md-sys-color-secondary);
     }
 
     .xyflow__node:active {
@@ -107,70 +124,63 @@ export class LitFlow extends SignalWatcher(LitElement) {
     .lit-flow__handle {
       display: block;
       position: absolute;
-      width: 8px;
-      height: 8px;
-      background: #555;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       z-index: 10;
       pointer-events: all;
       cursor: pointer;
-      border: 4px solid transparent;
+      border: 2px solid var(--lit-flow-handle-outline);
       background-clip: padding-box;
-      box-sizing: content-box;
+      box-sizing: border-box;
+      transition: transform 0.1s ease-in-out;
     }
 
-    .lit-flow__handle::after {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border: 1px solid white;
-      border-radius: 50%;
-      pointer-events: none;
+    .lit-flow__handle:hover {
+      transform: scale(1.2);
     }
 
     .lit-flow__handle.source {
-      background-color: #555;
+      background-color: var(--lit-flow-handle-source);
     }
 
     .lit-flow__handle.target {
-      background-color: #0041d0;
+      background-color: var(--lit-flow-handle-target);
     }
 
     .lit-flow__handle[data-handlepos="top"] {
-      top: -8px;
+      top: -5px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     .lit-flow__handle[data-handlepos="bottom"] {
-      bottom: -8px;
+      bottom: -5px;
       left: 50%;
       transform: translateX(-50%);
     }
 
     .lit-flow__handle[data-handlepos="left"] {
-      left: -8px;
+      left: -5px;
       top: 50%;
       transform: translateY(-50%);
     }
 
     .lit-flow__handle[data-handlepos="right"] {
-      right: -8px;
+      right: -5px;
       top: 50%;
       transform: translateY(-50%);
     }
 
     .xyflow__connection-path {
       fill: none;
-      stroke: #b1b1b7;
+      stroke: var(--md-sys-color-outline);
       stroke-width: 2;
       stroke-dasharray: 5,5;
       pointer-events: none;
     }
-  `;
+  `
+  ];
 
   @query('.xyflow__renderer')
   _renderer?: HTMLElement;
@@ -210,6 +220,10 @@ export class LitFlow extends SignalWatcher(LitElement) {
   set nodes(nodes: NodeBase[]) {
     this._state.nodes.set(nodes);
     adoptUserNodes(nodes, this._state.nodeLookup, this._state.parentLookup, {
+      nodeOrigin: this._state.nodeOrigin,
+      nodeExtent: this._state.nodeExtent,
+    });
+    updateAbsolutePositions(this._state.nodeLookup, this._state.parentLookup, {
       nodeOrigin: this._state.nodeOrigin,
       nodeExtent: this._state.nodeExtent,
     });
@@ -386,9 +400,12 @@ export class LitFlow extends SignalWatcher(LitElement) {
 
   private _setupDrags() {
     const nodeElements = this.shadowRoot?.querySelectorAll('.xyflow__node');
+    const currentIds = new Set<string>();
+
     nodeElements?.forEach((el) => {
       const id = (el as HTMLElement).dataset.id;
       if (id) {
+        currentIds.add(id);
         this._resizeObserver?.observe(el);
         
         // Add click listener for selection
@@ -397,8 +414,9 @@ export class LitFlow extends SignalWatcher(LitElement) {
           this._selectNode(id, e.shiftKey || e.metaKey);
         };
 
-        if (!this._drags.has(id)) {
-          const dragInstance = XYDrag({
+        let dragInstance = this._drags.get(id);
+        if (!dragInstance) {
+          dragInstance = XYDrag({
             getStoreItems: () => ({
               ...this._state,
               nodes: this._state.nodes.get(),
@@ -425,24 +443,39 @@ export class LitFlow extends SignalWatcher(LitElement) {
                   if (node) {
                     node.position = item.position;
                     node.internals.positionAbsolute = item.internals.positionAbsolute;
-                    const userNode = this.nodes.find(n => n.id === id);
+                    const userNode = this.nodes.find((n) => n.id === id);
                     if (userNode) userNode.position = item.position;
                   }
                 });
+
+                // Recalculate all absolute positions to ensure children follow parents
+                updateAbsolutePositions(this._state.nodeLookup, this._state.parentLookup, {
+                  nodeOrigin: this._state.nodeOrigin,
+                  nodeExtent: this._state.nodeExtent,
+                });
+
                 // Trigger update via signal
                 this._state.nodes.set([...this.nodes]);
               },
               unselectNodesAndEdges: () => {},
             }),
           });
-          dragInstance.update({
-            domNode: el,
-            nodeId: id,
-          });
           this._drags.set(id, dragInstance);
         }
+
+        dragInstance.update({
+          domNode: el as HTMLElement,
+          nodeId: id,
+        });
       }
     });
+
+    // Clean up stale drag instances
+    for (const id of this._drags.keys()) {
+      if (!currentIds.has(id)) {
+        this._drags.delete(id);
+      }
+    }
   }
 
   private _renderEdge(edge: any) {
@@ -450,34 +483,73 @@ export class LitFlow extends SignalWatcher(LitElement) {
     const targetNode = this._state.nodeLookup.get(edge.target);
     if (!sourceNode || !targetNode) return null;
 
+    // Check if either node is hidden in the user-facing nodes array
+    const userSource = this.nodes.find(n => n.id === edge.source);
+    const userTarget = this.nodes.find(n => n.id === edge.target);
+    if (userSource?.hidden || userTarget?.hidden) return null;
+
     const sourceHandle = (sourceNode.internals.handleBounds?.source || []).find(
       (h: any) => h.id === (edge.sourceHandle || null)
-    ) || sourceNode.internals.handleBounds?.source?.[0];
+    ) || sourceNode.internals.handleBounds?.source?.[0] || { 
+      id: null, 
+      type: 'source', 
+      nodeId: edge.source, 
+      position: Position.Bottom, 
+      x: (sourceNode.measured.width || 0) / 2, 
+      y: sourceNode.measured.height || 0, 
+      width: 1, 
+      height: 1 
+    };
 
     const targetHandle = (targetNode.internals.handleBounds?.target || []).find(
       (h: any) => h.id === (edge.targetHandle || null)
-    ) || targetNode.internals.handleBounds?.target?.[0];
-
-    if (!sourceHandle || !targetHandle) return null;
+    ) || targetNode.internals.handleBounds?.target?.[0] || { 
+      id: null, 
+      type: 'target', 
+      nodeId: edge.target, 
+      position: Position.Top, 
+      x: (targetNode.measured.width || 0) / 2, 
+      y: 0, 
+      width: 1, 
+      height: 1 
+    };
 
     const sPos = getHandlePosition(sourceNode, sourceHandle, sourceHandle.position, true);
     const tPos = getHandlePosition(targetNode, targetHandle, targetHandle.position, true);
 
-    const [path] = getBezierPath({
+    let path = '';
+    const pathParams = {
       sourceX: sPos.x,
       sourceY: sPos.y,
       sourcePosition: sourceHandle.position,
       targetX: tPos.x,
       targetY: tPos.y,
       targetPosition: targetHandle.position,
-    });
+    };
+
+    switch (edge.type) {
+      case 'straight':
+        [path] = getStraightPath(pathParams);
+        break;
+      case 'smoothstep':
+        [path] = getSmoothStepPath(pathParams);
+        break;
+      case 'step':
+        [path] = getSmoothStepPath({ ...pathParams, borderRadius: 0 });
+        break;
+      case 'bezier':
+      default:
+        [path] = getBezierPath(pathParams);
+        break;
+    }
 
     return svg`
       <path
         d="${path}"
         fill="none"
-        stroke="${edge.selected ? '#555' : '#b1b1b7'}"
+        stroke="${edge.selected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}"
         stroke-width="2"
+        style="pointer-events: none;"
       />
     `;
   }
@@ -586,23 +658,32 @@ export class LitFlow extends SignalWatcher(LitElement) {
           class="xyflow__viewport"
           style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"
         >
-          <svg class="xyflow__edges">
-            ${this.edges.map((edge) => this._renderEdge(edge))}
-            ${this._renderConnectionLine(connectionInProgress)}
-          </svg>
           <div class="xyflow__nodes" @handle-pointer-down="${this._onHandlePointerDown}">
             ${this.nodes.map((node) => {
+              if (node.hidden) return null;
               const internalNode = this._state.nodeLookup.get(node.id);
-              const pos = internalNode?.position || node.position;
+              const pos = internalNode?.internals.positionAbsolute || node.position;
               const tagName = this.nodeTypes[node.type || 'default'] || this.nodeTypes.default;
               const tag = unsafeStatic(tagName);
+
+              const style = (node as any).style || {};
+              const styleString = Object.entries(style)
+                .map(([k, v]) => `${k.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${typeof v === 'number' ? `${v}px` : v}`)
+                .join('; ');
+
+              const width = (node as any).width || style.width;
+              const height = (node as any).height || style.height;
+              const widthStyle = width ? `width: ${typeof width === 'number' ? `${width}px` : width};` : '';
+              const heightStyle = height ? `height: ${typeof height === 'number' ? `${height}px` : height};` : '';
+              const zIndex = (node as any).zIndex ? `z-index: ${(node as any).zIndex};` : '';
 
               return html`
                 <${tag}
                   class="xyflow__node"
                   data-id="${node.id}"
+                  type="${node.type || 'default'}"
                   .nodeId="${node.id}"
-                  style="transform: translate(${pos.x}px, ${pos.y}px)"
+                  style="transform: translate(${pos.x}px, ${pos.y}px); ${styleString} ${widthStyle} ${heightStyle} ${zIndex}"
                   .data="${node.data}"
                   .label="${(node.data as any).label}"
                   .type="${node.type || 'default'}"
@@ -612,6 +693,10 @@ export class LitFlow extends SignalWatcher(LitElement) {
               `;
             })}
           </div>
+          <svg class="xyflow__edges">
+            ${this.edges.map((edge) => this._renderEdge(edge))}
+            ${this._renderConnectionLine(connectionInProgress)}
+          </svg>
         </div>
       </div>
       ${this.showControls

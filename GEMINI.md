@@ -28,6 +28,10 @@ This project uses **bd (beads)** for issue tracking.
 ### Technical Insights & Lessons Learned
 - **Headless Core**: `@xyflow/system` is truly headless but requires manual orchestration of `XYPanZoom` and `XYDrag`.
 - **Light DOM Necessity**: Child components must be in Light DOM for `@xyflow/system` to perform hit-testing and handle discovery across the graph.
+- **Z-Index Layering**: Avoid negative `zIndex` values for nodes, as they can be hidden behind the canvas background in a WebComponent environment. Use positive relative values (e.g., 0 for groups, 1 for children).
+- **Custom Node State**: Custom nodes with interactive state (like collapse/expand) must sync that state through the `data` property. This ensures the state persists when the parent flow re-renders the nodes array.
+- **Subflow Coordinates**: Always call `updateAbsolutePositions` immediately after `adoptUserNodes` to ensure nested nodes have correct canvas-relative coordinates for the initial render.
+- **Edge Re-routing**: When collapsing groups, manually re-route edges from children to the parent group node to maintain visual connectivity.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support.
 - **Unwrapping Signals**: Always unwrap signals (e.g., `this._state.nodes.get()`) when passing state to `@xyflow/system` instances.
 - **Shadow DOM Timing**: When measuring elements (especially in Light DOM children), always `await element.updateComplete` to ensure rendering is finished.
@@ -71,4 +75,5 @@ The project follows a phased approach to mirror `xyflow` examples for Lit:
 ### Phase 4: Logic & Persistence
 - **Save & Restore** (`litflow-tfx`): JSON serialization.
 - **Validation** (`litflow-2fr`): Connection logic.
+- **Graphviz to LitFlow** (`litflow-48p`): DOT file parsing and layout.
 - **Interactivity** (`litflow-4bd`): Dynamic add/remove.

@@ -21,10 +21,10 @@ export class LitMinimap extends SignalWatcher(LitElement) {
       right: 10px;
       bottom: 10px;
       z-index: 5;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: var(--md-sys-color-surface);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      box-shadow: var(--md-sys-elevation-1);
       overflow: hidden;
     }
 
@@ -33,13 +33,13 @@ export class LitMinimap extends SignalWatcher(LitElement) {
     }
 
     .minimap-node {
-      fill: #eee;
-      stroke: #ccc;
+      fill: var(--md-sys-color-surface-variant);
+      stroke: var(--md-sys-color-outline-variant);
       stroke-width: 1;
     }
 
     .minimap-mask {
-      fill: rgba(0, 0, 0, 0.05);
+      fill: var(--lit-flow-minimap-mask);
       fill-rule: evenodd;
     }
   `;

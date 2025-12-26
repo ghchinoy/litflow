@@ -28,6 +28,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
   - `examples/basic/`: A simple graph implementation.
   - `examples/multiple-handles/`: Nodes with multiple input/output ports.
   - `examples/dynamic-interactivity/`: Adding/removing nodes and edges at runtime.
+  - `examples/subflows/`: Nested nodes and parent-child relationships.
 - **`<lit-flow>`**: The root component. It initializes the `XYPanZoom` instance for the viewport and manages the collection of nodes and edges.
 - **`<lit-node>`**: A reactive Lit component for individual nodes. Uses **Light DOM** to ensure compatibility with xyflow's system utilities (like hit-testing).
 - **`<lit-handle>`**: A connection port component. Also uses **Light DOM** to ensure discoverability during connection dragging.
