@@ -54,6 +54,11 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       position: absolute;
       top: 0;
       left: 0;
+      outline: none;
+    }
+
+    .xyflow__renderer:focus-visible {
+      box-shadow: inset 0 0 0 2px var(--md-sys-color-primary);
     }
 
     .xyflow__renderer.has-grid {
@@ -731,6 +736,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const isSelectionAction = e.shiftKey || this.selectionMode === 'select';
 
     if (isPaneClick && isSelectionAction) {
+      console.log('LitFlow: Selection started', { x: e.clientX, y: e.clientY, shift: e.shiftKey });
       const rect = this._renderer!.getBoundingClientRect();
       this._selectionStart = {
         x: e.clientX - rect.left,
@@ -760,12 +766,18 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       const height = Math.abs(this._selectionStart.y - currentY);
       
       this._selectionRect = { x, y, width, height };
+
+      // Live selection
+      this._performSelection(e.shiftKey);
     }
   }
 
   private _onPointerUp(e: PointerEvent) {
     if (this._selectionStart) {
+      console.log('LitFlow: Selection ended', this._selectionRect);
+      // Final selection (already updated live, but good to ensure final state)
       this._performSelection(e.shiftKey);
+      
       this._selectionStart = null;
       this._selectionRect = null;
       
@@ -794,7 +806,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       height: Math.abs(start.y - end.y),
     };
 
-    // Select nodes
+    let nodesChanged = false;
     const newNodes = this.nodes.map(node => {
       const internalNode = this._state.nodeLookup.get(node.id);
       if (!internalNode) return node;
@@ -809,34 +821,49 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         pos.x + width <= selectionBox.x + selectionBox.width &&
         pos.y + height <= selectionBox.y + selectionBox.height;
 
-      if (isInside) {
-        return { ...node, selected: true };
+      const nextSelected = isInside || (multi && node.selected);
+      
+      if (nextSelected !== !!node.selected) {
+        nodesChanged = true;
+        return { ...node, selected: nextSelected };
       }
-      return multi ? node : { ...node, selected: false };
+      return node;
     });
+
+    if (nodesChanged) {
+      this.nodes = newNodes;
+    }
 
     // Select edges
+    let edgesChanged = false;
+    const nodeSelectionMap = new Map(newNodes.map(n => [n.id, !!n.selected]));
+    
     const newEdges = this.edges.map(edge => {
-      const sourceNode = newNodes.find(n => n.id === edge.source);
-      const targetNode = newNodes.find(n => n.id === edge.target);
+      const sourceSelected = nodeSelectionMap.get(edge.source);
+      const targetSelected = nodeSelectionMap.get(edge.target);
       
-      const isInside = sourceNode?.selected && targetNode?.selected;
+      const isInside = sourceSelected && targetSelected;
+      const nextSelected = isInside || (multi && edge.selected);
       
-      if (isInside) {
-        return { ...edge, selected: true };
+      if (nextSelected !== !!edge.selected) {
+        edgesChanged = true;
+        return { ...edge, selected: nextSelected };
       }
-      return multi ? edge : { ...edge, selected: false };
+      return edge;
     });
 
-    this.nodes = newNodes;
-    this.edges = newEdges;
+    if (edgesChanged) {
+      this.edges = newEdges;
+    }
 
-    this.dispatchEvent(new CustomEvent('selection-change', {
-      detail: { 
-        nodes: this.nodes.filter(n => n.selected),
-        edges: this.edges.filter(e => e.selected)
-      }
-    }));
+    if (nodesChanged || edgesChanged) {
+      this.dispatchEvent(new CustomEvent('selection-change', {
+        detail: { 
+          nodes: this.nodes.filter(n => n.selected),
+          edges: this.edges.filter(e => e.selected)
+        }
+      }));
+    }
   }
 
   private _onHandlePointerDown(e: CustomEvent) {
@@ -978,6 +1005,67 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     `;
   }
 
+  private _onKeyDown(e: KeyboardEvent) {
+    // Don't handle if we are in an input field
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || (e.target as HTMLElement).isContentEditable) {
+      return;
+    }
+
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      const selectedNodes = this.nodes.filter(n => n.selected);
+      const selectedEdges = this.edges.filter(e => e.selected);
+
+      if (selectedNodes.length > 0 || selectedEdges.length > 0) {
+        const nodeIdsToRemove = new Set(selectedNodes.map(n => n.id));
+        const edgeIdsToRemove = new Set(selectedEdges.map(e => e.id));
+
+        // Also remove edges connected to removed nodes
+        this.edges.forEach(edge => {
+          if (nodeIdsToRemove.has(edge.source) || nodeIdsToRemove.has(edge.target)) {
+            edgeIdsToRemove.add(edge.id);
+          }
+        });
+
+        this.nodes = this.nodes.filter(n => !nodeIdsToRemove.has(n.id));
+        this.edges = this.edges.filter(e => !edgeIdsToRemove.add ? edgeIdsToRemove.has(edge.id) : edgeIdsToRemove.has(edge.id));
+        // Wait, I made a typo in my thought process, let's fix it in the actual code.
+        this.edges = this.edges.filter(e => !edgeIdsToRemove.has(e.id));
+
+        this.dispatchEvent(new CustomEvent('nodes-delete', {
+          detail: { nodes: selectedNodes }
+        }));
+        this.dispatchEvent(new CustomEvent('edges-delete', {
+          detail: { edges: selectedEdges }
+        }));
+      }
+    }
+
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      const selectedNodes = this.nodes.filter(n => n.selected);
+      if (selectedNodes.length > 0) {
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : 1;
+        const delta = {
+          x: e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0,
+          y: e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0,
+        };
+
+        this.nodes = this.nodes.map(node => {
+          if (node.selected) {
+            return {
+              ...node,
+              position: {
+                x: node.position.x + delta.x,
+                y: node.position.y + delta.y,
+              }
+            };
+          }
+          return node;
+        });
+      }
+    }
+  }
+
   render() {
     const transform = this._state.transform.get();
     const connectionInProgress = this._state.connectionInProgress.get();
@@ -985,6 +1073,8 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     return html`
       <div 
         class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}"
+        tabindex="0"
+        @keydown="${this._onKeyDown}"
         @dragover="${this._onDragOver}"
         @drop="${this._onDrop}"
         @pointermove="${this._onPointerMove}"

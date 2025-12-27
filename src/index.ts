@@ -5,5 +5,7 @@ export * from './lit-handle';
 export * from './lit-controls';
 export * from './lit-minimap';
 export * from './lit-sidebar';
+export * from './lit-gemini-prompt-node';
+export * from './lit-gemini-image-node';
 export * from './store';
 export * from './theme';

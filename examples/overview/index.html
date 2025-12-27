@@ -11,7 +11,7 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        font-family: sans-serif;
+        font-family: var(--md-sys-typescale-body-medium-font, sans-serif);
       }
       #app {
         width: 100vw;
@@ -20,12 +20,18 @@
         flex-direction: column;
       }
       .toolbar {
-        padding: 10px;
+        padding: 8px 16px;
         background: #fff;
         border-bottom: 1px solid #ccc;
         display: flex;
-        gap: 10px;
+        align-items: center;
+        gap: 16px;
         z-index: 20;
+      }
+      .main-content {
+        flex-grow: 1;
+        display: flex;
+        overflow: hidden;
       }
       .flow-container {
         flex-grow: 1;
@@ -38,28 +44,59 @@
         color: #333;
         font-size: 14px;
         font-weight: bold;
-        padding: 0 10px;
+      }
+      .title {
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--md-sys-color-primary);
       }
     </style>
   </head>
   <body>
     <div id="app">
       <div class="toolbar">
-        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+        <a href="/examples/index.html" class="back-link">← Back</a>
+        <div class="title">LitFlow Overview</div>
         <span style="flex-grow: 1"></span>
-        <div style="display: flex; align-items: center; gap: 10px; font-size: 12px;">
+        <div style="display: flex; align-items: center; gap: 15px; font-size: 12px;">
           <label><input type="checkbox" id="toggle-controls" checked> Controls</label>
           <label><input type="checkbox" id="toggle-minimap" checked> MiniMap</label>
+          <label><input type="checkbox" id="toggle-grid" checked> Grid</label>
         </div>
       </div>
-      <div class="flow-container">
-        <lit-flow id="overview-flow" show-controls show-minimap></lit-flow>
+      <div class="main-content">
+        <lit-sidebar id="overview-sidebar"></lit-sidebar>
+        <div class="flow-container">
+          <lit-flow id="overview-flow" show-controls show-minimap show-grid></lit-flow>
+        </div>
       </div>
     </div>
     <script type="module">
       import '../../src/index.ts';
+      import '../custom-nodes/color-picker-node.ts';
+      import '../subflows/group-node.ts';
+
       const flow = document.getElementById('overview-flow');
+      const sidebar = document.getElementById('overview-sidebar');
       
+      flow.nodeTypes = {
+        ...flow.nodeTypes,
+        'colorPicker': 'color-picker-node',
+        'group': 'group-node',
+        'geminiPrompt': 'lit-gemini-prompt-node',
+        'geminiImage': 'lit-gemini-image-node'
+      };
+
+      sidebar.nodeTypes = [
+        { type: 'default', label: 'Default Node' },
+        { type: 'input', label: 'Input Node' },
+        { type: 'output', label: 'Output Node' },
+        { type: 'colorPicker', label: 'Color Picker' },
+        { type: 'group', label: 'Group Container' },
+        { type: 'geminiPrompt', label: 'Gemini Prompt' },
+        { type: 'geminiImage', label: 'Gemini Image' },
+      ];
+
       const nodes = [
         {
           id: '1',
@@ -69,51 +106,146 @@
         },
         {
           id: '2',
-          data: { label: 'This is a default node' },
+          data: { label: 'Standard Node' },
           position: { x: 100, y: 100 },
         },
         {
           id: '3',
-          data: { label: 'This one is also default' },
+          type: 'colorPicker',
+          data: { label: 'Custom Node', color: '#673ab7' },
           position: { x: 400, y: 100 },
         },
         {
+          id: 'G1',
+          type: 'group',
+          data: { label: 'Subflow Group', collapsed: false },
+          position: { x: 50, y: 250 },
+          width: 350,
+          height: 200,
+        },
+        {
+          id: 'G1-1',
+          data: { label: 'Nested 1' },
+          position: { x: 50, y: 50 },
+          parentId: 'G1',
+          extent: 'parent',
+        },
+        {
+          id: 'G1-2',
+          data: { label: 'Nested 2' },
+          position: { x: 180, y: 100 },
+          parentId: 'G1',
+          extent: 'parent',
+        },
+        {
+          id: 'P1',
+          type: 'geminiPrompt',
+          data: { prompt: 'A futuristic city with flying cars' },
+          position: { x: 450, y: 250 },
+        },
+        {
+          id: 'I1',
+          type: 'geminiImage',
+          data: { status: 'idle' },
+          position: { x: 450, y: 450 },
+        },
+        {
           id: '4',
-          position: { x: 250, y: 200 },
-          data: { label: 'And a custom node can go here' },
-        },
-        {
-          id: '5',
-          data: { label: 'Output node' },
           type: 'output',
-          position: { x: 250, y: 325 },
-        },
-        {
-          id: '6',
-          type: 'output',
-          data: { label: 'Another output node' },
-          position: { x: 525, y: 325 },
+          data: { label: 'Output' },
+          position: { x: 250, y: 500 },
         },
       ];
 
       const edges = [
-        { id: 'e1-2', source: '1', target: '2' },
-        { id: 'e1-3', source: '1', target: '3' },
-        { id: 'e2-4', source: '2', target: '4' },
-        { id: 'e3-4', source: '3', target: '4' },
-        { id: 'e4-5', source: '4', target: '5' },
-        { id: 'e4-6', source: '4', target: '6' },
+        { id: 'e1-2', source: '1', target: '2', markerEnd: 'arrowclosed' },
+        { id: 'e1-3', source: '1', target: '3', markerEnd: 'arrowclosed' },
+        { id: 'e2-G1-1', source: '2', target: 'G1-1', type: 'smoothstep', markerEnd: 'arrowclosed' },
+        { id: 'e3-G1-2', source: '3', target: 'G1-2', type: 'step', markerEnd: 'arrowclosed' },
+        { id: 'eG1-1-G1-2', source: 'G1-1', target: 'G1-2', markerEnd: 'arrow' },
+        { id: 'eG1-2-4', source: 'G1-2', target: '4', markerEnd: 'arrowclosed' },
+        { id: 'eP1-I1', source: 'P1', target: 'I1', markerEnd: 'arrowclosed' },
       ];
 
       flow.nodes = nodes;
       flow.edges = edges;
 
-      document.getElementById('toggle-controls').onchange = (e) => {
-        flow.showControls = e.target.checked;
-      };
-      document.getElementById('toggle-minimap').onchange = (e) => {
-        flow.showMinimap = e.target.checked;
-      };
+      // UI Toggles
+      document.getElementById('toggle-controls').onchange = (e) => flow.showControls = e.target.checked;
+      document.getElementById('toggle-minimap').onchange = (e) => flow.showMinimap = e.target.checked;
+      document.getElementById('toggle-grid').onchange = (e) => flow.showGrid = e.target.checked;
+
+      // Handle data changes from custom nodes
+      flow.addEventListener('node-data-change', (e) => {
+        const { id, data } = e.detail;
+        flow.nodes = flow.nodes.map(n => n.id === id ? { ...n, data: { ...n.data, ...data } } : n);
+      });
+
+      // Handle Gemini generation
+      flow.addEventListener('gemini-generate', async (e) => {
+        const { id, prompt } = e.detail;
+        
+        // Find connected image nodes
+        const connectedEdges = flow.edges.filter(edge => edge.source === id);
+        const imageNodeIds = connectedEdges.map(edge => edge.target);
+
+        // Update image nodes to loading
+        flow.nodes = flow.nodes.map(node => 
+          imageNodeIds.includes(node.id) ? { ...node, data: { ...node.data, status: 'loading' } } : node
+        );
+
+        // Simulate API call
+        setTimeout(() => {
+          flow.nodes = flow.nodes.map(node => 
+            imageNodeIds.includes(node.id) 
+              ? { ...node, data: { ...node.data, status: 'success', imageUrl: `https://picsum.photos/seed/${encodeURIComponent(prompt)}/400/300` } } 
+              : node
+          );
+        }, 2000);
+      });
+
+      // Handle group collapse
+      flow.addEventListener('group-collapse', (e) => {
+        const { id, collapsed } = e.detail;
+        flow.nodes = flow.nodes.map(node => {
+          if (node.id === id) {
+            return { 
+              ...node, 
+              data: { ...node.data, collapsed },
+              width: collapsed ? 150 : 350, 
+              height: collapsed ? 80 : 200 
+            };
+          }
+          if (node.parentId === id) return { ...node, hidden: collapsed };
+          return node;
+        });
+        
+        flow.edges = flow.edges.map(edge => {
+          const sourceNode = flow.nodes.find(n => n.id === edge.source);
+          const targetNode = flow.nodes.find(n => n.id === edge.target);
+          if (collapsed) {
+            if (sourceNode?.parentId === id && targetNode?.parentId === id) return { ...edge, hidden: true };
+            let newEdge = { ...edge };
+            if (sourceNode?.parentId === id) { newEdge._originalSource = edge._originalSource || edge.source; newEdge.source = id; }
+            if (targetNode?.parentId === id) { newEdge._originalTarget = edge._originalTarget || edge.target; newEdge.target = id; }
+            return newEdge;
+          } else {
+            let newEdge = { ...edge, hidden: false };
+            if (edge._originalSource) { newEdge.source = edge._originalSource; delete newEdge._originalSource; }
+            if (edge._originalTarget) { newEdge.target = edge._originalTarget; delete newEdge._originalTarget; }
+            return newEdge;
+          }
+        });
+      });
+
+      // Handle drops
+      flow.addEventListener('node-drop', (e) => {
+        const { node } = e.detail;
+        if (node.type === 'group') {
+          // Initialize group dimensions
+          flow.nodes = flow.nodes.map(n => n.id === node.id ? { ...n, width: 200, height: 150 } : n);
+        }
+      });
     </script>
   </body>
 </html>
