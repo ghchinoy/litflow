@@ -1,5 +1,8 @@
 # LitFlow: xyflow + Lit WebComponents
 
+[![npm version](https://img.shields.io/npm/v/@ghchinoy/litflow.svg)](https://www.npmjs.com/package/@ghchinoy/litflow)
+[![license](https://img.shields.io/npm/l/@ghchinoy/litflow.svg)](https://github.com/ghchinoy/litflow/blob/main/LICENSE)
+
 LitFlow is a demonstration and starter kit for using the [xyflow](https://xyflow.com/) core system with [Lit](https://lit.dev/) WebComponents. It provides a lightweight, framework-agnostic way to build node-based UIs.
 
 ## 🚀 Quick Start
@@ -130,10 +133,10 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 - **Custom Node Support**: Easily build complex nodes with internal state and custom Lit templates.
 
 ## 📖 Documentation
-- [Tutorial: Static Documentation](./TUTORIAL_STATIC_DOCS.md): Learn how to build read-only, interactive diagrams.
-- [Lit vs React for xyflow](./LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
-- [Creating Custom Nodes](./CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
-- [GEMINI.md](./GEMINI.md): Project conventions and technical insights for AI agents.
+- [Tutorial: Static Documentation](./docs/TUTORIAL_STATIC_DOCS.md): Learn how to build read-only, interactive diagrams.
+- [Lit vs React for xyflow](./docs/LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
+- [Creating Custom Nodes](./docs/CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
+- [GEMINI.md](./docs/GEMINI.md): Project conventions and technical insights for AI agents.
 
 ## 🛠️ Development & Publishing
 
@@ -162,3 +165,7 @@ The package is published under the `@ghchinoy` scope. To publish a new version:
 
 ## 🤝 Contributing
 This project is an exploration of xyflow's headless capabilities. Feel free to open issues or submit PRs to improve the Lit integration!
+
+## License
+
+LitFlow is [MIT licensed](./LICENSE).
