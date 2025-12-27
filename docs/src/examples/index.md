@@ -1,0 +1,36 @@
+---
+layout: base.njk
+title: Examples & Showcase
+---
+
+# Examples
+
+Explore the capabilities of LitFlow through these live interactive examples.
+
+## Basic Features
+
+- **[Overview](/examples/overview/)**: A comprehensive demo of all core features.
+- **[Basic Flow](/examples/basic/)**: The simplest setup for a dynamic flow.
+- **[Static Display](/examples/static-display/)**: Using LitFlow as a read-only diagram for documentation.
+
+## Customization
+
+- **[Custom Nodes](/examples/custom-nodes/)**: Building rich, interactive nodes with custom logic.
+- **[Custom Edges](/examples/custom-edges/)**: Creating bespoke edge styles and paths.
+- **[Multiple Handles](/examples/multiple-handles/)**: Managing complex connectivity with multiple target and source handles.
+
+## Advanced Patterns
+
+- **[Subflows & Groups](/examples/subflows/)**: Nesting nodes and managing hierarchical structures.
+- **[Dynamic Interactivity](/examples/dynamic-interactivity/)**: Responding to events and updating the graph in real-time.
+
+---
+
+### Run locally
+To explore these examples and their source code locally:
+```bash
+git clone https://github.com/ghchinoy/litflow.git
+cd litflow
+pnpm install
+pnpm dev
+```

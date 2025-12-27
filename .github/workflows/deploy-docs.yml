@@ -47,6 +47,17 @@ jobs:
       - name: Build Eleventy
         run: cd docs && pnpm build
         
+      - name: Copy and Fix Examples
+        run: |
+          mkdir -p docs/_site/examples
+          cp -r examples/* docs/_site/examples/
+          # Fix imports in all index.html files in examples
+          find docs/_site/examples -name "index.html" -exec sed -i "s|import '../../src/index.ts';|import '/public/litflow.js';|g" {} +
+          find docs/_site/examples -name "index.html" -exec sed -i "s|import '../src/index.ts';|import '/public/litflow.js';|g" {} +
+          find docs/_site/examples -name "index.html" -exec sed -i "s|import '../../../src/index.ts';|import '/public/litflow.js';|g" {} +
+          # Add import map to examples to handle dependencies
+          find docs/_site/examples -name "index.html" -exec sed -i '/<head>/a \    <script type="importmap">{ "imports": { "lit": "https://esm.sh/lit?bundle", "lit/": "https://esm.sh/lit/", "@lit-labs/signals": "https://esm.sh/@lit-labs/signals", "@xyflow/system": "https://esm.sh/@xyflow/system", "d3-drag": "https://esm.sh/d3-drag", "d3-interpolate": "https://esm.sh/d3-interpolate", "d3-selection": "https://esm.sh/d3-selection", "d3-zoom": "https://esm.sh/d3-zoom" } }</script>' {} +
+          
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
