@@ -29,8 +29,9 @@
   "scripts": {
     "dev": "vite",
     "docs:prepare": "mkdir -p docs/src/public && cp dist/litflow.js docs/src/public/ && cp dist/theme.js docs/src/public/",
-    "docs:dev": "pnpm docs:prepare && pnpm --dir docs dev",
-    "docs:build": "pnpm docs:prepare && pnpm --dir docs build",
+    "docs:sync": "./scripts/sync-docs-examples.sh",
+    "docs:dev": "pnpm docs:prepare && (pnpm --dir docs dev & sleep 2 && pnpm docs:sync)",
+    "docs:build": "pnpm docs:prepare && pnpm --dir docs build && pnpm docs:sync",
     "build": "vite build && pnpm build:types",
     "build:types": "tsc --project tsconfig.types.json",
     "prepublishOnly": "pnpm run build",
