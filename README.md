@@ -133,9 +133,15 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 - **Custom Node Support**: Easily build complex nodes with internal state and custom Lit templates.
 
 ## 📖 Documentation
-- [Tutorial: Static Documentation](./docs/src/tutorials/static-docs.md): Learn how to build read-only, interactive diagrams.
-- [Lit vs React for xyflow](./docs/src/explanation/lit-vs-react.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
-- [Creating Custom Nodes](./docs/src/guides/custom-nodes.md): A primer on building complex, data-driven nodes in LitFlow.
+
+Explore our comprehensive documentation following the [Diataxis](https://diataxis.fr/) framework:
+
+- **[Tutorials](./docs/src/tutorials/index.md)**: Step-by-step guides to get you started.
+- **[Guides](./docs/src/guides/index.md)**: Practical instructions for common tasks.
+- **[Explanation](./docs/src/explanation/index.md)**: Deep dives into the architecture and concepts.
+- **[Reference](./docs/src/reference/index.md)**: Technical API documentation.
+- **[Examples](./docs/src/examples/index.md)**: Live interactive showcases.
+
 - [GEMINI.md](./GEMINI.md): 🤖 Project conventions and technical insights for AI agents.
 
 ## 🛠️ Development & Publishing
