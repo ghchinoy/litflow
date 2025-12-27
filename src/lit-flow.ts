@@ -477,6 +477,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       this._state.domNode = this._renderer;
       this._resizeObserver?.observe(this._renderer);
 
+      // Add capture listener for selection to intercept before D3
+      this._renderer.addEventListener('pointerdown', (e) => this._onPointerDown(e), { capture: true });
+
       this._panZoom = XYPanZoom({
         domNode: this._renderer,
         minZoom: 0.5,
@@ -984,7 +987,6 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}"
         @dragover="${this._onDragOver}"
         @drop="${this._onDrop}"
-        @pointerdownCapture="${this._onPointerDown}"
         @pointermove="${this._onPointerMove}"
         @pointerup="${this._onPointerUp}"
         @click="${(e: MouseEvent) => {
