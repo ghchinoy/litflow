@@ -709,11 +709,26 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     `;
   }
 
+  private _isPaneClick(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement || target instanceof SVGElement)) return false;
+    
+    // If it's the renderer itself, it's a pane click
+    if (target === this._renderer) return true;
+    
+    // If it's the viewport or the edges SVG, it's a pane click
+    if (target.classList.contains('xyflow__viewport') || 
+        target.classList.contains('xyflow__edges') ||
+        target.classList.contains('xyflow__nodes')) return true;
+        
+    return false;
+  }
+
   private _onPointerDown(e: PointerEvent) {
-    // Only start selection if clicking on the background (renderer)
-    // and either Shift is pressed or selectionMode is 'select'
-    if (e.target === this._renderer && (e.shiftKey || this.selectionMode === 'select')) {
-      const rect = this._renderer.getBoundingClientRect();
+    const isPaneClick = this._isPaneClick(e.target);
+    const isSelectionAction = e.shiftKey || this.selectionMode === 'select';
+
+    if (isPaneClick && isSelectionAction) {
+      const rect = this._renderer!.getBoundingClientRect();
       this._selectionStart = {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
@@ -723,8 +738,10 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       // Disable panning while selecting
       this._updatePanZoom(true);
       
-      this._renderer.setPointerCapture(e.pointerId);
-      e.stopPropagation();
+      this._renderer!.setPointerCapture(e.pointerId);
+      
+      // Prevent D3 from starting a pan
+      e.stopImmediatePropagation();
     }
   }
 
@@ -967,11 +984,11 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}"
         @dragover="${this._onDragOver}"
         @drop="${this._onDrop}"
-        @pointerdown="${this._onPointerDown}"
+        @pointerdownCapture="${this._onPointerDown}"
         @pointermove="${this._onPointerMove}"
         @pointerup="${this._onPointerUp}"
         @click="${(e: MouseEvent) => {
-          if (e.target === this._renderer) {
+          if (this._isPaneClick(e.target)) {
             this.nodes = this.nodes.map(n => ({ ...n, selected: false }));
             this.edges = this.edges.map(e => ({ ...e, selected: false }));
           }
