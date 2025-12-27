@@ -98,7 +98,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       box-sizing: border-box;
       color: var(--lit-flow-node-text);
       font-size: var(--md-sys-typescale-body-medium-size);
-      transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+      transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, border-width 0.1s ease-in-out;
     }
 
     .xyflow__node[type="group"] {
@@ -115,8 +115,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
     .xyflow__node[selected] {
       border-color: var(--lit-flow-node-selected-border);
-      border-width: 2px;
-      box-shadow: var(--md-sys-elevation-2);
+      border-width: 3px;
+      box-shadow: var(--md-sys-elevation-3);
+      margin: -2px; /* Offset the border width increase to prevent layout shift */
     }
 
     .xyflow__node[type="input"] {
@@ -684,10 +685,10 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
           d="${path}"
           fill="none"
           stroke="${edge.selected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}"
-          stroke-width="2"
+          stroke-width="${edge.selected ? '3' : '2'}"
           marker-end="${markerEndId ? `url(#${markerEndId})` : ''}"
           marker-start="${markerStartId ? `url(#${markerStartId})` : ''}"
-          style="pointer-events: none;"
+          style="pointer-events: none; transition: stroke 0.2s ease-in-out, stroke-width 0.2s ease-in-out;"
         />
         ${edge.label 
           ? svg`
