@@ -11,6 +11,7 @@ This project uses **bd (beads)** for issue tracking.
 - `bd create "Title" --type task --priority 2` - Create issue
 - `bd close <id>` - Complete work
 - `bd sync` - Sync with git (run at session end)
+- See [AGENTS.md](./AGENTS.md) for the mandatory session completion workflow and critical rules for AI agents.
 
 ## Package Management
 - **Package Manager**: [pnpm](https://pnpm.io/) is used for dependency management. Use `pnpm install` and `pnpm dev`.
