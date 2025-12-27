@@ -25,6 +25,12 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: String, attribute: 'data-id', reflect: true })
   nodeId = '';
 
+  @property({ type: Number, attribute: 'position-x' })
+  positionX = 0;
+
+  @property({ type: Number, attribute: 'position-y' })
+  positionY = 0;
+
   render() {
     return html`
       <div class="label" style="font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface); pointer-events: none; font-family: var(--md-sys-typescale-body-medium-font);">${this.label}</div>

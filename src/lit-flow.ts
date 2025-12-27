@@ -264,6 +264,31 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     return this._state.nodes.get();
   }
 
+  private _discoverNodes() {
+    if (this.nodes.length > 0) return;
+
+    const childNodes = Array.from(this.querySelectorAll('lit-node')) as any[];
+    if (childNodes.length > 0) {
+      const nodes: NodeBase[] = childNodes.map((el) => ({
+        id: el.id || el.getAttribute('id') || `node-${Math.random().toString(36).substr(2, 9)}`,
+        type: el.type || el.getAttribute('type') || 'default',
+        position: {
+          x: parseFloat(el.getAttribute('position-x') || '0'),
+          y: parseFloat(el.getAttribute('position-y') || '0'),
+        },
+        data: {
+          label: el.label || el.getAttribute('label') || '',
+          ...el.data,
+        },
+      }));
+      this.nodes = nodes;
+      // Force update of internal nodeId for child elements
+      childNodes.forEach((el, i) => {
+        el.nodeId = nodes[i].id;
+      });
+    }
+  }
+
   @property({ type: Array })
   set edges(edges: any[]) {
     this._state.edges.set(edges);
@@ -278,6 +303,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
   connectedCallback() {
     super.connectedCallback();
+    this._discoverNodes();
     this._resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target === this) {
@@ -779,6 +805,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
             ></lit-minimap>
           `
         : ''}
+      <slot style="display: none;"></slot>
     `;
   }
 }
