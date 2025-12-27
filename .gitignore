@@ -4,8 +4,10 @@ node_modules/
 
 # Build output
 dist/
-docs/_site/
+# Docs generated assets
 docs/src/public/litflow.js
+docs/src/public/theme.js
+docs/_site/
 
 # IDEs and editors
 .vscode/

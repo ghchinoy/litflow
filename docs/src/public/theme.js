@@ -16,6 +16,10 @@ const r = o`
     --md-sys-color-on-surface: #1b1b1f;
     --md-sys-color-surface-variant: #e1e2ec;
     --md-sys-color-on-surface-variant: #44474f;
+
+    --md-sys-color-surface-container-low: #f7f2fa;
+    --md-sys-color-surface-container: #f3edf7;
+    --md-sys-color-surface-container-high: #ece6f0;
     
     --md-sys-color-outline: #74777f;
     --md-sys-color-outline-variant: #c4c6d0;
