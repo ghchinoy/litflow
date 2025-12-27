@@ -130,6 +130,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 - **Custom Node Support**: Easily build complex nodes with internal state and custom Lit templates.
 
 ## 📖 Documentation
+- [Tutorial: Static Documentation](./TUTORIAL_STATIC_DOCS.md): Learn how to build read-only, interactive diagrams.
 - [Lit vs React for xyflow](./LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
 - [Creating Custom Nodes](./CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
 - [GEMINI.md](./GEMINI.md): Project conventions and technical insights for AI agents.
