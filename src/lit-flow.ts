@@ -189,6 +189,20 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       stroke-dasharray: 5,5;
       pointer-events: none;
     }
+
+    .xyflow__edge-label {
+      background: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      padding: 2px 6px;
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      font-size: var(--md-sys-typescale-label-small-size);
+      font-family: var(--md-sys-typescale-body-medium-font);
+      border: 1px solid var(--md-sys-color-outline-variant);
+      white-space: nowrap;
+      pointer-events: all;
+      user-select: none;
+      box-shadow: var(--md-sys-elevation-1);
+    }
   `
   ];
 
@@ -624,6 +638,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const tPos = getHandlePosition(targetNode, targetHandle, targetHandle.position, true);
 
     let path = '';
+    let labelX = 0;
+    let labelY = 0;
+
     const pathParams = {
       sourceX: sPos.x,
       sourceY: sPos.y,
@@ -635,17 +652,17 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
     switch (edge.type) {
       case 'straight':
-        [path] = getStraightPath(pathParams);
+        [path, labelX, labelY] = getStraightPath(pathParams);
         break;
       case 'smoothstep':
-        [path] = getSmoothStepPath(pathParams);
+        [path, labelX, labelY] = getSmoothStepPath(pathParams);
         break;
       case 'step':
-        [path] = getSmoothStepPath({ ...pathParams, borderRadius: 0 });
+        [path, labelX, labelY] = getSmoothStepPath({ ...pathParams, borderRadius: 0 });
         break;
       case 'bezier':
       default:
-        [path] = getBezierPath(pathParams);
+        [path, labelX, labelY] = getBezierPath(pathParams);
         break;
     }
 
@@ -660,15 +677,32 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const markerStartId = getMarkerId(edge.markerStart);
 
     return svg`
-      <path
-        d="${path}"
-        fill="none"
-        stroke="${edge.selected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}"
-        stroke-width="2"
-        marker-end="${markerEndId ? `url(#${markerEndId})` : ''}"
-        marker-start="${markerStartId ? `url(#${markerStartId})` : ''}"
-        style="pointer-events: none;"
-      />
+      <g class="xyflow__edge">
+        <path
+          d="${path}"
+          fill="none"
+          stroke="${edge.selected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}"
+          stroke-width="2"
+          marker-end="${markerEndId ? `url(#${markerEndId})` : ''}"
+          marker-start="${markerStartId ? `url(#${markerStartId})` : ''}"
+          style="pointer-events: none;"
+        />
+        ${edge.label 
+          ? svg`
+            <foreignObject
+              width="100"
+              height="30"
+              x="${labelX - 50}"
+              y="${labelY - 15}"
+              requiredExtensions="http://www.w3.org/1999/xhtml"
+            >
+              <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                <div class="xyflow__edge-label">${edge.label}</div>
+              </div>
+            </foreignObject>
+          ` 
+          : ''}
+      </g>
     `;
   }
 

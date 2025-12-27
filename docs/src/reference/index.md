@@ -33,5 +33,5 @@ Edges in LitFlow support the following properties:
 | `type` | `string` | Edge type: `bezier`, `straight`, `step`, `smoothstep`. |
 | `markerEnd` | `string \| object` | Marker at the end of the edge (e.g., `arrowclosed`). |
 | `markerStart` | `string \| object` | Marker at the start of the edge. |
-| `label` | `string` | (Coming soon) Text label for the edge. |
+| `label` | `string` | Text label rendered at the path midpoint. |
 | `selected` | `boolean` | Whether the edge is currently selected. |
