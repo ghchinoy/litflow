@@ -203,6 +203,17 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       user-select: none;
       box-shadow: var(--md-sys-elevation-1);
     }
+
+    .xyflow__selection {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--md-sys-color-primary-container);
+      border: 1px solid var(--md-sys-color-primary);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 1000;
+    }
   `
   ];
 
@@ -257,6 +268,14 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
   @property({ type: Boolean, attribute: 'prompt-on-drop', reflect: true, converter: boolConverter })
   promptOnDrop = false;
+
+  @property({ type: String, attribute: 'selection-mode' })
+  selectionMode: 'pan' | 'select' = 'pan';
+
+  @state()
+  private _selectionRect: { x: number; y: number; width: number; height: number } | null = null;
+
+  private _selectionStart: { x: number; y: number } | null = null;
 
   @state()
   private _width = 0;
@@ -429,15 +448,33 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     };
   }
 
+  private _updatePanZoom(userSelectionActive = false) {
+    if (!this._panZoom) return;
+
+    this._panZoom.update({
+      noWheelClassName: 'nowheel',
+      noPanClassName: 'nopan',
+      preventScrolling: true,
+      panOnScroll: false,
+      panOnDrag: this.panOnDrag,
+      panOnScrollMode: PanOnScrollMode.Free,
+      panOnScrollSpeed: 0.5,
+      userSelectionActive,
+      zoomOnPinch: this.zoomOnPinch,
+      zoomOnScroll: this.zoomOnScroll,
+      zoomOnDoubleClick: this.zoomOnDoubleClick,
+      zoomActivationKeyPressed: false,
+      lib: 'lit',
+      onTransformChange: () => {},
+      connectionInProgress: !!this._state.connectionInProgress.get(),
+      paneClickDistance: 0,
+    });
+  }
+
   firstUpdated() {
     if (this._renderer) {
       this._state.domNode = this._renderer;
       this._resizeObserver?.observe(this._renderer);
-
-      // Clear selection on background click
-      this._renderer.onclick = () => {
-        this.nodes = this.nodes.map(n => ({ ...n, selected: false }));
-      };
 
       this._panZoom = XYPanZoom({
         domNode: this._renderer,
@@ -455,25 +492,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         },
       });
 
-      this._panZoom.update({
-        noWheelClassName: 'nowheel',
-        noPanClassName: 'nopan',
-        preventScrolling: true,
-        panOnScroll: false,
-        panOnDrag: this.panOnDrag,
-        panOnScrollMode: PanOnScrollMode.Free,
-        panOnScrollSpeed: 0.5,
-        userSelectionActive: false,
-        zoomOnPinch: this.zoomOnPinch,
-        zoomOnScroll: this.zoomOnScroll,
-        zoomOnDoubleClick: this.zoomOnDoubleClick,
-        zoomActivationKeyPressed: false,
-        lib: 'lit',
-        onTransformChange: () => {},
-        connectionInProgress: false,
-        paneClickDistance: 0,
-      });
-
+      this._updatePanZoom();
       this._state.panZoom = this._panZoom;
     }
   }
@@ -489,24 +508,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       changedProperties.has('zoomOnPinch') ||
       changedProperties.has('zoomOnDoubleClick')
     )) {
-      this._panZoom.update({
-        noWheelClassName: 'nowheel',
-        noPanClassName: 'nopan',
-        preventScrolling: true,
-        panOnScroll: false,
-        panOnDrag: this.panOnDrag,
-        panOnScrollMode: PanOnScrollMode.Free,
-        panOnScrollSpeed: 0.5,
-        userSelectionActive: false,
-        zoomOnPinch: this.zoomOnPinch,
-        zoomOnScroll: this.zoomOnScroll,
-        zoomOnDoubleClick: this.zoomOnDoubleClick,
-        zoomActivationKeyPressed: false,
-        lib: 'lit',
-        onTransformChange: () => {},
-        connectionInProgress: false,
-        paneClickDistance: 0,
-      });
+      this._updatePanZoom();
     }
   }
 
@@ -706,6 +708,116 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     `;
   }
 
+  private _onPointerDown(e: PointerEvent) {
+    // Only start selection if clicking on the background (renderer)
+    // and either Shift is pressed or selectionMode is 'select'
+    if (e.target === this._renderer && (e.shiftKey || this.selectionMode === 'select')) {
+      const rect = this._renderer.getBoundingClientRect();
+      this._selectionStart = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+      this._selectionRect = { x: this._selectionStart.x, y: this._selectionStart.y, width: 0, height: 0 };
+      
+      // Disable panning while selecting
+      this._updatePanZoom(true);
+      
+      this._renderer.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    }
+  }
+
+  private _onPointerMove(e: PointerEvent) {
+    if (this._selectionStart && this._renderer) {
+      const rect = this._renderer.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+      
+      const x = Math.min(this._selectionStart.x, currentX);
+      const y = Math.min(this._selectionStart.y, currentY);
+      const width = Math.abs(this._selectionStart.x - currentX);
+      const height = Math.abs(this._selectionStart.y - currentY);
+      
+      this._selectionRect = { x, y, width, height };
+    }
+  }
+
+  private _onPointerUp(e: PointerEvent) {
+    if (this._selectionStart) {
+      this._performSelection(e.shiftKey);
+      this._selectionStart = null;
+      this._selectionRect = null;
+      
+      // Re-enable panning
+      this._updatePanZoom(false);
+      
+      if (this._renderer) {
+        this._renderer.releasePointerCapture(e.pointerId);
+      }
+    }
+  }
+
+  private _performSelection(multi: boolean) {
+    if (!this._selectionRect) return;
+
+    const start = this.project({ x: this._selectionRect.x, y: this._selectionRect.y });
+    const end = this.project({ 
+      x: this._selectionRect.x + this._selectionRect.width, 
+      y: this._selectionRect.y + this._selectionRect.height 
+    });
+
+    const selectionBox = {
+      x: Math.min(start.x, end.x),
+      y: Math.min(start.y, end.y),
+      width: Math.abs(start.x - end.x),
+      height: Math.abs(start.y - end.y),
+    };
+
+    // Select nodes
+    const newNodes = this.nodes.map(node => {
+      const internalNode = this._state.nodeLookup.get(node.id);
+      if (!internalNode) return node;
+
+      const pos = internalNode.internals.positionAbsolute;
+      const width = internalNode.measured.width || 0;
+      const height = internalNode.measured.height || 0;
+
+      const isInside = 
+        pos.x >= selectionBox.x &&
+        pos.y >= selectionBox.y &&
+        pos.x + width <= selectionBox.x + selectionBox.width &&
+        pos.y + height <= selectionBox.y + selectionBox.height;
+
+      if (isInside) {
+        return { ...node, selected: true };
+      }
+      return multi ? node : { ...node, selected: false };
+    });
+
+    // Select edges
+    const newEdges = this.edges.map(edge => {
+      const sourceNode = newNodes.find(n => n.id === edge.source);
+      const targetNode = newNodes.find(n => n.id === edge.target);
+      
+      const isInside = sourceNode?.selected && targetNode?.selected;
+      
+      if (isInside) {
+        return { ...edge, selected: true };
+      }
+      return multi ? edge : { ...edge, selected: false };
+    });
+
+    this.nodes = newNodes;
+    this.edges = newEdges;
+
+    this.dispatchEvent(new CustomEvent('selection-change', {
+      detail: { 
+        nodes: this.nodes.filter(n => n.selected),
+        edges: this.edges.filter(e => e.selected)
+      }
+    }));
+  }
+
   private _onHandlePointerDown(e: CustomEvent) {
     const { event, handleId, nodeId, type, handleDomNode } = e.detail;
     const isTarget = type === 'target';
@@ -854,6 +966,15 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}"
         @dragover="${this._onDragOver}"
         @drop="${this._onDrop}"
+        @pointerdown="${this._onPointerDown}"
+        @pointermove="${this._onPointerMove}"
+        @pointerup="${this._onPointerUp}"
+        @click="${(e: MouseEvent) => {
+          if (e.target === this._renderer) {
+            this.nodes = this.nodes.map(n => ({ ...n, selected: false }));
+            this.edges = this.edges.map(e => ({ ...e, selected: false }));
+          }
+        }}"
       >
         <div
           class="xyflow__viewport"
@@ -945,6 +1066,14 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
             ${this._renderConnectionLine(connectionInProgress)}
           </svg>
         </div>
+        ${this._selectionRect 
+          ? html`
+            <div 
+              class="xyflow__selection" 
+              style="transform: translate(${this._selectionRect.x}px, ${this._selectionRect.y}px); width: ${this._selectionRect.width}px; height: ${this._selectionRect.height}px;"
+            ></div>
+          ` 
+          : ''}
       </div>
       ${this.showControls
         ? html`<lit-controls .panZoom="${this._panZoom}"></lit-controls>`

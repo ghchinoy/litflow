@@ -18,6 +18,7 @@ Explore the capabilities of LitFlow through these live interactive examples.
 - **[Custom Nodes](/examples/custom-nodes/)**: Building rich, interactive nodes with custom logic.
 - **[Custom Edges](/examples/custom-edges/)**: Creating bespoke edge styles and paths.
 - **[Edge Markers](/examples/edge-markers/)**: Showcasing arrowheads and bidirectional edges.
+- **[Marquee Selection](/examples/marquee-selection/)**: Selecting multiple nodes and edges by dragging a box.
 - **[Multiple Handles](/examples/multiple-handles/)**: Managing complex connectivity with multiple target and source handles.
 
 ## Advanced Patterns

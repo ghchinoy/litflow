@@ -126,6 +126,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 ## 🛠️ Key Features
 - **Panning & Zooming**: Full support for viewport manipulation via d3-zoom (via xyflow).
 - **Node Dragging**: Individual nodes can be dragged, with positions synced back to the state.
+- **Marquee Selection**: Bulk select nodes and edges by dragging a selection box (Shift + Drag).
 - **Edge Markers**: Support for arrowheads and other markers on edges.
 - **Manual Connections**: Drag-to-connect functionality between handles with a live connection line.
 - **Controls & MiniMap**: Built-in utility components for navigation and overview.

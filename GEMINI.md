@@ -30,6 +30,7 @@ This project uses **bd (beads)** for issue tracking.
 - **Static Display Mode**: Disable `XYPanZoom` and `XYDrag` via properties (`pan-on-drag="false"`, etc.) to create read-only documentation graphs while maintaining custom interactivity (like group toggles).
 - **Edge Re-routing**: When collapsing groups, manually re-route edges from children to the parent group node in the event handler to maintain visual connectivity.
 - **Edge Markers**: SVG markers (arrowheads) must be defined in a `<defs>` section within the `<svg>` element. To support color changes (e.g., for selection), define separate markers for different states (e.g., `lit-flow__arrow` and `lit-flow__arrow-selected`).
+- **Marquee Selection**: To implement marquee selection, disable `XYPanZoom` panning (`userSelectionActive: true`) during the drag. Use the `project()` method to translate the screen-space selection rectangle into canvas-space coordinates for intersection testing against `nodeLookup`.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support.
 - **SignalWatcher Type Fix**: To avoid `TS4020` errors during type generation, use a type cast for `SignalWatcher(LitElement)` to hide private internal types from the exported class.
 - **Z-Index Layering**: Avoid negative `zIndex` values for nodes, as they can be hidden behind the canvas background in a WebComponent environment. Use positive relative values (e.g., 0 for groups, 1 for children).
