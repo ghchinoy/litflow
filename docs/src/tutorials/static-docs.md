@@ -1,3 +1,8 @@
+---
+layout: base.njk
+title: Building Static Documentation with LitFlow
+---
+
 # Tutorial: Building Static Documentation with LitFlow
 
 This tutorial walks you through creating a read-only, interactive graph for documentation using LitFlow.

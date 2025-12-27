@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title or "LitFlow" }}</title>
+    <link rel="stylesheet" href="/public/style.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "lit": "https://esm.sh/lit?bundle",
+        "lit/": "https://esm.sh/lit/",
+        "@lit-labs/signals": "https://esm.sh/@lit-labs/signals",
+        "@xyflow/system": "https://esm.sh/@xyflow/system",
+        "d3-drag": "https://esm.sh/d3-drag",
+        "d3-interpolate": "https://esm.sh/d3-interpolate",
+        "d3-selection": "https://esm.sh/d3-selection",
+        "d3-zoom": "https://esm.sh/d3-zoom",
+        "@ghchinoy/litflow": "/public/litflow.js"
+      }
+    }
+    </script>
+    <!-- Import LitFlow as a module for live examples -->
+    <script type="module">
+        import '@ghchinoy/litflow';
+    </script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/tutorials/">Tutorials</a>
+            <a href="/guides/">Guides</a>
+            <a href="/reference/">Reference</a>
+            <a href="/explanation/">Explanation</a>
+        </nav>
+    </header>
+    <main>
+        {{ content | safe }}
+    </main>
+    <footer>
+        <p>&copy; 2025 G. Hussain Chinoy</p>
+    </footer>
+</body>
+</html>

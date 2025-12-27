@@ -1,0 +1,60 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'docs/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          
+      - name: Install dependencies (root)
+        run: pnpm install
+        
+      - name: Build Library
+        run: pnpm build
+        
+      - name: Install dependencies (docs)
+        run: cd docs && pnpm install
+        
+      - name: Prepare Docs Public Assets
+        run: |
+          mkdir -p docs/src/public
+          cp dist/litflow.js docs/src/public/
+          # Optional: cp dist/theme.js docs/src/public/
+          
+      - name: Build Eleventy
+        run: cd docs && pnpm build
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs/_site'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

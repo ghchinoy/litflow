@@ -1,3 +1,8 @@
+---
+layout: base.njk
+title: Creating Custom Nodes in LitFlow
+---
+
 # Creating Custom Nodes in LitFlow
 
 Custom nodes allow you to build complex, interactive, and data-driven elements within your flow. Since LitFlow uses **Light DOM** for nodes, your custom components integrate seamlessly with the `@xyflow/system` core.

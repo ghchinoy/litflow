@@ -1,3 +1,8 @@
+---
+layout: base.njk
+title: Lit WebComponents vs. React for xyflow
+---
+
 # Lit WebComponents vs. React for xyflow
 
 Building node-based UIs with `xyflow` can be done using its framework-specific wrappers (React Flow, Svelte Flow) or by using the headless `@xyflow/system` core with other libraries like Lit. This document explores the benefits and trade-offs of using Lit WebComponents compared to the standard React implementation.
