@@ -56,13 +56,21 @@ When adding new features to LitFlow, follow this sequence:
 5.  **Documentation**: Update `README.md`, Diataxis docs in `docs/src/`, and `GEMINI.md` technical insights.
 6.  **Versioning**: Increment the version in `package.json` (see below).
 
+### Verification & Testing
+Currently, the project relies on visual verification via the `examples/` directory.
+- **Manual Verification**: Run `pnpm dev` and navigate to `examples/overview/index.html` to verify core features (dragging, selection, AI nodes, subflows).
+- **Build Check**: Always run `pnpm run build` before committing major changes to catch TypeScript errors.
+- **Linting**: (Future) Integrate ESLint/Prettier for code style consistency.
+
 ### Publishing Workflow
 To release a new version of `@ghchinoy/litflow`:
-1.  **Version Bump**: 
-    - `pnpm version patch`: For bug fixes and small, non-breaking features (e.g., Edge Markers).
-    - `pnpm version minor`: For significant new features or architectural changes (e.g., Drag & Drop).
-2.  **Build**: `pnpm run build` (generates `dist/` and types).
-3.  **Publish**: `pnpm publish --access public`.
+1.  **Verify**: Run `pnpm run build` to ensure no TypeScript or build errors.
+2.  **Version Bump**: 
+    - `pnpm version patch`: For bug fixes and small, non-breaking features.
+    - `pnpm version minor`: For significant new features or architectural changes.
+    *Note: This creates a local git commit and tag.*
+3.  **Push**: `git push origin main --tags` to sync the version bump and tag to GitHub.
+4.  **Publish**: `pnpm publish --access public`.
 *Note: The `prepublishOnly` script in `package.json` ensures a fresh build before every publish.*
 
 ### Proposed Components
