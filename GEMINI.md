@@ -56,8 +56,8 @@ To release a new version of `@ghchinoy/litflow`:
 - `<lit-handle>`: Connection port component for nodes.
 
 ## 📖 Documentation
-- [Lit vs React for xyflow](./LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
-- [Creating Custom Nodes](./CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
+- [Lit vs React for xyflow](./docs/LIT_VS_REACT.md): A comparison of using Lit WebComponents vs React for building flow-based UIs.
+- [Creating Custom Nodes](./docs/CUSTOM_NODES.md): A primer on building complex, data-driven nodes in LitFlow.
 - [GEMINI.md](./GEMINI.md): Project conventions and technical insights for AI agents.
 
 ### Development Plan (High-Level)

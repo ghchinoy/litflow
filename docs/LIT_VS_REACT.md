@@ -77,7 +77,26 @@ Because LitFlow is a standard WebComponent, it can be published as a single, min
 
 ---
 
+## 🎨 Material 3 & Design Tokens
+
+LitFlow is built with **Material 3** principles from the ground up.
+- **Centralized Theme**: All components use a shared `theme.ts` containing M3 design tokens (colors, typography, elevation, shapes).
+- **CSS Variables**: The theme is exposed via standard CSS variables, making it trivial to customize or brand the flow editor without touching the core logic.
+- **Consistent UI**: Overlays like `MiniMap` and `Controls` share the same design language as the nodes, providing a cohesive "out-of-the-box" experience that rivals framework-specific libraries.
+
+---
+
 ## 📊 Comparison Table
+
+| Feature | Lit + xyflow | React Flow |
+| :--- | :--- | :--- |
+| **Bundle Size** | ~30KB (minified/gzipped) | ~150KB+ (React + Zustand + RF) |
+| **Reactivity** | Fine-grained (Signals) | Component-level (Zustand/Hooks) |
+| **Interoperability** | Universal (WebComponent) | React-only |
+| **Styling** | M3 Tokens / Shadow DOM | CSS / Styled Components |
+| **Subflows** | Manual orchestration | Built-in |
+| **Static Docs** | Native attributes | Prop-based |
+| **Learning Curve** | Moderate (Web Standards) | Low (if you know React) |
 
 ## ✅ Pros & ❌ Cons
 
@@ -86,24 +105,25 @@ Because LitFlow is a standard WebComponent, it can be published as a single, min
 - **Portability**: Build once, use anywhere (React, Vue, Angular, or plain HTML).
 - **Speed**: Extremely fast boot time and low memory footprint.
 - **Fine-Grained Reactivity**: Signals minimize unnecessary re-renders in large graphs.
-- **Standards-based**: Leverages native browser features (WebComponents).
+- **Built-in M3 Theme**: Modern, professional look out of the box.
+- **Documentation Friendly**: Easy to embed as a static, read-only diagram.
 
 **Cons:**
 - **Manual Setup**: Requires manual orchestration of `XYPanZoom` and `XYDrag`.
-- **Styling Complexity**: Light DOM children require styles to be managed in the parent ShadowRoot or globally.
-- **Smaller Community**: Fewer pre-built "custom node" libraries compared to React Flow.
+- **Ecosystem**: Fewer community-made custom nodes compared to React Flow.
+- **SVG Namespace**: Edge rendering requires careful handling of SVG templates in Lit.
 
 ### React Flow
 **Pros:**
-- **Feature Rich**: Includes many built-in components (MiniMap, Controls, Background).
-- **Developer Experience**: Excellent hooks API (`useReactFlow`, `useNodes`).
+- **Feature Rich**: Includes many built-in components and advanced plugins.
+- **Developer Experience**: Excellent hooks API and mature documentation.
 - **Huge Community**: Thousands of examples and community-made nodes.
 - **Battle Tested**: Used in production by major companies.
 
 **Cons:**
 - **Locked to React**: Cannot be used in other frameworks without a bridge.
 - **Bundle Size**: Larger due to React and its dependencies.
-- **Virtual DOM Overhead**: Can become a bottleneck for thousands of nodes if not optimized.
+- **Virtual DOM Overhead**: Can become a bottleneck for extremely large graphs.
 
 ## 🎯 Conclusion
 

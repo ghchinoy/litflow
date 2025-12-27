@@ -10,7 +10,7 @@ A custom node is a standard Lit component that follows a few conventions:
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { Position } from '@xyflow/system';
-import '../../src/lit-handle'; // Import the handle component
+import '../src/lit-handle'; // Import the handle component
 
 @customElement('my-custom-node')
 export class MyCustomNode extends LitElement {
@@ -118,7 +118,32 @@ flow.nodes = [
 ];
 ```
 
-## 5. Styling
+## 5. Interactive State & Syncing
+
+If your custom node has internal interactive state (e.g., a collapsed/expanded toggle), you must sync this state back to the `data` property. This ensures the state is preserved when the parent flow re-renders the `nodes` array.
+
+```typescript
+@property({ type: Object })
+set data(val: any) {
+  this._data = val;
+  // Sync internal state from data
+  this.collapsed = !!val.collapsed;
+}
+
+private _toggleCollapse() {
+  // Dispatch event to parent to update the global nodes array
+  this.dispatchEvent(new CustomEvent('group-collapse', {
+    bubbles: true,
+    composed: true,
+    detail: {
+      id: this.nodeId,
+      collapsed: !this.collapsed
+    }
+  }));
+}
+```
+
+## 6. Styling
 
 Since custom nodes use Light DOM, their styles should be defined:
 1.  **Globally** in your page's `<style>` tag.
