@@ -1027,8 +1027,6 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         });
 
         this.nodes = this.nodes.filter(n => !nodeIdsToRemove.has(n.id));
-        this.edges = this.edges.filter(e => !edgeIdsToRemove.add ? edgeIdsToRemove.has(edge.id) : edgeIdsToRemove.has(edge.id));
-        // Wait, I made a typo in my thought process, let's fix it in the actual code.
         this.edges = this.edges.filter(e => !edgeIdsToRemove.has(e.id));
 
         this.dispatchEvent(new CustomEvent('nodes-delete', {
