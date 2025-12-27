@@ -43,11 +43,22 @@ This project uses **bd (beads)** for issue tracking.
 - **Event Propagation**: Stop propagation of `mousedown` and `touchstart` in `<lit-handle>` to prevent node dragging during connection attempts.
 - **DX (Developer Experience)**: Use Vite for fast development. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
+### Feature Implementation Workflow
+When adding new features to LitFlow, follow this sequence:
+1.  **Core Support**: Update `src/lit-flow.ts` (and other core components) to support the new properties/logic.
+2.  **Visual States**: Ensure the feature respects selection and theme states (e.g., separate SVG markers for selected edges).
+3.  **Example Integration**: Update existing examples (e.g., `basic`, `subflows`) to demonstrate the feature.
+4.  **Dedicated Showcase**: If the feature has many options, create a dedicated example in `examples/`.
+5.  **Documentation**: Update `README.md`, Diataxis docs in `docs/src/`, and `GEMINI.md` technical insights.
+6.  **Versioning**: Increment the version in `package.json` (see below).
+
 ### Publishing Workflow
 To release a new version of `@ghchinoy/litflow`:
-1. **Version Bump**: `pnpm version patch` (or minor/major).
-2. **Build**: `pnpm run build` (generates `dist/` and types).
-3. **Publish**: `pnpm publish --access public`.
+1.  **Version Bump**: 
+    - `pnpm version patch`: For bug fixes and small, non-breaking features (e.g., Edge Markers).
+    - `pnpm version minor`: For significant new features or architectural changes (e.g., Drag & Drop).
+2.  **Build**: `pnpm run build` (generates `dist/` and types).
+3.  **Publish**: `pnpm publish --access public`.
 *Note: The `prepublishOnly` script in `package.json` ensures a fresh build before every publish.*
 
 ### Proposed Components

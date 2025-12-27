@@ -1,6 +1,6 @@
 {
   "name": "@ghchinoy/litflow",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "xyflow core integrated with Lit WebComponents",
   "license": "MIT",
   "author": "G. Hussain Chinoy",
@@ -42,6 +42,7 @@
     "d3-interpolate": "^3.0.1",
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
+    "eleventy": "^2.0.1",
     "lit": "^3.3.2"
   },
   "devDependencies": {
