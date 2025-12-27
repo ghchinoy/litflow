@@ -26,9 +26,6 @@ importers:
       d3-zoom:
         specifier: ^3.0.0
         version: 3.0.0
-      eleventy:
-        specifier: ^2.0.1
-        version: 2.0.1
       lit:
         specifier: ^3.3.2
         version: 3.3.2
@@ -394,10 +391,6 @@ packages:
     resolution: {integrity: sha512-b8AmV3kfQaqWAuacbPuNbL6vahnOJflOhexLzMMNLga62+/nh0JzvJ0aO/5a5MVgUFGS7Hu1P9P03o3fJkDCyw==}
     engines: {node: '>=12'}
 
-  eleventy@2.0.1:
-    resolution: {integrity: sha512-Zsh2rCvXxxjIDj9s93YhhfqmIzhUpv4VQgS7QxFB51btWO/09xdm7/Da/KmDpunTQ8wWsvW2Jo8a6gDcCc+6VA==}
-    hasBin: true
-
   esbuild@0.27.2:
     resolution: {integrity: sha512-HyNQImnsOC7X9PMNaCIeAm4ISCQXs5a5YasTXVliKv4uuBo1dKrG0A+uQS8M5eXjVMnLg3WgXaKvprHlFJQffw==}
     engines: {node: '>=18'}
@@ -732,8 +725,6 @@ snapshots:
       d3-interpolate: 3.0.1
       d3-selection: 3.0.0
       d3-transition: 3.0.1(d3-selection@3.0.0)
-
-  eleventy@2.0.1: {}
 
   esbuild@0.27.2:
     optionalDependencies:
