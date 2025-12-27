@@ -4,5 +4,6 @@ export * from './lit-edge';
 export * from './lit-handle';
 export * from './lit-controls';
 export * from './lit-minimap';
+export * from './lit-sidebar';
 export * from './store';
 export * from './theme';

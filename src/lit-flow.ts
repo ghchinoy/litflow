@@ -241,6 +241,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: Boolean, attribute: 'zoom-on-double-click', reflect: true, converter: boolConverter })
   zoomOnDoubleClick = true;
 
+  @property({ type: Boolean, attribute: 'prompt-on-drop', reflect: true, converter: boolConverter })
+  promptOnDrop = false;
+
   @state()
   private _width = 0;
 
@@ -398,6 +401,18 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       return multi ? node : { ...node, selected: false };
     });
     this.nodes = newNodes;
+  }
+
+  /**
+   * Projects a screen position (relative to the flow container) to canvas coordinates.
+   * Useful for Drag & Drop and context menus.
+   */
+  project(position: { x: number; y: number }): { x: number; y: number } {
+    const [tx, ty, zoom] = this._state.transform.get();
+    return {
+      x: (position.x - tx) / zoom,
+      y: (position.y - ty) / zoom,
+    };
   }
 
   firstUpdated() {
@@ -715,6 +730,51 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     });
   }
 
+  private _onDragOver(e: DragEvent) {
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+  }
+
+  private _onDrop(e: DragEvent) {
+    e.preventDefault();
+
+    const type = e.dataTransfer?.getData('application/litflow');
+
+    // check if the dropped element is valid
+    if (typeof type === 'undefined' || !type) {
+      return;
+    }
+
+    // Get the position of the drop relative to the flow container
+    const rect = this.getBoundingClientRect();
+    const position = this.project({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+
+    let label = `${type} node`;
+    if (this.promptOnDrop) {
+      const userLabel = window.prompt('Enter node label:', label);
+      if (userLabel === null) return; // Cancelled
+      label = userLabel || label;
+    }
+
+    const newNode = {
+      id: `node_${Date.now()}`,
+      type,
+      position,
+      data: { label },
+    };
+
+    this.nodes = [...this.nodes, newNode];
+    
+    this.dispatchEvent(new CustomEvent('node-drop', {
+      detail: { node: newNode, event: e }
+    }));
+  }
+
   private _renderConnectionLine(conn: any) {
     if (!conn) return null;
 
@@ -744,7 +804,11 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const connectionInProgress = this._state.connectionInProgress.get();
 
     return html`
-      <div class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}">
+      <div 
+        class="xyflow__renderer ${this.showGrid ? 'has-grid' : ''}"
+        @dragover="${this._onDragOver}"
+        @drop="${this._onDrop}"
+      >
         <div
           class="xyflow__viewport"
           style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"

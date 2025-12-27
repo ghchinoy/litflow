@@ -16,3 +16,4 @@ Practical solutions to specific problems and recipes for common tasks.
 ## Available Guides
 
 - [Creating Custom Nodes](/guides/custom-nodes/)
+- **[Drag & Drop](/guides/drag-and-drop/)**: Implement palette-to-canvas interactions.
