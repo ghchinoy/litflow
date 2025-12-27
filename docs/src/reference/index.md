@@ -20,3 +20,18 @@ Technical documentation for the LitFlow API, components, and properties.
 - `<lit-node>`
 - `<lit-handle>`
 - `<lit-edge>`
+
+## Edge Properties
+
+Edges in LitFlow support the following properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `id` | `string` | Unique identifier for the edge. |
+| `source` | `string` | ID of the source node. |
+| `target` | `string` | ID of the target node. |
+| `type` | `string` | Edge type: `bezier`, `straight`, `step`, `smoothstep`. |
+| `markerEnd` | `string \| object` | Marker at the end of the edge (e.g., `arrowclosed`). |
+| `markerStart` | `string \| object` | Marker at the start of the edge. |
+| `label` | `string` | (Coming soon) Text label for the edge. |
+| `selected` | `boolean` | Whether the edge is currently selected. |

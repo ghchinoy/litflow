@@ -649,12 +649,24 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         break;
     }
 
+    const getMarkerId = (marker: any) => {
+      if (!marker) return null;
+      const type = typeof marker === 'string' ? marker : marker.type;
+      if (!type) return null;
+      return `lit-flow__${type}${edge.selected ? '-selected' : ''}`;
+    };
+
+    const markerEndId = getMarkerId(edge.markerEnd);
+    const markerStartId = getMarkerId(edge.markerStart);
+
     return svg`
       <path
         d="${path}"
         fill="none"
         stroke="${edge.selected ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-outline-variant)'}"
         stroke-width="2"
+        marker-end="${markerEndId ? `url(#${markerEndId})` : ''}"
+        marker-start="${markerStartId ? `url(#${markerStartId})` : ''}"
         style="pointer-events: none;"
       />
     `;
@@ -849,6 +861,52 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
             })}
           </div>
           <svg class="xyflow__edges">
+            <defs>
+              <marker
+                id="lit-flow__arrow"
+                viewBox="0 0 10 10"
+                refX="5"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--md-sys-color-outline-variant)" />
+              </marker>
+              <marker
+                id="lit-flow__arrowclosed"
+                viewBox="0 0 10 10"
+                refX="5"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--md-sys-color-outline-variant)" />
+              </marker>
+              <marker
+                id="lit-flow__arrow-selected"
+                viewBox="0 0 10 10"
+                refX="5"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--md-sys-color-primary)" />
+              </marker>
+              <marker
+                id="lit-flow__arrowclosed-selected"
+                viewBox="0 0 10 10"
+                refX="5"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--md-sys-color-primary)" />
+              </marker>
+            </defs>
             ${this.edges.map((edge) => this._renderEdge(edge))}
             ${this._renderConnectionLine(connectionInProgress)}
           </svg>
