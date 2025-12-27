@@ -63,9 +63,10 @@ export class LitControls extends (SignalWatcher as <T extends Constructor<LitEle
   }
 
   private _fitView() {
-    // fitView implementation will need more data from the flow
-    // for now just a placeholder or simple zoom reset
-    this.panZoom?.setViewport({ x: 0, y: 0, zoom: 1 });
+    this.dispatchEvent(new CustomEvent('fit-view', {
+      bubbles: true,
+      composed: true
+    }));
   }
 
   render() {
@@ -76,8 +77,8 @@ export class LitControls extends (SignalWatcher as <T extends Constructor<LitEle
       <button @click="${this._zoomOut}" title="Zoom Out">
         <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
       </button>
-      <button @click="${this._fitView}" title="Reset View">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+      <button @click="${this._fitView}" title="Fit View">
+        <svg viewBox="0 0 24 24"><path d="M6 16h12V8H6v8zm2-6h8v4H8v-4zM4 4h16v16H4V4zm2 2v12h12V6H6z"/></svg>
       </button>
     `;
   }

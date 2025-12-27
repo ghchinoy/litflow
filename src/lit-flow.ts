@@ -454,6 +454,49 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     };
   }
 
+  /**
+   * Fits the view to the current nodes.
+   * @param padding Optional padding in pixels (default: 50)
+   */
+  async fitView(padding = 50) {
+    if (!this._panZoom || this.nodes.length === 0) return;
+
+    const nodes = Array.from(this._state.nodeLookup.values());
+    if (nodes.length === 0) return;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    nodes.forEach((node) => {
+      const { x, y } = node.internals.positionAbsolute;
+      const width = node.measured.width || 0;
+      const height = node.measured.height || 0;
+
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + width);
+      maxY = Math.max(maxY, y + height);
+    });
+
+    const graphWidth = maxX - minX;
+    const graphHeight = maxY - minY;
+    const containerWidth = this.offsetWidth;
+    const containerHeight = this.offsetHeight;
+
+    if (containerWidth === 0 || containerHeight === 0) return;
+
+    const zoomX = (containerWidth - padding * 2) / graphWidth;
+    const zoomY = (containerHeight - padding * 2) / graphHeight;
+    const zoom = Math.min(zoomX, zoomY, 1); // Don't zoom in past 1:1
+
+    const x = (containerWidth - graphWidth * zoom) / 2 - minX * zoom;
+    const y = (containerHeight - graphHeight * zoom) / 2 - minY * zoom;
+
+    await this._panZoom.setViewport({ x, y, zoom }, { duration: 400 });
+  }
+
   private _updatePanZoom(userSelectionActive = false) {
     if (!this._panZoom) return;
 
@@ -1184,7 +1227,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
           : ''}
       </div>
       ${this.showControls
-        ? html`<lit-controls .panZoom="${this._panZoom}"></lit-controls>`
+        ? html`<lit-controls .panZoom="${this._panZoom}" @fit-view="${() => this.fitView()}"></lit-controls>`
         : ''}
       ${this.showMinimap
         ? html`
