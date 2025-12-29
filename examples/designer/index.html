@@ -17,9 +17,15 @@
 
     .designer-container {
       display: grid;
-      grid-template-columns: 1fr 400px;
+      grid-template-columns: 240px 1fr 400px;
       height: 100vh;
       width: 100vw;
+    }
+
+    .palette-pane {
+      background-color: var(--md-sys-color-surface);
+      border-right: 1px solid #333;
+      z-index: 100;
     }
 
     .canvas-pane {
@@ -142,6 +148,9 @@
 </head>
 <body>
   <div class="designer-container">
+    <div class="palette-pane">
+      <lit-sidebar id="sidebar"></lit-sidebar>
+    </div>
     <div class="canvas-pane">
       <lit-flow 
         id="flow" 
@@ -182,13 +191,16 @@
     import '../../src/index.ts';
 
     const flow = document.getElementById('flow');
+    const sidebar = document.getElementById('sidebar');
     const editor = document.getElementById('json-editor');
     const nodeCount = document.getElementById('node-count');
-    const edgeCount = document.getElementById('edge-count');
-    const copyBtn = document.getElementById('copy-btn');
-    const applyBtn = document.getElementById('apply-btn');
-    const formatBtn = document.getElementById('format-btn');
-    const toast = document.getElementById('toast');
+
+    // Update sidebar with standard types
+    sidebar.nodeTypes = [
+      { type: 'input', label: 'Input Node' },
+      { type: 'default', label: 'Default Node' },
+      { type: 'output', label: 'Output Node' },
+    ];
 
     const autoApply = document.getElementById('auto-apply');
 
