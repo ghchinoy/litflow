@@ -33,3 +33,9 @@ Experience LitFlow as a complete authoring tool. Drag nodes from the palette, co
 </div>
 
 [Open Designer in new window](/examples/designer/index.html)
+
+---
+
+## Acknowledgements
+
+LitFlow is built upon the incredible work of the **[xyflow](https://xyflow.com/)** team. We would like to thank them for their excellent xyflow core system and their continued, inspiring support of the open-source community.
