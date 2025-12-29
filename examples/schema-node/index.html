@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LitFlow - Schema Node</title>
+  <style>
+    body { margin: 0; padding: 0; font-family: sans-serif; height: 100vh; width: 100vw; overflow: hidden; }
+    lit-flow { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <lit-flow id="flow" show-controls show-minimap></lit-flow>
+
+  <script type="module">
+    import '../../src/index.ts';
+
+    const flow = document.getElementById('flow');
+
+    // Register the schema node type
+    flow.nodeTypes = {
+      default: 'lit-node',
+      schema: 'lit-schema-node'
+    };
+
+    // Define Breadboard-like Schemas
+    const llmSchema = {
+      type: 'object',
+      properties: {
+        model: { title: 'Model Name', type: 'string' },
+        prompt: { title: 'Prompt', type: 'string', behavior: ['llm-content'] },
+        context: { title: 'Context', type: 'array' }
+      }
+    };
+
+    const outputSchema = {
+      type: 'object',
+      properties: {
+        response: { title: 'Response', type: 'string' }
+      }
+    };
+
+    flow.nodes = [
+      { 
+        id: '1', 
+        type: 'schema', 
+        position: { x: 250, y: 50 }, 
+        data: { 
+          label: 'Gemini 3 Flash Preview',
+          inputSchema: llmSchema,
+          outputSchema: outputSchema
+        }
+      },
+    ];
+  </script>
+</body>
+</html>
