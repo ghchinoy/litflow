@@ -1,9 +1,13 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-module.exports = function() {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export default function() {
   // Read the root package.json
-  const packageJsonPath = path.resolve(__dirname, '../../../../package.json');
+  const packageJsonPath = path.resolve(__dirname, '../../../package.json');
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
   return {
