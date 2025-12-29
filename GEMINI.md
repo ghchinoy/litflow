@@ -16,9 +16,11 @@ This project uses **bd (beads)** for issue tracking.
 
 ## Package Management
 - **Package Manager**: [pnpm](https://pnpm.io/) is used for dependency management. Use `pnpm install` and `pnpm dev`.
+- **Files Whitelist**: When using the `files` array in `package.json`, **always explicitly include** `README.md`, `LICENSE`, and `CHANGELOG.md`. Do not rely on npm's default inclusion rules, as strict whitelisting can exclude them.
 
 ### Coding Conventions
 - **Language**: TypeScript is used for core logic and components.
+- **Node.js Context**: Always check the nearest `package.json` for `"type": "module"`. If present (like in `docs/`), use ESM syntax (`import`, `export default`, `import.meta.url`) instead of CommonJS (`require`, `__dirname`) for scripts and configuration files.
 - **Framework**: [Lit](https://lit.dev/) for WebComponents.
 - **Issue Tracking**: Use `bd` (beads) for all task management.
 - **State Management**: Use `@lit-labs/signals` for fine-grained reactivity. Components must use the `SignalWatcher` mixin.
