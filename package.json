@@ -15,7 +15,9 @@
   "type": "module",
   "files": [
     "dist",
-    "src"
+    "src",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
