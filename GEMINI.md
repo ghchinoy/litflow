@@ -11,6 +11,7 @@ This project uses **bd (beads)** for issue tracking.
 - `bd create "Title" --type task --priority 2` - Create issue
 - `bd close <id>` - Complete work
 - `bd sync` - Sync with git (run at session end)
+- **Importing Tasks**: Use `bd sync --import-only` if the task database (`.beads/issues.jsonl`) has changed externally (e.g., after a git pull) to update your local state without overwriting.
 - See [AGENTS.md](./AGENTS.md) for the mandatory session completion workflow and critical rules for AI agents.
 
 ## Package Management
@@ -35,6 +36,7 @@ This project uses **bd (beads)** for issue tracking.
 - **Keyboard Interactivity**: To support keyboard shortcuts (e.g., Delete, Arrow keys), the main renderer must have a `tabindex="0"` and an `outline: none` (or custom focus style). Always check `e.target` to ensure shortcuts don't trigger while the user is typing in an input or textarea.
 - **Custom Node Data Sync**: Custom nodes should dispatch a bubbling, composed `node-data-change` event when their internal state changes. The parent `<lit-flow>` should listen for this and update the `nodes` array to ensure the change persists across re-renders.
 - **Selection Performance**: When implementing marquee selection or bulk updates, check if the selection state actually changed before updating the `nodes` or `edges` signals. Use a `Map` for node selection status to avoid O(N) lookups when determining if an edge's source and target are both selected.
+- **Global Event Observability**: To support external tools (like a JSON inspector) that need to react to any graph change (dragging, connecting, deleting), dispatch a generic `change` event from the central `<lit-flow>` component. Use a helper method like `_notifyChange()` and call it in property setters, drag handlers (`updateNodePositions`), and dimension updaters to ensure no mutation path is missed.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support.
 - **SignalWatcher Type Fix**: To avoid `TS4020` errors during type generation, use a type cast for `SignalWatcher(LitElement)` to hide private internal types from the exported class.
 - **Z-Index Layering**: Avoid negative `zIndex` values for nodes, as they can be hidden behind the canvas background in a WebComponent environment. Use positive relative values (e.g., 0 for groups, 1 for children).
@@ -66,7 +68,12 @@ Currently, the project relies on visual verification via the `examples/` directo
 ### Publishing Workflow
 To release a new version of `@ghchinoy/litflow`:
 1.  **Verify**: Run `pnpm run build` to ensure no TypeScript or build errors.
-2.  **Version Bump**: 
+2.  **Update Changelog**: Generate `CHANGELOG.md` from closed tasks:
+    ```bash
+    bd list --status closed --json | jq -r 'sort_by(.closed_at) | reverse | map(select(.closed_at != null)) | group_by(.closed_at[0:10]) | .[] | "## " + (.[0].closed_at[0:10]) + "\n" + (map("- " + .title + " (" + .id + ")") | join("\n")) + "\n"' > CHANGELOG.md
+    ```
+    *Review and commit the changelog.*
+3.  **Version Bump**: 
     - `pnpm version patch`: For bug fixes and small, non-breaking features.
     - `pnpm version minor`: For significant new features or architectural changes.
     *Note: This creates a local git commit and tag.*
