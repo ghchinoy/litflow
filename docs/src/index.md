@@ -20,11 +20,16 @@ LitFlow is a project dedicated to creating Lit WebComponent examples and a libra
 
 Check out our [Tutorials](/tutorials/) to start building your first flow.
 
-## Live Example
+## Live Designer
 
-<lit-flow style="height: 300px; display: block; border: 1px solid #ccc;" pan-on-drag="false">
-  <lit-node id="1" type="default" label="Hello" position-x="50" position-y="50"></lit-node>
-  <lit-node id="2" type="default" label="LitFlow" position-x="200" position-y="150"></lit-node>
-</lit-flow>
+Experience LitFlow as a complete authoring tool. Drag nodes from the palette, connect them, and see the live JSON configuration update in real-time.
 
-*(Note: Live examples require the litflow library to be bundled and available in /public/litflow.js)*
+<div class="designer-preview" style="border: 1px solid var(--primary-color); border-radius: 8px; overflow: hidden; margin: 2rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  <iframe 
+    src="/examples/designer/index.html" 
+    style="width: 100%; height: 600px; border: none; display: block;"
+    title="LitFlow Designer"
+  ></iframe>
+</div>
+
+[Open Designer in new window](/examples/designer/index.html)
