@@ -53,3 +53,16 @@ Users should be able to draw a graph just for documentation (using simple HTML t
 
 **Q: What about xyflow?**
 **A:** We keep it. `xyflow` handles the physics (zoom, pan, drag) perfectly. We focus our innovation on the **Node Surface** (what happens *inside* the box) and the **Runtime Bridge** (what happens *between* the boxes).
+
+## 7. Architecture Mapping (The Rosetta Stone)
+
+| Concept | xyflow (The Physics) | Breadboard (The Brains) | LitFlow (The Interface) |
+| :--- | :--- | :--- | :--- |
+| **The Graph** | `nodes[]`, `edges[]` | `GraphDescriptor` | `GraphStore` (Reactive Adapter) |
+| **The Unit** | `<Node>` Component | `NodeDescriptor` | `<lit-schema-node>` |
+| **Inputs/Outputs** | `<Handle>` Component | `Schema` / `Ports` | `<lit-handle>` (Dynamic) |
+| **Data Flow** | Edges (Visual) | Harness Events | `LitFlowRunner` |
+| **Rich Data** | Custom HTML | `LLMContent` / Behaviors | `<lit-chiclet>` |
+
+*   **xyflow Users**: Think of Breadboard as a "State Management Library" for your graph.
+*   **Breadboard Users**: Think of LitFlow as a "Native Web Component Renderer" for your graphs.
