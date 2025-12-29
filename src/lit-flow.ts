@@ -300,10 +300,22 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       nodeOrigin: this._state.nodeOrigin,
       nodeExtent: this._state.nodeExtent,
     });
+    this._notifyChange();
   }
 
   get nodes() {
     return this._state.nodes.get();
+  }
+
+  private _notifyChange() {
+    this.dispatchEvent(new CustomEvent('change', {
+      detail: {
+        nodes: this.nodes,
+        edges: this.edges,
+      },
+      bubbles: true,
+      composed: true,
+    }));
   }
 
   private _discoverNodes() {
@@ -334,6 +346,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: Array })
   set edges(edges: any[]) {
     this._state.edges.set(edges);
+    this._notifyChange();
   }
 
   get edges() {
@@ -429,6 +442,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
       // Trigger update via signal
       this._state.nodes.set([...this.nodes]);
+      this._notifyChange();
     }
   }
 
@@ -630,6 +644,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
                 // Trigger update via signal
                 this._state.nodes.set([...this.nodes]);
+                this._notifyChange();
               },
               unselectNodesAndEdges: () => {},
             }),
