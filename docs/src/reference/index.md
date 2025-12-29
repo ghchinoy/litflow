@@ -44,6 +44,7 @@ Technical documentation for the LitFlow API, components, and properties.
 
 | Event | Detail | Description |
 |-------|--------|-------------|
+| `change` | `{ nodes, edges }` | Fired globally whenever the graph structure or data changes (drag, connect, delete). |
 | `connect` | `Connection` | Fired when a new connection is made. |
 | `node-drop` | `{ node, event }` | Fired when a node is dropped onto the canvas. |
 | `selection-change` | `{ nodes, edges }` | Fired when the selection changes via marquee. |

@@ -26,6 +26,10 @@ Explore the capabilities of LitFlow through these live interactive examples.
 - **[Subflows & Groups](/examples/subflows/)**: Nesting nodes and managing hierarchical structures.
 - **[Dynamic Interactivity](/examples/dynamic-interactivity/)**: Responding to events and updating the graph in real-time.
 
+## Tools & Editors
+
+- **[Inspector Designer](/examples/designer/)**: A full-featured authoring tool with a drag-and-drop palette, property inspector, and live JSON sync.
+
 ---
 
 ### Run locally
