@@ -1,14 +1,53 @@
+## 2025-12-26
+- Implement M3-styled Controls component (litflow-qwm)
+- Style lit-handle with Material 3 (litflow-rip)
+- Style lit-node with Material 3 (litflow-clx)
+- Example: Static Documentation Display (litflow-l52)
+- Packaging and Distribution (litflow-b9b)
+- Example: Subflows (Parent/Child) (litflow-2lt)
+- Example: Custom Edges (Step/SmoothStep) (litflow-8zz)
+- Implement manual edge connections (litflow-ycn)
+- Establish Material 3 Design System (litflow-m7y)
+- Investigate and fix node jumping on subsequent drags (litflow-v7y)
+- Example: Custom Nodes with Lit templates (litflow-aop)
+- Implement Controls and MiniMap components (litflow-04c)
+- Example: Dynamic Interactivity (Add/Remove) (litflow-4bd)
+- Implement SignalWatcher in lit-node and lit-edge (litflow-lu1)
+- Integrate Lit Signals for state management (litflow-txd)
+- Refactor store.ts to use @lit-labs/signals (litflow-jdv)
+- Migrate from npm to pnpm (litflow-ytd)
+- Example: Multiple Handles/Ports (litflow-e6c)
+- Example: Basic Flow (litflow-xzk)
+- Setup examples/ directory and base runner (litflow-8oj)
+
+## 2025-12-27
+- Implement Advanced FitView (litflow-w6a)
+- Example: Gemini AI Nodes (Prompt & Image) (litflow-ln0)
+- Implement Keyboard Interactivity (litflow-d81)
+- Validate and Debug Marquee Selection reliability (litflow-cc1)
+- Example: Overview (litflow-59h)
+- Implement Marquee Selection (litflow-ucl)
+- Investigate and implement Edge Labels (litflow-3z2)
+- Implement Edge Markers (Arrowheads) (litflow-c56)
+- Configurable Node Naming on Drop (litflow-8ku)
+- Create Drag & Drop Guide (litflow-w6v)
+- Example: Drag & Drop (litflow-lyd)
+- Implement M3-styled Sidebar for Drag & Drop (litflow-kyi)
+- Implement project method in LitFlow (litflow-ypx)
+- Investigate and implement Edge Labels (litflow-1ed)
+- Tutorial: Building Static Documentation with LitFlow (litflow-vgd)
+- Project Documentation System (Eleventy + Diataxis + gh-pages) (litflow-46j)
+- Draft Welcome Landing Page (litflow-46j.5)
+- Configure GitHub Actions Deployment (litflow-46j.4)
+- Implement Live Example integration (litflow-46j.3)
+- Migrate and structure docs using Diataxis (litflow-46j.2)
+- Initialize Eleventy project in docs/ (litflow-46j.1)
+- Example: Graphviz to LitFlow (litflow-48p)
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.6] - 2025-12-29
+## 2025-12-29
+- Example: Inspector Designer with live JSON sync (litflow-0i5)
 
-### Added
-- **Events**: `LitFlow` now dispatches a robust `change` event whenever nodes or edges are updated (including dragging, deletions, and connections). This enables reliable external state synchronization.
-- **Example**: New "Inspector Designer" example (`examples/designer/`) showcasing a dual-pane authoring tool with live JSON sync, two-way binding, and auto-apply capabilities.
-
-### Improved
-- **State Management**: Added `_notifyChange()` internal helper to ensure consistent event emission across all state mutation paths (setters, internal store updates, interactions).
-
----
