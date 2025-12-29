@@ -1,6 +1,6 @@
 {
   "name": "@ghchinoy/litflow",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "xyflow core integrated with Lit WebComponents",
   "homepage": "https://litflow.dev",
   "license": "MIT",
