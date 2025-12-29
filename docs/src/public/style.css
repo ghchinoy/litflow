@@ -38,6 +38,33 @@ footer {
     padding: 2rem;
     color: #666;
     font-size: 0.8rem;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 2rem;
+}
+
+.project-meta {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    align-items: center;
+}
+
+.project-meta a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.project-meta a:hover {
+    text-decoration: underline;
+}
+
+.project-meta span {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
 }
 
 code {

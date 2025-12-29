@@ -41,7 +41,14 @@
         {{ content | safe }}
     </main>
     <footer>
-        <p>&copy; 2025 G. Hussain Chinoy</p>
+        <div class="footer-content">
+            <p>&copy; 2025 G. Hussain Chinoy</p>
+            <p class="project-meta">
+                <span>v{{ project.version }}</span>
+                <a href="{{ project.repository }}">GitHub</a>
+                <a href="{{ project.npmUrl }}">NPM</a>
+            </p>
+        </div>
     </footer>
 </body>
 </html>
