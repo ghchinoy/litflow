@@ -70,9 +70,9 @@ Currently, the project relies on visual verification via the `examples/` directo
 ### Publishing Workflow
 To release a new version of `@ghchinoy/litflow`:
 1.  **Verify**: Run `pnpm run build` to ensure no TypeScript or build errors.
-2.  **Update Changelog**: Generate `CHANGELOG.md` from closed tasks:
+2.  **Update Changelog**: Fully regenerate `CHANGELOG.md` from closed tasks:
     ```bash
-    bd list --status closed --json | jq -r 'sort_by(.closed_at) | reverse | map(select(.closed_at != null)) | group_by(.closed_at[0:10]) | .[] | "## " + (.[0].closed_at[0:10]) + "\n" + (map("- " + .title + " (" + .id + ")") | join("\n")) + "\n"' > CHANGELOG.md
+    echo -e "# Changelog\n\nAll notable changes to this project will be documented in this file.\n" > CHANGELOG.md && bd list --status closed --json | jq -r 'sort_by(.closed_at) | reverse | map(select(.closed_at != null)) | group_by(.closed_at[0:10]) | .[] | "## " + (.[0].closed_at[0:10]) + "\n" + (map("- " + .title + " (" + .id + ")") | join("\n")) + "\n"' >> CHANGELOG.md
     ```
     *Review and commit the changelog.*
 3.  **Version Bump**: 
