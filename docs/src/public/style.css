@@ -18,8 +18,17 @@ body {
 
 header {
     background: #f3edf7;
-    padding: 1rem;
+    padding: 0;
     border-bottom: 1px solid #e0e0e0;
+}
+
+.header-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 nav a {
@@ -27,6 +36,34 @@ nav a {
     text-decoration: none;
     color: var(--primary-color);
     font-weight: 500;
+}
+
+.project-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.project-meta a {
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.project-meta a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.project-meta span {
+    background: #e6e0eb;
+    color: var(--primary-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    border: 1px solid #d0c4e0;
 }
 
 main {
@@ -40,31 +77,6 @@ footer {
     font-size: 0.8rem;
     border-top: 1px solid #e0e0e0;
     margin-top: 2rem;
-}
-
-.project-meta {
-    margin-top: 0.5rem;
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    align-items: center;
-}
-
-.project-meta a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.project-meta a:hover {
-    text-decoration: underline;
-}
-
-.project-meta span {
-    background: #f0f0f0;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: monospace;
 }
 
 code {

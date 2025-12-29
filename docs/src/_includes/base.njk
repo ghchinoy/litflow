@@ -28,27 +28,27 @@
 </head>
 <body>
     <header>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/tutorials/">Tutorials</a>
-            <a href="/guides/">Guides</a>
-            <a href="/explanation/">Explanation</a>
-            <a href="/reference/">Reference</a>
-            <a href="/examples/">Examples</a>
-        </nav>
+        <div class="header-content">
+            <nav>
+                <a href="/">Home</a>
+                <a href="/tutorials/">Tutorials</a>
+                <a href="/guides/">Guides</a>
+                <a href="/explanation/">Explanation</a>
+                <a href="/reference/">Reference</a>
+                <a href="/examples/">Examples</a>
+            </nav>
+            <div class="project-meta">
+                <span title="Latest Release">v{{ project.version }}</span>
+                <a href="{{ project.repository }}" title="GitHub Repository">GitHub</a>
+                <a href="{{ project.npmUrl }}" title="NPM Package">NPM</a>
+            </div>
+        </div>
     </header>
     <main>
         {{ content | safe }}
     </main>
     <footer>
-        <div class="footer-content">
-            <p>&copy; 2025 G. Hussain Chinoy</p>
-            <p class="project-meta">
-                <span>v{{ project.version }}</span>
-                <a href="{{ project.repository }}">GitHub</a>
-                <a href="{{ project.npmUrl }}">NPM</a>
-            </p>
-        </div>
+        <p>&copy; 2025 G. Hussain Chinoy</p>
     </footer>
 </body>
 </html>
