@@ -116,6 +116,7 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
   - `examples/multiple-handles/`: Nodes with multiple input/output ports.
   - `examples/dynamic-interactivity/`: Adding/removing nodes and edges at runtime.
   - `examples/subflows/`: Nested nodes and parent-child relationships.
+  - `examples/designer/`: A dual-pane authoring tool with live JSON sync.
 - **`<lit-flow>`**: The root component. It initializes the `XYPanZoom` instance for the viewport and manages the collection of nodes and edges.
 - **`<lit-node>`**: A reactive Lit component for individual nodes. Uses **Light DOM** to ensure compatibility with xyflow's system utilities (like hit-testing).
 - **`<lit-handle>`**: A connection port component. Also uses **Light DOM** to ensure discoverability during connection dragging.
@@ -126,6 +127,8 @@ LitFlow leverages `@xyflow/system`, the same headless core that powers React Flo
 ## 🛠️ Key Features
 - **Panning & Zooming**: Full support for viewport manipulation via d3-zoom (via xyflow).
 - **Node Dragging**: Individual nodes can be dragged, with positions synced back to the state.
+- **Live Inspector Designer**: A comprehensive authoring example featuring a drag-and-drop palette and live JSON synchronization.
+- **Global Change Observability**: A robust `change` event that fires on any graph mutation (drag, connect, delete) for external state syncing.
 - **Marquee Selection**: Bulk select nodes and edges by dragging a selection box (Shift + Drag).
 - **Edge Markers**: Support for arrowheads and other markers on edges.
 - **Manual Connections**: Drag-to-connect functionality between handles with a live connection line.
