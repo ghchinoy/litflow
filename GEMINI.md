@@ -37,6 +37,8 @@ This project uses **bd (beads)** for issue tracking.
 - **Custom Node Data Sync**: Custom nodes should dispatch a bubbling, composed `node-data-change` event when their internal state changes. The parent `<lit-flow>` should listen for this and update the `nodes` array to ensure the change persists across re-renders.
 - **Selection Performance**: When implementing marquee selection or bulk updates, check if the selection state actually changed before updating the `nodes` or `edges` signals. Use a `Map` for node selection status to avoid O(N) lookups when determining if an edge's source and target are both selected.
 - **Global Event Observability**: To support external tools (like a JSON inspector) that need to react to any graph change (dragging, connecting, deleting), dispatch a generic `change` event from the central `<lit-flow>` component. Use a helper method like `_notifyChange()` and call it in property setters, drag handlers (`updateNodePositions`), and dimension updaters to ensure no mutation path is missed.
+- **Example Complexity (Gap Analysis)**: When implementing complex examples (e.g., a "Designer"), perform a gap analysis against the desired end-state (e.g., "Minimal Viable Designer"). Create separate `bd` tasks for missing features (Creation, Modification, Deletion) rather than building everything in one go.
+- **Documentation Patterns**: For complex examples with custom layouts or CSS, embed them in documentation markdown files using an `iframe` pointing to the standalone example (e.g., `/examples/designer/index.html`). This avoids style conflicts and ensures the example works exactly as developed.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support.
 - **SignalWatcher Type Fix**: To avoid `TS4020` errors during type generation, use a type cast for `SignalWatcher(LitElement)` to hide private internal types from the exported class.
 - **Z-Index Layering**: Avoid negative `zIndex` values for nodes, as they can be hidden behind the canvas background in a WebComponent environment. Use positive relative values (e.g., 0 for groups, 1 for children).
@@ -77,8 +79,9 @@ To release a new version of `@ghchinoy/litflow`:
     - `pnpm version patch`: For bug fixes and small, non-breaking features.
     - `pnpm version minor`: For significant new features or architectural changes.
     *Note: This creates a local git commit and tag.*
-3.  **Push**: `git push origin main --tags` to sync the version bump and tag to GitHub.
-4.  **Publish**: `pnpm publish --access public`.
+4.  **Push**: `git push origin main --tags` to sync the version bump and tag to GitHub.
+5.  **Publish**: `pnpm publish --access public`.
+    *Note: If `pnpm` reports an "Unclean working tree" due to ignored files (like `bd` artifacts), use `pnpm publish --access public --no-git-checks` after verifying the build and git status manually.*
 *Note: The `prepublishOnly` script in `package.json` ensures a fresh build before every publish.*
 
 ### Proposed Components
