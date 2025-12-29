@@ -2,9 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
-## 2025-12-29
-- Designer: Integrate Drag & Drop Palette (litflow-aa8)
-- Example: Inspector Designer with live JSON sync (litflow-0i5)
+## 2025-12-26
+- Implement M3-styled Controls component (litflow-qwm)
+- Style lit-handle with Material 3 (litflow-rip)
+- Style lit-node with Material 3 (litflow-clx)
+- Example: Static Documentation Display (litflow-l52)
+- Packaging and Distribution (litflow-b9b)
+- Example: Subflows (Parent/Child) (litflow-2lt)
+- Example: Custom Edges (Step/SmoothStep) (litflow-8zz)
+- Implement manual edge connections (litflow-ycn)
+- Establish Material 3 Design System (litflow-m7y)
+- Investigate and fix node jumping on subsequent drags (litflow-v7y)
+- Example: Custom Nodes with Lit templates (litflow-aop)
+- Implement Controls and MiniMap components (litflow-04c)
+- Example: Dynamic Interactivity (Add/Remove) (litflow-4bd)
+- Implement SignalWatcher in lit-node and lit-edge (litflow-lu1)
+- Integrate Lit Signals for state management (litflow-txd)
+- Refactor store.ts to use @lit-labs/signals (litflow-jdv)
+- Migrate from npm to pnpm (litflow-ytd)
+- Example: Multiple Handles/Ports (litflow-e6c)
+- Example: Basic Flow (litflow-xzk)
+- Setup examples/ directory and base runner (litflow-8oj)
 
 ## 2025-12-27
 - Implement Advanced FitView (litflow-w6a)
@@ -30,24 +48,7 @@ All notable changes to this project will be documented in this file.
 - Initialize Eleventy project in docs/ (litflow-46j.1)
 - Example: Graphviz to LitFlow (litflow-48p)
 
-## 2025-12-26
-- Implement M3-styled Controls component (litflow-qwm)
-- Style lit-handle with Material 3 (litflow-rip)
-- Style lit-node with Material 3 (litflow-clx)
-- Example: Static Documentation Display (litflow-l52)
-- Packaging and Distribution (litflow-b9b)
-- Example: Subflows (Parent/Child) (litflow-2lt)
-- Example: Custom Edges (Step/SmoothStep) (litflow-8zz)
-- Implement manual edge connections (litflow-ycn)
-- Establish Material 3 Design System (litflow-m7y)
-- Investigate and fix node jumping on subsequent drags (litflow-v7y)
-- Example: Custom Nodes with Lit templates (litflow-aop)
-- Implement Controls and MiniMap components (litflow-04c)
-- Example: Dynamic Interactivity (Add/Remove) (litflow-4bd)
-- Implement SignalWatcher in lit-node and lit-edge (litflow-lu1)
-- Integrate Lit Signals for state management (litflow-txd)
-- Refactor store.ts to use @lit-labs/signals (litflow-jdv)
-- Migrate from npm to pnpm (litflow-ytd)
-- Example: Multiple Handles/Ports (litflow-e6c)
-- Example: Basic Flow (litflow-xzk)
-- Setup examples/ directory and base runner (litflow-8oj)
+## 2025-12-29
+- Designer: Integrate Drag & Drop Palette (litflow-aa8)
+- Example: Inspector Designer with live JSON sync (litflow-0i5)
+
