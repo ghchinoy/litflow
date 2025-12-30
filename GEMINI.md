@@ -43,6 +43,9 @@ This project uses **bd (beads)** for issue tracking.
 - **Documentation Patterns**: For complex examples with custom layouts or CSS, embed them in documentation markdown files using an `iframe` pointing to the standalone example (e.g., `/examples/designer/index.html`). This avoids style conflicts and ensures the example works exactly as developed.
 - **Signal Typing**: Use `ReturnType<typeof signal<T>>` for store properties to ensure robust TypeScript support.
 - **SignalWatcher Type Fix**: To avoid `TS4020` errors during type generation, use a type cast for `SignalWatcher(LitElement)` to hide private internal types from the exported class.
+- **Decorator Configuration Strategy**: This project uses **Experimental Decorators** (`experimentalDecorators: true` in `tsconfig.json`) to maintain compatibility with Lit v3 best practices in Vite. However, vendored dependencies (like Breadboard) often use **Standard Decorators**.
+    *   **Conflict Resolution**: Do NOT change `tsconfig.json` to fix vendor code, as it breaks Lit. Instead, manually patch vendored files to remove standard decorators (e.g., replace `@signal accessor` with `get`/`set` accessing a private `Signal.State`).
+    *   **Automation**: Use `scripts/sync-breadboard.sh` to apply these patches automatically during sync.
 - **Z-Index Layering**: Avoid negative `zIndex` values for nodes, as they can be hidden behind the canvas background in a WebComponent environment. Use positive relative values (e.g., 0 for groups, 1 for children).
 - **Custom Node State**: Custom nodes with interactive state (like collapse/expand) must sync that state through the `data` property. This ensures the state persists when the parent flow re-renders the nodes array.
 - **Subflow Coordinates**: Always call `updateAbsolutePositions` immediately after `adoptUserNodes` to ensure nested nodes have correct canvas-relative coordinates for the initial render.
