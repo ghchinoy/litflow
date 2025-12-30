@@ -49,6 +49,11 @@ All notable changes to this project will be documented in this file.
 - Example: Graphviz to LitFlow (litflow-48p)
 
 ## 2025-12-29
+- Implement Real LitFlowRunner (litflow-wmj)
+- Implement Mock Runner (litflow-wjn)
+- Implement LitSchemaNode (litflow-ztw)
+- Analysis: Phase 3 - GenAI & Gemini Integration (litflow-9ms)
+- Analysis: Phase 2 - Graph Execution (The Core) (litflow-i81)
 - Designer: Integrate Drag & Drop Palette (litflow-aa8)
 - Example: Inspector Designer with live JSON sync (litflow-0i5)
 

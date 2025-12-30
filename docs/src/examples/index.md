@@ -29,6 +29,7 @@ Explore the capabilities of LitFlow through these live interactive examples.
 ## Tools & Editors
 
 - **[Inspector Designer](/examples/designer/)**: A full-featured authoring tool with a drag-and-drop palette, property inspector, and live JSON sync.
+- **[Schema-Driven Node](/examples/schema-node/)**: A powerful node type that auto-generates its UI from a JSON Schema, simulating a Generative AI execution flow.
 
 ---
 
