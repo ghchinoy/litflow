@@ -8,5 +8,6 @@ export * from './lit-sidebar';
 export * from './lit-gemini-prompt-node';
 export * from './lit-gemini-image-node';
 export * from './lit-schema-node';
+export * from './lit-chiclet';
 export * from './store';
 export * from './theme';

@@ -118,6 +118,16 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       pointer-events: all;
     }
 
+    /* Remove default styling for schema nodes which handle their own layout */
+    .xyflow__node[type="schema"],
+    .xyflow__node[type="gemini-prompt"],
+    .xyflow__node[type="gemini-image"] {
+      padding: 0;
+      border: none;
+      background: none;
+      box-shadow: none;
+    }
+
     .xyflow__node[selected] {
       border-color: var(--lit-flow-node-selected-border);
       border-width: 3px;
@@ -414,9 +424,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
           const bounds = h.getBoundingClientRect();
           const nodeRect = element.getBoundingClientRect();
           const handleData = {
-            id: h.handleId || null,
-            type: h.type,
-            position: h.position,
+            id: h.handleId || h.getAttribute('data-handleid') || null,
+            type: h.type || h.getAttribute('type'),
+            position: h.position || h.getAttribute('data-handlepos'),
             x: (bounds.left - nodeRect.left) / zoom,
             y: (bounds.top - nodeRect.top) / zoom,
             width: bounds.width / zoom,
@@ -1186,7 +1196,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               <marker
                 id="lit-flow__arrow"
                 viewBox="0 0 10 10"
-                refX="5"
+                refX="9"
                 refY="5"
                 markerWidth="6"
                 markerHeight="6"
@@ -1197,7 +1207,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               <marker
                 id="lit-flow__arrowclosed"
                 viewBox="0 0 10 10"
-                refX="5"
+                refX="9"
                 refY="5"
                 markerWidth="6"
                 markerHeight="6"
@@ -1208,7 +1218,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               <marker
                 id="lit-flow__arrow-selected"
                 viewBox="0 0 10 10"
-                refX="5"
+                refX="9"
                 refY="5"
                 markerWidth="6"
                 markerHeight="6"
@@ -1219,7 +1229,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               <marker
                 id="lit-flow__arrowclosed-selected"
                 viewBox="0 0 10 10"
-                refX="5"
+                refX="9"
                 refY="5"
                 markerWidth="6"
                 markerHeight="6"

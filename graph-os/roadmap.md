@@ -25,6 +25,7 @@ Users should be able to draw a graph just for documentation (using simple HTML t
 
 - [ ] **`LitFlowGraphStore`**: A light wrapper around `MutableGraphStore` that syncs Breadboard's data model to LitFlow's `nodes`/`edges` array.
 - [ ] **`LitFlowRunner`**: A class that wraps the Breadboard `HarnessRunner`. It listens for events (`nodestart`, `nodeend`) and dispatches them to LitFlow.
+- [ ] **Granular Node Updates**: Add an `updateNode(id, data)` method to `LitFlow` to allow updating individual nodes without replacing the entire `nodes` array.
 - [ ] **Visual State Mapping**: Update `lit-node` (and `lit-schema-node`) to react to execution states (`status="working"`, `status="error"`).
 
 ## 4. Milestone 3: The AI Experience

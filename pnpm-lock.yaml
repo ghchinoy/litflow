@@ -11,6 +11,9 @@ importers:
       '@breadboard-ai/types':
         specifier: ^0.8.0
         version: 0.8.0
+      '@breadboard-ai/utils':
+        specifier: ^0.0.2
+        version: 0.0.2
       '@lit-labs/signals':
         specifier: ^0.2.0
         version: 0.2.0
@@ -32,6 +35,12 @@ importers:
       lit:
         specifier: ^3.3.2
         version: 3.3.2
+      signal-polyfill:
+        specifier: ^0.2.2
+        version: 0.2.2
+      signal-utils:
+        specifier: ^0.21.1
+        version: 0.21.1(signal-polyfill@0.2.2)
     devDependencies:
       '@open-wc/testing':
         specifier: ^4.0.0
@@ -91,6 +100,9 @@ packages:
 
   '@breadboard-ai/types@0.8.0':
     resolution: {integrity: sha512-fV5er9g9qaP4a3VogRxPgPcTzlKkIZJIQN8JcosyeXlQ9t6BNVV7K9O+HSt/BlReZQKSJfI3wKec2j46rzhL0Q==}
+
+  '@breadboard-ai/utils@0.0.2':
+    resolution: {integrity: sha512-f0Yg6tVT7Ln2a9Y1XiTaYizddm+hMZYyjTrRW417lfCP9OTdVHULGNQ/5sxnI+gzifibRHoETXl8thgdwElovA==}
 
   '@csstools/color-helpers@5.1.0':
     resolution: {integrity: sha512-S11EXWJyy0Mz5SYvRmY8nJYTFFd1LCNV+7cXyAgQtOOuzb4EsgfqDufL+9esx72/eLhsRdGZwaldu/h+E4t4BA==}
@@ -1454,6 +1466,11 @@ packages:
   signal-polyfill@0.2.2:
     resolution: {integrity: sha512-p63Y4Er5/eMQ9RHg0M0Y64NlsQKpiu6MDdhBXpyywRuWiPywhJTpKJ1iB5K2hJEbFZ0BnDS7ZkJ+0AfTuL37Rg==}
 
+  signal-utils@0.21.1:
+    resolution: {integrity: sha512-i9cdLSvVH4j8ql8mz2lyrA93xL499P8wEbIev3ldSriXeUwqh+wM4Q5VPhIZ19gPtIS4BOopJuKB8l1+wH9LCg==}
+    peerDependencies:
+      signal-polyfill: ^0.2.0
+
   sirv@3.0.2:
     resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
     engines: {node: '>=18'}
@@ -1751,6 +1768,10 @@ snapshots:
   '@babel/helper-validator-identifier@7.28.5': {}
 
   '@breadboard-ai/types@0.8.0': {}
+
+  '@breadboard-ai/utils@0.0.2':
+    dependencies:
+      '@breadboard-ai/types': 0.8.0
 
   '@csstools/color-helpers@5.1.0': {}
 
@@ -3142,6 +3163,10 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-polyfill@0.2.2: {}
+
+  signal-utils@0.21.1(signal-polyfill@0.2.2):
+    dependencies:
+      signal-polyfill: 0.2.2
 
   sirv@3.0.2:
     dependencies:
