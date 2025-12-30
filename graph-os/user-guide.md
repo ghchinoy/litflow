@@ -94,6 +94,31 @@ runner.addEventListener('nodestart', (e) => {
 await runner.run();
 ```
 
+### Prototyping with Mocks
+Before you have a full backend, you can use `MockRunner` to simulate execution. This allows you to design the UI and interactions without waiting for the engine.
+
+```javascript
+import { MockRunner } from 'litflow/breadboard/runner';
+const runner = new MockRunner({});
+// ... same API as real runner
+```
+
+### Critical: State Persistence
+When updating nodes based on execution events (e.g. showing a result Chiclet), you must update the **LitFlow State**, not just the DOM element.
+
+**Incorrect (DOM only)**:
+```javascript
+nodeElement.data = newData; // Will be lost on next re-render!
+```
+
+**Correct (State update)**:
+```javascript
+// Update the central state to persist changes
+flow.nodes = flow.nodes.map(n => 
+  n.id === targetId ? { ...n, data: { ...n.data, ...newData } } : n
+);
+```
+
 ---
 
 ## Summary Comparison
