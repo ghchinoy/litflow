@@ -24,6 +24,13 @@ We maintain a shell script that automates this copy process to ensure reproducib
 4.  Copies `packages/visual-editor/src/engine/run` -> `src/breadboard/engine/run`.
 5.  **Patches Imports**: Uses `sed` to fix import paths if directory structure depth changes.
 
+### Validation & Testing
+After syncing, we must validate the engine works in isolation.
+1.  **Unit Tests**: Create `src/breadboard/engine/tests/orchestrator.test.ts`.
+2.  **Logic**: Instantiate `Orchestrator` with a simple graph (e.g., `input -> echo -> output`).
+3.  **Assertion**: Run the graph and verify outputs match expectations.
+4.  **CI**: Include these tests in `pnpm test` to prevent regressions.
+
 ## 3. Long Term
 When Breadboard publishes a standalone `@breadboard-ai/engine` or `@breadboard-ai/core` package, we will:
 1.  Delete `src/breadboard/engine`.
