@@ -46,6 +46,10 @@ This project uses **bd (beads)** for issue tracking.
 - **Decorator Configuration Strategy**: This project uses **Experimental Decorators** (`experimentalDecorators: true` in `tsconfig.json`) to maintain compatibility with Lit v3 best practices in Vite. However, vendored dependencies (like Breadboard) often use **Standard Decorators**.
     *   **Conflict Resolution**: Do NOT change `tsconfig.json` to fix vendor code, as it breaks Lit. Instead, manually patch vendored files to remove standard decorators (e.g., replace `@signal accessor` with `get`/`set` accessing a private `Signal.State`).
     *   **Automation**: Use `scripts/sync-breadboard.sh` to apply these patches automatically during sync.
+- **Vendoring Strategy**: When vendoring complex third-party TypeScript code (like the Breadboard engine), do not attempt to fix all type errors or align `tsconfig` settings. Instead:
+    1.  **Suppress Errors**: Automatically prepend `// @ts-nocheck` to all vendored files during the sync process.
+    2.  **Patch Logic**: Use `sed` to patch incompatible syntax (like decorators) rather than changing the host project's configuration.
+    3.  **Exclude Types**: Ensure `tsconfig.types.json` excludes the vendor directory to prevent `d.ts` generation errors.
 - **Node State Persistence**: When updating custom node data (e.g., from an execution runner), always update the central state (`flow.nodes = ...`) rather than manipulating the DOM element's `.data` property directly. Leaf elements in `lit-flow` are re-rendered frequently (on zoom, pan, or dimension changes), and they will revert to the state stored in the parent if not synced.
 - **Z-Index Layering**: Avoid negative `zIndex` values for nodes, as they can be hidden behind the canvas background in a WebComponent environment. Use positive relative values (e.g., 0 for groups, 1 for children).
 - **Custom Node State**: Custom nodes with interactive state (like collapse/expand) must sync that state through the `data` property. This ensures the state persists when the parent flow re-renders the nodes array.
