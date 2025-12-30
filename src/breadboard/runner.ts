@@ -1,11 +1,6 @@
 import type { 
   HarnessRunner, 
   RunConfig, 
-  RunLifecycleEvent, 
-  RunNodeStartEvent, 
-  RunNodeEndEvent, 
-  RunInputEvent, 
-  RunOutputEvent,
   NodeIdentifier
 } from '@breadboard-ai/types';
 
@@ -22,7 +17,11 @@ export class MockRunner extends EventTarget implements HarnessRunner {
     return this._running;
   }
 
-  async run(inputs?: Record<string, any>): Promise<boolean> {
+  secretKeys() { return []; }
+  inputSchema() { return null; }
+  addObserver() {}
+
+  async run(_inputs?: Record<string, any>): Promise<boolean> {
     this._running = true;
     this.dispatchEvent(new CustomEvent('start', { detail: { timestamp: Date.now() } }));
 

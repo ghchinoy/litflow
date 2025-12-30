@@ -8,5 +8,7 @@
     "allowImportingTsExtensions": false,
     "noEmitOnError": false
   },
-  "include": ["src/**/*.ts"]
-}
+      "include": ["src/**/*.ts"],
+      "exclude": ["src/breadboard/engine/**/*.ts", "src/breadboard/data/**/*.ts"]
+    }
+    

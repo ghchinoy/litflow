@@ -1,7 +1,7 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { map } from 'lit/directives/map.js';
-import { Schema } from '@breadboard-ai/types';
+import type { Schema } from '@breadboard-ai/types';
 import './lit-handle';
 import './lit-chiclet';
 

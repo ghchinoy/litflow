@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * @license
  * Copyright 2025 Google LLC
@@ -195,28 +196,30 @@ class PlanRunner
     }
   }
 
-  #orchestratorState = new Signal.State<Orchestrator>(null!);
-  get _orchestrator() { return this.#orchestratorState.get(); }
-  set _orchestrator(value) { this.#orchestratorState.set(value); }
+  /* @signal */
+  accessor #orchestrator: Orchestrator;
 
+  /* @signal */
   get state(): OrchestratorState {
-    const orchestrator = this._orchestrator;
+    const orchestrator = this.#orchestrator;
     if (orchestrator) {
       return orchestrator.fullState();
     }
     return emptyOrchestratorState();
   }
 
+  /* @signal */
   get plan() {
-    const orchestrator = this._orchestrator;
+    const orchestrator = this.#orchestrator;
     if (orchestrator) {
       return orchestrator.plan;
     }
     return emptyPlan();
   }
 
+  /* @signal */
   get waiting() {
-    const orchestrator = this._orchestrator;
+    const orchestrator = this.#orchestrator;
     if (!orchestrator) return new Map();
     return new Map(orchestrator.allWaiting);
   }
@@ -231,7 +234,7 @@ class PlanRunner
         `Unable to initialize PlanRunner: RunConfig.runner is empty`
       );
     }
-    this._orchestrator = this.#createOrchestrator(config.runner);
+    this.#orchestrator = this.#createOrchestrator(config.runner);
   }
 
   #createOrchestrator(graph: GraphDescriptor) {
@@ -289,25 +292,25 @@ class PlanRunner
       // First, activate the run
       this.run(undefined, true);
     }
-    if (!this._orchestrator.working) {
+    if (!this.#orchestrator.working) {
       this.dispatchEvent(new ResumeEvent({ timestamp: timestamp() }));
     }
     const outcome = await this.#controller?.runNode(id);
-    if (!this._orchestrator.working) {
+    if (!this.#orchestrator.working) {
       this.dispatchEvent(new PauseEvent(false, { timestamp: timestamp() }));
     }
     return outcome;
   }
 
   async runFrom(id: NodeIdentifier): Promise<Outcome<void>> {
-    this._orchestrator.allWaiting.forEach(([id]) => {
+    this.#orchestrator.allWaiting.forEach(([id]) => {
       this.stop(id);
     });
 
     // Stop all nodes from later stages that are currently working
-    const nodeStage = this._orchestrator.getNodeState(id)?.stage;
+    const nodeStage = this.#orchestrator.getNodeState(id)?.stage;
     if (nodeStage !== undefined) {
-      this._orchestrator.allWorking.forEach(([id, workingNodeState]) => {
+      this.#orchestrator.allWorking.forEach(([id, workingNodeState]) => {
         if (workingNodeState.stage > nodeStage) {
           this.stop(id);
         }
@@ -317,7 +320,7 @@ class PlanRunner
     if (!this.#controller || !this.running()) {
       // If not already running, start a run in interactive mode
       this.run(undefined, true);
-    } else if (!this._orchestrator.working) {
+    } else if (!this.#orchestrator.working) {
       this.dispatchEvent(new ResumeEvent({ timestamp: timestamp() }));
     }
     return this.#controller?.runFrom(id);
@@ -325,7 +328,7 @@ class PlanRunner
 
   async stop(id: NodeIdentifier): Promise<Outcome<void>> {
     const outcome = this.#controller?.stop(id);
-    if (!this._orchestrator.working) {
+    if (!this.#orchestrator.working) {
       this.dispatchEvent(new PauseEvent(false, { timestamp: timestamp() }));
     }
     return outcome;
@@ -340,10 +343,10 @@ class PlanRunner
       this.#controller = new InternalRunStateController(
         this.config,
         this.config.runner!,
-        this._orchestrator,
+        this.#orchestrator,
         this.breakpoints,
         () => {
-          if (!this._orchestrator.working) {
+          if (!this.#orchestrator.working) {
             this.dispatchEvent(
               new PauseEvent(false, { timestamp: timestamp() })
             );
@@ -374,13 +377,13 @@ class PlanRunner
   }
 
   async updateGraph(graph: GraphDescriptor) {
-    if (this._orchestrator.working) {
+    if (this.#orchestrator.working) {
       this.#controller?.stopAll();
       this.dispatchEvent(new PauseEvent(false, { timestamp: timestamp() }));
     }
-    this._orchestrator = this.#createOrchestrator(graph);
+    this.#orchestrator = this.#createOrchestrator(graph);
     if (this.#controller) {
-      this.#controller.update(this._orchestrator);
+      this.#controller.update(this.#orchestrator);
     }
   }
 }

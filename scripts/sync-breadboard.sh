@@ -36,6 +36,9 @@ DATA_DIR="src/breadboard/data"
 mkdir -p "$DATA_DIR"
 cp -r "$BREADBOARD_PATH/packages/visual-editor/src/data"/* "$DATA_DIR/"
 
+echo "🛡️  Adding @ts-nocheck to vendored files..."
+find "$DEST_DIR" "$DATA_DIR" -name "*.ts" -exec sed -i '1i// @ts-nocheck' {} +
+
 echo "🔧 Patching Imports..."
 # Since we copied the whole structure, relative imports inside 'engine' should still work!
 # e.g. import { ... } from '../static/orchestrator.js' inside runtime/harness/plan-runner.ts

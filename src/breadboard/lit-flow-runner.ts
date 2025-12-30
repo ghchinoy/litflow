@@ -3,9 +3,7 @@ import {
   RunConfig, 
   GraphDescriptor,
   Kit,
-  NodeHandlerContext,
-  InputValues,
-  OutputValues
+  InputValues
 } from '@breadboard-ai/types';
 import { PlanRunner } from './engine/runtime/harness/plan-runner.js';
 
@@ -60,6 +58,10 @@ export class LitFlowRunner extends EventTarget implements HarnessRunner {
   running() {
     return this._runner.running();
   }
+
+  secretKeys() { return []; }
+  inputSchema() { return null; }
+  addObserver() {}
 
   async run(inputs?: InputValues) {
     return this._runner.run(inputs);

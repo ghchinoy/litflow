@@ -50,7 +50,9 @@
     "d3-interpolate": "^3.0.1",
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
+    "idb": "^8.0.3",
     "lit": "^3.3.2",
+    "littlezipper": "^0.1.5",
     "signal-polyfill": "^0.2.2",
     "signal-utils": "^0.21.1"
   },
