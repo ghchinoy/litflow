@@ -3,18 +3,13 @@
 All notable changes to this project will be documented in this file.
 
 ## 2025-12-26
-- Implement M3-styled Controls component (litflow-qwm)
-- Style lit-handle with Material 3 (litflow-rip)
-- Style lit-node with Material 3 (litflow-clx)
 - Example: Static Documentation Display (litflow-l52)
 - Packaging and Distribution (litflow-b9b)
 - Implement manual edge connections (litflow-ycn)
-- Establish Material 3 Design System (litflow-m7y)
 - Investigate and fix node jumping on subsequent drags (litflow-v7y)
 - Example: Custom Nodes with Lit templates (litflow-aop)
 - Implement Controls and MiniMap components (litflow-04c)
 - Example: Dynamic Interactivity (Add/Remove) (litflow-4bd)
-- Implement SignalWatcher in lit-node and lit-edge (litflow-lu1)
 - Integrate Lit Signals for state management (litflow-txd)
 - Refactor store.ts to use @lit-labs/signals (litflow-jdv)
 - Migrate from npm to pnpm (litflow-ytd)
@@ -33,7 +28,6 @@ All notable changes to this project will be documented in this file.
 - Implement Edge Markers (Arrowheads) (litflow-c56)
 - Configurable Node Naming on Drop (litflow-8ku)
 - Create Drag & Drop Guide (litflow-w6v)
-- Implement M3-styled Sidebar for Drag & Drop (litflow-kyi)
 - Implement project method in LitFlow (litflow-ypx)
 - Investigate and implement Edge Labels (litflow-1ed)
 - Tutorial: Building Static Documentation with LitFlow (litflow-vgd)
@@ -54,6 +48,12 @@ All notable changes to this project will be documented in this file.
 - Example: Inspector Designer with live JSON sync (litflow-0i5)
 
 ## 2026-01-03
+- Epic: Tasker Integration Enhancements (litflow-hf4)
+- Feature: Data-First Mapper Component (litflow-hf4.4)
+- Improvement: Define static styles on LitNode (litflow-hf4.7)
+- Docs: "Getting Started" Tutorial (litflow-kev)
+- Example: Subgraph Isolation API (litflow-c5l)
+- Example: Zero-Config Automatic Layout (litflow-8np)
 - Feature: M3 Standardized Node Slots (litflow-hf4.5)
 - Feature: Sub-Graph Focus/Isolate API (litflow-hf4.2)
 - Feature: Built-in Layout Orchestration (litflow-hf4.1)
