@@ -1,5 +1,6 @@
 export * from './lit-flow';
 export * from './lit-node';
+export * from './lit-node-toolbar';
 export * from './lit-edge';
 export * from './lit-handle';
 export * from './lit-controls';

@@ -28,6 +28,33 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
       color: var(--md-sys-color-on-surface-variant);
       font-family: var(--md-sys-typescale-body-medium-font);
     }
+    .resize-handle {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--md-sys-color-outline);
+      border-bottom: 2px solid var(--md-sys-color-outline);
+      cursor: nwse-resize;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: all;
+    }
+    :host([selected]) .resize-handle {
+      opacity: 1;
+    }
+    .node-toolbar-container {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      pointer-events: all;
+    }
+    :host([selected]) .node-toolbar-container {
+      display: block;
+    }
   `;
 
   createRenderRoot() {
@@ -46,6 +73,9 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: Boolean, reflect: true })
   selected = false;
 
+  @property({ type: Boolean, reflect: true })
+  resizable = false;
+
   @property({ type: String, attribute: 'data-id', reflect: true })
   nodeId = '';
 
@@ -57,6 +87,9 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
 
   render() {
     return html`
+      <div class="node-toolbar-container">
+        <slot name="toolbar"></slot>
+      </div>
       <div class="content-wrapper">
         <div class="headline">
           <slot name="headline">${this.label}</slot>
@@ -66,6 +99,7 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
         </div>
         <slot></slot>
       </div>
+      ${this.resizable ? html`<div class="resize-handle" @pointerdown="${this._onResizeStart}"></div>` : ''}
       ${this.type === 'input' || this.type === 'default'
         ? html`<lit-handle type="source" data-handlepos="bottom" data-nodeid="${this.nodeId}"></lit-handle>`
         : ''}
@@ -73,5 +107,14 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
         ? html`<lit-handle type="target" data-handlepos="top" data-nodeid="${this.nodeId}"></lit-handle>`
         : ''}
     `;
+  }
+
+  private _onResizeStart(e: PointerEvent) {
+    e.stopPropagation();
+    this.dispatchEvent(new CustomEvent('node-resize-start', {
+      detail: { nodeId: this.nodeId, event: e },
+      bubbles: true,
+      composed: true
+    }));
   }
 }

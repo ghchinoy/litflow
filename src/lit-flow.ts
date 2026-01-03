@@ -25,6 +25,8 @@ import { m3Tokens } from './theme';
 import './lit-node';
 import './lit-edge';
 import dagre from 'dagre';
+import * as d3 from 'd3-force';
+import * as d3h from 'd3-hierarchy';
 
 type Constructor<T> = new (...args: any[]) => T;
 
@@ -108,7 +110,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       box-sizing: border-box;
       color: var(--lit-flow-node-text);
       font-size: var(--md-sys-typescale-body-medium-size);
-      transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, border-width 0.1s ease-in-out;
+      transition: transform 0.4s ease-out, opacity 0.4s ease-in, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, border-width 0.1s ease-in-out;
     }
 
     .xyflow__node[type="group"] {
@@ -299,6 +301,21 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: Number, attribute: 'layout-padding' })
   layoutPadding = 40;
 
+  @property({ type: String, attribute: 'layout-strategy' })
+  layoutStrategy: 'hierarchical' | 'organic' | 'tree' = 'hierarchical';
+
+  @property({ type: Boolean, attribute: 'auto-fit', reflect: true, converter: boolConverter })
+  autoFit = false;
+
+  @property({ type: String, attribute: 'focus-node' })
+  focusNode: string | null = null;
+
+  @property({ type: String, attribute: 'focus-direction' })
+  focusDirection: 'downstream' | 'upstream' | 'both' = 'downstream';
+
+  @state()
+  private _isMeasuring = false;
+
   @state()
   private _selectionRect: { x: number; y: number; width: number; height: number } | null = null;
 
@@ -312,16 +329,21 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
   @property({ type: Array })
   set nodes(nodes: NodeBase[]) {
-    // Check if layout is enabled and any node is missing a position
-    const needsLayout = this.layoutEnabled && nodes.some(node => !node.position || (node.position.x === undefined || node.position.y === undefined));
+    // Ensure all nodes have at least a default position to avoid crashes in @xyflow/system
+    const nodesWithPosition = nodes.map(node => ({
+      ...node,
+      position: node.position || { x: 0, y: 0 }
+    }));
 
-    let nodesToSet = nodes;
-    if (needsLayout) {
-      nodesToSet = this._performLayout(nodes, this.edges);
+    // If layout is enabled and any node is missing measurement, enter measuring mode
+    const needsMeasurement = this.layoutEnabled && nodesWithPosition.some(node => !node.measured || !node.measured.width);
+    
+    if (needsMeasurement) {
+      this._isMeasuring = true;
     }
 
-    this._state.nodes.set(nodesToSet);
-    adoptUserNodes(nodesToSet, this._state.nodeLookup, this._state.parentLookup, {
+    this._state.nodes.set(nodesWithPosition);
+    adoptUserNodes(nodesWithPosition, this._state.nodeLookup, this._state.parentLookup, {
       nodeOrigin: this._state.nodeOrigin,
       nodeExtent: this._state.nodeExtent,
     });
@@ -373,31 +395,103 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   }
 
   private _performLayout(nodesToLayout: NodeBase[], edgesToLayout: any[]): LayoutNode[] {
+    if (this.layoutStrategy === 'tree') {
+      try {
+        const stratifier = d3h.stratify()
+          .id((d: any) => d.id)
+          .parentId((d: any) => {
+            const edge = edgesToLayout.find(e => e.target === d.id);
+            return edge ? edge.source : undefined;
+          });
+
+        const root = stratifier(nodesToLayout);
+        
+        // Use nodeSize to maintain consistent spacing regardless of tree size
+        // We swap width and height in nodeSize because we want a horizontal tree
+        const verticalSpacing = this.layoutPadding * 2;
+        const horizontalSpacing = 250; 
+        const treeLayout = d3h.tree().nodeSize([verticalSpacing, horizontalSpacing]);
+        
+        treeLayout(root);
+
+        const nodeMap = new Map();
+        root.descendants().forEach(d => {
+          // d.x is vertical, d.y is horizontal in d3.tree() when using nodeSize
+          nodeMap.set(d.id, { x: d.y, y: d.x });
+        });
+
+        return nodesToLayout.map(node => {
+          const pos = nodeMap.get(node.id) || { x: 0, y: 0 };
+          return {
+            ...node,
+            position: pos
+          } as LayoutNode;
+        });
+      } catch (e) {
+        console.warn('Tree layout failed (multiple parents or cycles detected). Falling back to hierarchical.', e);
+        // Fallback to dagre below
+      }
+    }
+
+    if (this.layoutStrategy === 'organic') {
+      // Organic Layout (D3-Force)
+      const simulationNodes = nodesToLayout.map(n => ({
+        id: n.id,
+        x: n.position?.x ?? 0,
+        y: n.position?.y ?? 0,
+        width: n.measured?.width || 150,
+        height: n.measured?.height || 50
+      }));
+
+      const links = edgesToLayout.map(e => ({
+        source: e.source,
+        target: e.target
+      }));
+
+      const simulation = d3.forceSimulation(simulationNodes as any)
+        .force('link', d3.forceLink(links).id((d: any) => d.id).distance(this.layoutPadding * 3))
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('collide', d3.forceCollide().radius((d: any) => Math.max(d.width, d.height) / 2 + this.layoutPadding))
+        .force('center', d3.forceCenter(300, 300)) // Arbitrary center, auto-fit will handle viewport
+        .stop();
+
+      // Run simulation synchronously
+      for (let i = 0; i < 300; ++i) simulation.tick();
+
+      return nodesToLayout.map((node, i) => {
+        const simNode = simulationNodes[i];
+        return {
+          ...node,
+          position: {
+            x: simNode.x - (simNode.width / 2),
+            y: simNode.y - (simNode.height / 2)
+          }
+        } as LayoutNode;
+      });
+    }
+
+    // Hierarchical Layout (Dagre) - Default
     const g = new dagre.graphlib.Graph();
-    g.setGraph({}); // Set graph defaults, e.g., { rankdir: 'LR' } for left-to-right
+    g.setGraph({});
 
-    // Default to a left-to-right layout for dependency graphs
     g.graph().rankdir = 'LR';
-    g.graph().nodesep = this.layoutPadding; // Horizontal spacing
-    g.graph().edgesep = this.layoutPadding; // Spacing between parallel edges
-    g.graph().ranksep = this.layoutPadding * 2; // Vertical spacing between ranks/layers
+    g.graph().nodesep = this.layoutPadding;
+    g.graph().edgesep = this.layoutPadding;
+    g.graph().ranksep = this.layoutPadding * 2;
 
-    // Add nodes to the graphlib. Each node must have a width and height for dagre to work.
     nodesToLayout.forEach((node) => {
-      // Use estimated or default dimensions if not measured yet
-      const width = node.measured?.width || 150; // Default width
-      const height = node.measured?.height || 50; // Default height
+      const width = node.measured?.width || 150;
+      const height = node.measured?.height || 50;
       g.setNode(node.id, { label: node.id, width, height });
     });
 
-    // Add edges to the graphlib
     edgesToLayout.forEach((edge) => {
       g.setEdge(edge.source, edge.target);
     });
 
     dagre.layout(g);
 
-    const newNodes = nodesToLayout.map((node) => {
+    return nodesToLayout.map((node) => {
       const graphNode = g.node(node.id);
       return {
         ...node,
@@ -407,8 +501,6 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         },
       } as LayoutNode;
     });
-
-    return newNodes;
   }
 
   @property({ type: Array })
@@ -539,19 +631,20 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   /**
    * Fits the view to the current nodes.
    * @param padding Optional padding in pixels (default: 50)
+   * @param duration Optional animation duration in ms (default: 400)
    */
-  async fitView(padding = 50) {
+  async fitView(padding = 50, duration = 400) {
     if (!this._panZoom || this.nodes.length === 0) return;
 
-    const nodes = Array.from(this._state.nodeLookup.values());
-    if (nodes.length === 0) return;
+    const visibleNodes = Array.from(this._state.nodeLookup.values()).filter(n => !n.hidden);
+    if (visibleNodes.length === 0) return;
 
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
     let maxY = -Infinity;
 
-    nodes.forEach((node) => {
+    visibleNodes.forEach((node) => {
       const { x, y } = node.internals.positionAbsolute;
       const width = node.measured.width || 0;
       const height = node.measured.height || 0;
@@ -571,12 +664,14 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
     const zoomX = (containerWidth - padding * 2) / graphWidth;
     const zoomY = (containerHeight - padding * 2) / graphHeight;
-    const zoom = Math.min(zoomX, zoomY, 1); // Don't zoom in past 1:1
+    
+    // Smart Zoom: Only zoom out if it doesn't fit at 1:1. Never zoom in past 1:1.
+    const zoom = Math.min(zoomX, zoomY, 1);
 
     const x = (containerWidth - graphWidth * zoom) / 2 - minX * zoom;
     const y = (containerHeight - graphHeight * zoom) / 2 - minY * zoom;
 
-    await this._panZoom.setViewport({ x, y, zoom }, { duration: 400 });
+    await this._panZoom.setViewport({ x, y, zoom }, { duration });
   }
 
   /**
@@ -704,17 +799,56 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       this._updatePanZoom();
     }
 
-    // Trigger layout if layout is enabled and nodes/edges change or layout properties change
-    if (this.layoutEnabled && (
-      changedProperties.has('nodes') ||
-      changedProperties.has('edges') ||
+    // Handle Render-Measure-Reflow completion
+    if (this._isMeasuring) {
+      const allMeasured = this.nodes.every(n => n.measured && n.measured.width);
+      if (allMeasured) {
+        this._isMeasuring = false;
+        const newNodes = this._performLayout(this.nodes, this.edges);
+        this.nodes = newNodes; // This re-enters setter but won't trigger measuring
+        
+        if (this.autoFit) {
+          setTimeout(() => this.fitView(), 50);
+        }
+        
+        this.dispatchEvent(new CustomEvent('layout-complete', {
+          detail: { strategy: this.layoutStrategy }
+        }));
+        return;
+      }
+    }
+
+    // Trigger layout if layout properties change (and we aren't already measuring)
+    if (!this._isMeasuring && this.layoutEnabled && (
       changedProperties.has('layoutEnabled') ||
-      changedProperties.has('layoutPadding')
+      changedProperties.has('layoutPadding') ||
+      changedProperties.has('layoutStrategy')
     )) {
       const newNodes = this._performLayout(this.nodes, this.edges);
-      if (JSON.stringify(newNodes.map(n => n.position)) !== JSON.stringify(this.nodes.map(n => n.position))) {
-        this._state.nodes.set(newNodes);
-        this._notifyChange();
+      this.nodes = newNodes;
+      
+      if (this.autoFit) {
+        setTimeout(() => this.fitView(), 50);
+      }
+
+      this.dispatchEvent(new CustomEvent('layout-complete', {
+        detail: { strategy: this.layoutStrategy }
+      }));
+    }
+
+    // Handle Auto-Fit on graph changes
+    if (this.autoFit && !this._isMeasuring && (changedProperties.has('nodes') || changedProperties.has('edges'))) {
+      // Use a small delay to ensure rendering is stable
+      setTimeout(() => this.fitView(), 100);
+    }
+
+    // Reactive Subgraph Isolation
+    if (changedProperties.has('focusNode') || changedProperties.has('focusDirection')) {
+      if (this.focusNode) {
+        this.isolateSubgraph(this.focusNode, this.focusDirection);
+      } else if (changedProperties.get('focusNode')) {
+        // Only clear if it was previously set
+        this.clearIsolation();
       }
     }
   }
@@ -1135,6 +1269,60 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     });
   }
 
+  private _onNodeResizeStart(e: CustomEvent) {
+    const { nodeId, event } = e.detail;
+    const startX = event.clientX;
+    const startY = event.clientY;
+    
+    const node = this._state.nodeLookup.get(nodeId);
+    if (!node) return;
+
+    const startWidth = node.measured.width || 150;
+    const startHeight = node.measured.height || 50;
+    const zoom = this._state.transform.get()[2];
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const deltaX = (moveEvent.clientX - startX) / zoom;
+      const deltaY = (moveEvent.clientY - startY) / zoom;
+      
+      const newWidth = Math.max(50, startWidth + deltaX);
+      const newHeight = Math.max(30, startHeight + deltaY);
+
+      // Update node dimensions
+      node.measured = { width: newWidth, height: newHeight };
+      
+      // Sync back to user node
+      const userNode = this.nodes.find(n => n.id === nodeId) as any;
+      if (userNode) {
+        userNode.width = newWidth;
+        userNode.height = newHeight;
+        if (!userNode.style) userNode.style = {};
+        userNode.style.width = `${newWidth}px`;
+        userNode.style.height = `${newHeight}px`;
+      }
+
+      // Update absolute positions and signal
+      updateAbsolutePositions(this._state.nodeLookup, this._state.parentLookup, {
+        nodeOrigin: this._state.nodeOrigin,
+        nodeExtent: this._state.nodeExtent,
+      });
+      this._state.nodes.set([...this.nodes]);
+      this._notifyChange();
+    };
+
+    const onPointerUp = () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      
+      this.dispatchEvent(new CustomEvent('node-resize-end', {
+        detail: { nodeId, width: node.measured.width, height: node.measured.height }
+      }));
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+  }
+
   private _onDragOver(e: DragEvent) {
     e.preventDefault();
     if (e.dataTransfer) {
@@ -1284,14 +1472,17 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         }}"
       >
         <div
-          class="xyflow__viewport"
-          style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"
+          class="xyflow__reveal-container"
+          style="width: 100%; height: 100%; transition: opacity 0.4s ease-in-out, transform 0.4s ease-out; opacity: ${this._isMeasuring ? '0' : '1'}; transform: ${this._isMeasuring ? 'scale(0.98)' : 'scale(1)'};"
         >
-          <div class="xyflow__nodes" @handle-pointer-down="${this._onHandlePointerDown}">
+          <div class="xyflow__viewport"
+            style="transform: translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})"
+          >
+          <div class="xyflow__nodes" @handle-pointer-down="${this._onHandlePointerDown}" @node-resize-start="${this._onNodeResizeStart}">
             ${this.nodes.map((node) => {
               if (node.hidden) return null;
               const internalNode = this._state.nodeLookup.get(node.id);
-              const pos = internalNode?.internals.positionAbsolute || node.position;
+              const pos = internalNode?.internals.positionAbsolute || node.position || { x: 0, y: 0 };
               const tagName = this.nodeTypes[node.type || 'default'] || this.nodeTypes.default;
               const tag = unsafeStatic(tagName);
 
@@ -1317,6 +1508,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
                   .label="${(node.data as any).label}"
                   .type="${node.type || 'default'}"
                   ?selected="${node.selected}"
+                  ?resizable="${(node as any).resizable}"
                 >
                 </${tag}>
               `;

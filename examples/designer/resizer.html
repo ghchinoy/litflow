@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LitFlow - Node Resizer & Toolbar</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Roboto', sans-serif;
+      overflow: hidden;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .toolbar {
+      padding: 10px 20px;
+      background: #fff;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      gap: 20px;
+      z-index: 20;
+      align-items: center;
+    }
+    .flow-container {
+      flex-grow: 1;
+      position: relative;
+    }
+    .back-link {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .info {
+      font-size: 14px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="toolbar">
+      <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+      <div class="info">Select a node to see the Resizer (bottom-right) and Toolbar (top).</div>
+    </div>
+    <div class="flow-container">
+      <lit-flow id="flow" show-controls show-grid pan-on-drag></lit-flow>
+    </div>
+  </div>
+
+  <script type="module">
+    import '../../src/index.ts';
+
+    const flow = document.getElementById('flow');
+
+    flow.nodes = [
+      { 
+        id: '1', 
+        type: 'default', 
+        data: { label: 'Resizable Node' }, 
+        position: { x: 100, y: 100 },
+        resizable: true 
+      },
+      { 
+        id: '2', 
+        type: 'default', 
+        data: { label: 'Node with Toolbar' }, 
+        position: { x: 400, y: 100 },
+        resizable: true
+      },
+    ];
+
+    flow.edges = [
+      { id: 'e1-2', source: '1', target: '2', markerEnd: 'arrowclosed' },
+    ];
+
+    // Node Types with Toolbar
+    flow.nodeTypes = {
+      default: 'custom-toolbar-node'
+    };
+
+    // Define a custom node class that includes the toolbar
+    import { LitElement, html } from 'lit';
+    import { customElement, property } from 'lit/decorators.js';
+
+    @customElement('custom-toolbar-node')
+    class CustomToolbarNode extends LitElement {
+      createRenderRoot() { return this; }
+      
+      @property({ type: Object }) data = {};
+      @property({ type: String }) nodeId = '';
+      @property({ type: Boolean }) selected = false;
+      @property({ type: Boolean }) resizable = false;
+
+      render() {
+        return html`
+          <lit-node 
+            .data="${this.data}" 
+            .nodeId="${this.nodeId}" 
+            ?selected="${this.selected}"
+            ?resizable="${this.resizable}"
+            label="${this.data.label}"
+          >
+            <lit-node-toolbar slot="toolbar">
+              <button @click="${() => this._duplicate()}">Duplicate</button>
+              <button @click="${() => this._delete()}" style="color: var(--md-sys-color-error)">Delete</button>
+            </lit-node-toolbar>
+            <div style="padding: 10px; font-size: 12px; color: #666;">
+              Custom content area.
+            </div>
+          </lit-node>
+        `;
+      }
+
+      _duplicate() {
+        const flow = document.getElementById('flow');
+        const newNode = {
+          ...flow.nodes.find(n => n.id === this.nodeId),
+          id: `node_${Date.now()}`,
+          position: { 
+            x: (flow.nodes.find(n => n.id === this.nodeId).position.x || 0) + 50, 
+            y: (flow.nodes.find(n => n.id === this.nodeId).position.y || 0) + 50 
+          },
+          selected: false
+        };
+        flow.nodes = [...flow.nodes, newNode];
+      }
+
+      _delete() {
+        const flow = document.getElementById('flow');
+        flow.nodes = flow.nodes.filter(n => n.id !== this.nodeId);
+      }
+    }
+  </script>
+</body>
+</html>

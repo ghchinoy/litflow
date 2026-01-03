@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organizational Chart - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .toolbar {
+        padding: 12px 20px;
+        background: #fff;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        gap: 20px;
+        z-index: 20;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .flow-container {
+        flex-grow: 1;
+        position: relative;
+        background-color: #fafafa;
+      }
+      .back-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #5f6368;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .back-link:hover {
+        color: #1a73e8;
+      }
+      .info {
+        font-size: 14px;
+        color: #5f6368;
+      }
+      .badge {
+        background: #e8f0fe;
+        color: #1a73e8;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="toolbar">
+        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+        <div class="info">
+          <span class="badge">D3-Hierarchy</span>
+          This example uses <strong>layout-strategy="tree"</strong> for a perfect organizational layout.
+        </div>
+      </div>
+      <div class="flow-container">
+        <lit-flow id="my-flow" layout-enabled layout-strategy="tree" auto-fit show-controls></lit-flow>
+      </div>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      const flow = document.getElementById('my-flow');
+      
+      flow.nodes = [
+        { id: 'ceo', type: 'input', data: { label: 'CEO' } },
+        { id: 'cto', data: { label: 'CTO' } },
+        { id: 'cfo', data: { label: 'CFO' } },
+        { id: 'coo', data: { label: 'COO' } },
+        { id: 'eng-vp', data: { label: 'VP Engineering' } },
+        { id: 'product-vp', data: { label: 'VP Product' } },
+        { id: 'eng-m1', data: { label: 'Eng Manager A' } },
+        { id: 'eng-m2', data: { label: 'Eng Manager B' } },
+        { id: 'p-m1', data: { label: 'Product Manager' } },
+        { id: 'fin-m1', data: { label: 'Financial Controller' } },
+        { id: 'ops-m1', data: { label: 'Ops Manager' } },
+      ];
+
+      flow.edges = [
+        { id: 'e1', source: 'ceo', target: 'cto', markerEnd: 'arrowclosed' },
+        { id: 'e2', source: 'ceo', target: 'cfo', markerEnd: 'arrowclosed' },
+        { id: 'e3', source: 'ceo', target: 'coo', markerEnd: 'arrowclosed' },
+        { id: 'e4', source: 'cto', target: 'eng-vp', markerEnd: 'arrowclosed' },
+        { id: 'e5', source: 'cto', target: 'product-vp', markerEnd: 'arrowclosed' },
+        { id: 'e6', source: 'eng-vp', target: 'eng-m1', markerEnd: 'arrowclosed' },
+        { id: 'e7', source: 'eng-vp', target: 'eng-m2', markerEnd: 'arrowclosed' },
+        { id: 'e8', source: 'product-vp', target: 'p-m1', markerEnd: 'arrowclosed' },
+        { id: 'e9', source: 'cfo', target: 'fin-m1', markerEnd: 'arrowclosed' },
+        { id: 'e10', source: 'coo', target: 'ops-m1', markerEnd: 'arrowclosed' },
+      ];
+    </script>
+  </body>
+</html>
