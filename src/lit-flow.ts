@@ -514,24 +514,29 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     // to avoid Dagre TypeError: Cannot set properties of undefined (setting 'points')
     const allNodesHaveDimensions = nodesToLayout.every(n => n.measured?.width && n.measured.width > 0);
     
-    if (allNodesHaveDimensions) {
+    if (allNodesHaveDimensions && edgesToLayout.length > 0) {
       edgesToLayout.forEach((edge) => {
+        // Ensure BOTH nodes exist in Dagre graph before adding edge
         if (g.hasNode(edge.source) && g.hasNode(edge.target)) {
           g.setEdge(edge.source, edge.target);
         }
       });
     }
 
-    dagre.layout(g);
+    try {
+      dagre.layout(g);
+    } catch (e) {
+      console.error('Dagre layout failed:', e);
+      return nodesToLayout as LayoutNode[];
+    }
 
     return nodesToLayout.map((node) => {
       const graphNode = g.node(node.id);
-      // Fallback if dagre didn't position the node (e.g. if we skipped edges)
+      // Fallback if dagre didn't position the node
       if (!graphNode || graphNode.x === undefined) {
         return { ...node, position: node.position || { x: 0, y: 0 } } as LayoutNode;
       }
       
-      console.log(`  Node ${node.id} layout pos: ${graphNode.x},${graphNode.y}`);
       return {
         ...node,
         position: {

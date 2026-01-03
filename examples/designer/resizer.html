@@ -62,32 +62,18 @@
     const flow = document.getElementById('flow');
 
     flow.nodes = [
-      { 
-        id: '1', 
-        type: 'default', 
-        data: { label: 'Resizable Node' }, 
-        position: { x: 100, y: 100 },
-        resizable: true 
-      },
-      { 
-        id: '2', 
-        type: 'default', 
-        data: { label: 'Node with Toolbar' }, 
-        position: { x: 400, y: 100 },
-        resizable: true
-      },
+      { id: '1', type: 'default', data: { label: 'Resizable Node' }, position: { x: 100, y: 100 }, resizable: true },
+      { id: '2', type: 'default', data: { label: 'Node with Toolbar' }, position: { x: 400, y: 100 }, resizable: true },
     ];
 
     flow.edges = [
       { id: 'e1-2', source: '1', target: '2', markerEnd: 'arrowclosed' },
     ];
 
-    // Node Types with Toolbar
     flow.nodeTypes = {
       default: 'custom-toolbar-node'
     };
 
-    // Define a custom node class that includes the toolbar
     import { LitElement, html } from 'lit';
 
     class CustomToolbarNode extends LitElement {
@@ -98,24 +84,21 @@
         resizable: { type: Boolean }
       };
 
-      constructor() {
-        super();
-      }
-
       createRenderRoot() { return this; }
       
       render() {
+        const label = this.data ? this.data.label : '';
         return html`
           <lit-node 
             .data="${this.data}" 
             .nodeId="${this.nodeId}" 
             ?selected="${this.selected}"
             ?resizable="${this.resizable}"
-            .label="${this.data.label}"
+            label="${label}"
           >
             <lit-node-toolbar slot="toolbar">
-              <button @click="${() => this._duplicate()}">Duplicate</button>
-              <button @click="${() => this._delete()}" style="color: var(--md-sys-color-error)">Delete</button>
+              <button @click="${(e) => this._duplicate(e)}">Duplicate</button>
+              <button @click="${(e) => this._delete(e)}" style="color: var(--md-sys-color-error)">Delete</button>
             </lit-node-toolbar>
             <div style="padding: 10px; font-size: 12px; color: #666;">
               Custom content area.
@@ -124,27 +107,28 @@
         `;
       }
 
-      _duplicate() {
-        const flow = document.getElementById('flow');
+      _duplicate(e) {
+        e.stopPropagation();
         const node = flow.nodes.find(n => n.id === this.nodeId);
-        const newNode = {
-          ...node,
-          id: `node_${Date.now()}`,
-          position: { 
-            x: (node.position.x || 0) + 50, 
-            y: (node.position.y || 0) + 50 
-          },
-          selected: false
-        };
+        if (!node) return;
+        
+        const newNode = JSON.parse(JSON.stringify(node));
+        newNode.id = 'node_' + Date.now();
+        newNode.position.x += 50;
+        newNode.position.y += 50;
+        newNode.selected = false;
+        
         flow.nodes = [...flow.nodes, newNode];
       }
 
-      _delete() {
-        const flow = document.getElementById('flow');
+      _delete(e) {
+        e.stopPropagation();
         flow.nodes = flow.nodes.filter(n => n.id !== this.nodeId);
       }
     }
     customElements.define('custom-toolbar-node', CustomToolbarNode);
+
+    setTimeout(() => flow.fitView(), 500);
   </script>
 </body>
 </html>

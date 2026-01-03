@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { SignalWatcher } from '@lit-labs/signals';
 
@@ -6,57 +6,6 @@ type Constructor<T> = new (...args: any[]) => T;
 
 @customElement('lit-node')
 export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
-  static styles = css`
-    :host {
-      display: block;
-    }
-    .content-wrapper {
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      pointer-events: none;
-    }
-    .headline {
-      font-size: var(--md-sys-typescale-title-small-size);
-      font-weight: var(--md-sys-typescale-title-small-weight);
-      color: var(--md-sys-color-on-surface);
-      font-family: var(--md-sys-typescale-title-small-font);
-    }
-    .supporting-text {
-      font-size: var(--md-sys-typescale-body-medium-size);
-      color: var(--md-sys-color-on-surface-variant);
-      font-family: var(--md-sys-typescale-body-medium-font);
-    }
-    .resize-handle {
-      position: absolute;
-      right: 4px;
-      bottom: 4px;
-      width: 8px;
-      height: 8px;
-      border-right: 2px solid var(--md-sys-color-outline);
-      border-bottom: 2px solid var(--md-sys-color-outline);
-      cursor: nwse-resize;
-      opacity: 0;
-      transition: opacity 0.2s;
-      pointer-events: all;
-    }
-    :host([selected]) .resize-handle {
-      opacity: 1;
-    }
-    .node-toolbar-container {
-      position: absolute;
-      top: -40px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      pointer-events: all;
-    }
-    :host([selected]) .node-toolbar-container {
-      display: block;
-    }
-  `;
-
   createRenderRoot() {
     return this;
   }
@@ -87,9 +36,51 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
 
   render() {
     return html`
+      <style>
+        lit-node {
+          display: block;
+        }
+        .content-wrapper {
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          pointer-events: none;
+        }
+        .headline {
+          font-size: var(--md-sys-typescale-title-small-size);
+          font-weight: var(--md-sys-typescale-title-small-weight);
+          color: var(--md-sys-color-on-surface);
+          font-family: var(--md-sys-typescale-title-small-font);
+        }
+        .supporting-text {
+          font-size: var(--md-sys-typescale-body-medium-size);
+          color: var(--md-sys-color-on-surface-variant);
+          font-family: var(--md-sys-typescale-body-medium-font);
+        }
+        .node-toolbar-container {
+          position: absolute;
+          top: -45px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 100;
+        }
+        .resize-handle {
+          position: absolute;
+          right: 4px;
+          bottom: 4px;
+          width: 10px;
+          height: 10px;
+          border-right: 2px solid var(--md-sys-color-primary);
+          border-bottom: 2px solid var(--md-sys-color-primary);
+          cursor: nwse-resize;
+          pointer-events: all;
+          z-index: 100;
+        }
+      </style>
       <div 
         class="node-toolbar-container"
-        style="position: absolute; top: -40px; left: 50%; transform: translateX(-50%); display: ${this.selected ? 'block' : 'none'}; pointer-events: all;"
+        style="display: ${this.selected ? 'block' : 'none'};"
       >
         <slot name="toolbar"></slot>
       </div>
@@ -102,12 +93,8 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
         </div>
         <slot></slot>
       </div>
-      ${this.resizable 
-        ? html`<div 
-            class="resize-handle" 
-            style="position: absolute; right: 4px; bottom: 4px; width: 8px; height: 8px; border-right: 2px solid var(--md-sys-color-outline); border-bottom: 2px solid var(--md-sys-color-outline); cursor: nwse-resize; opacity: ${this.selected ? '1' : '0'}; pointer-events: all;"
-            @pointerdown="${this._onResizeStart}"
-          ></div>` 
+      ${this.resizable && this.selected
+        ? html`<div class="resize-handle" @pointerdown="${this._onResizeStart}"></div>` 
         : ''}
       ${this.type === 'input' || this.type === 'default'
         ? html`<lit-handle type="source" data-handlepos="bottom" data-nodeid="${this.nodeId}"></lit-handle>`
