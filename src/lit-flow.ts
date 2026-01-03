@@ -958,6 +958,12 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
                     node.internals.positionAbsolute = item.internals.positionAbsolute;
                     const userNode = this.nodes.find((n) => n.id === id);
                     if (userNode) userNode.position = item.position;
+
+                    // Performance: Directly update DOM transform to eliminate lag vs edges
+                    const el = this.shadowRoot?.querySelector(`.xyflow__node[data-id="${id}"]`) as HTMLElement;
+                    if (el) {
+                      el.style.transform = `translate(${item.position.x}px, ${item.position.y}px)`;
+                    }
                   }
                 });
 
@@ -967,7 +973,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
                   nodeExtent: this._state.nodeExtent,
                 });
 
-                // Trigger update via signal
+                // Trigger update via signal (asynchronously)
                 this._state.nodes.set([...this.nodes]);
                 this._notifyChange();
               },
