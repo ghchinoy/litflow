@@ -89,17 +89,25 @@
 
     // Define a custom node class that includes the toolbar
     import { LitElement, html } from 'lit';
-    import { customElement, property } from 'lit/decorators.js';
 
-    @customElement('custom-toolbar-node')
     class CustomToolbarNode extends LitElement {
+      static properties = {
+        data: { type: Object },
+        nodeId: { type: String },
+        selected: { type: Boolean },
+        resizable: { type: Boolean }
+      };
+
+      constructor() {
+        super();
+        this.data = {};
+        this.nodeId = '';
+        this.selected = false;
+        this.resizable = false;
+      }
+
       createRenderRoot() { return this; }
       
-      @property({ type: Object }) data = {};
-      @property({ type: String }) nodeId = '';
-      @property({ type: Boolean }) selected = false;
-      @property({ type: Boolean }) resizable = false;
-
       render() {
         return html`
           <lit-node 
@@ -107,7 +115,7 @@
             .nodeId="${this.nodeId}" 
             ?selected="${this.selected}"
             ?resizable="${this.resizable}"
-            label="${this.data.label}"
+            .label="${this.data.label}"
           >
             <lit-node-toolbar slot="toolbar">
               <button @click="${() => this._duplicate()}">Duplicate</button>
@@ -122,12 +130,13 @@
 
       _duplicate() {
         const flow = document.getElementById('flow');
+        const node = flow.nodes.find(n => n.id === this.nodeId);
         const newNode = {
-          ...flow.nodes.find(n => n.id === this.nodeId),
+          ...node,
           id: `node_${Date.now()}`,
           position: { 
-            x: (flow.nodes.find(n => n.id === this.nodeId).position.x || 0) + 50, 
-            y: (flow.nodes.find(n => n.id === this.nodeId).position.y || 0) + 50 
+            x: (node.position.x || 0) + 50, 
+            y: (node.position.y || 0) + 50 
           },
           selected: false
         };
@@ -139,6 +148,7 @@
         flow.nodes = flow.nodes.filter(n => n.id !== this.nodeId);
       }
     }
+    customElements.define('custom-toolbar-node', CustomToolbarNode);
   </script>
 </body>
 </html>

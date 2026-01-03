@@ -500,19 +500,28 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       g.setNode(node.id, { label: node.id, width, height });
     });
 
-    // CRITICAL: Only add edges where both source and target exist in the graph.
-    // Omit edges pointing to missing nodes to prevent Dagre 'points' crash.
-    edgesToLayout.forEach((edge) => {
-      if (g.hasNode(edge.source) && g.hasNode(edge.target)) {
-        g.setEdge(edge.source, edge.target);
-      }
-    });
+    // CRITICAL STABILITY CHECK:
+    // Only add edges if all nodes have been added to the graph.
+    // If we are in the middle of a Render-Measure cycle, we skip edges 
+    // to avoid Dagre TypeError: Cannot set properties of undefined (setting 'points')
+    const allNodesHaveDimensions = nodesToLayout.every(n => n.measured?.width && n.measured.width > 0);
+    
+    if (allNodesHaveDimensions) {
+      edgesToLayout.forEach((edge) => {
+        if (g.hasNode(edge.source) && g.hasNode(edge.target)) {
+          g.setEdge(edge.source, edge.target);
+        }
+      });
+    }
 
     dagre.layout(g);
 
     return nodesToLayout.map((node) => {
       const graphNode = g.node(node.id);
-      if (!graphNode) return { ...node, position: node.position || { x: 0, y: 0 } } as LayoutNode;
+      // Fallback if dagre didn't position the node (e.g. if we skipped edges)
+      if (!graphNode || graphNode.x === undefined) {
+        return { ...node, position: node.position || { x: 0, y: 0 } } as LayoutNode;
+      }
       
       return {
         ...node,
@@ -822,21 +831,24 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
     // Handle Render-Measure-Reflow completion
     if (this._isMeasuring) {
+      // Use double rAF to ensure browser has painted and ResizeObserver has updated
       requestAnimationFrame(() => {
-        const allMeasured = this.nodes.every(n => n.measured && n.measured.width);
-        if (allMeasured) {
-          this._isMeasuring = false;
-          const newNodes = this._performLayout(this.nodes, this.edges);
-          this.nodes = newNodes; // This re-enters setter but won't trigger measuring
-          
-          if (this.autoFit) {
-            setTimeout(() => this.fitView(), 50);
+        requestAnimationFrame(() => {
+          const allMeasured = this.nodes.every(n => n.measured?.width && n.measured.width > 0);
+          if (allMeasured) {
+            this._isMeasuring = false;
+            const newNodes = this._performLayout(this.nodes, this.edges);
+            this.nodes = newNodes; 
+            
+            if (this.autoFit) {
+              setTimeout(() => this.fitView(), 50);
+            }
+            
+            this.dispatchEvent(new CustomEvent('layout-complete', {
+              detail: { strategy: this.layoutStrategy }
+            }));
           }
-          
-          this.dispatchEvent(new CustomEvent('layout-complete', {
-            detail: { strategy: this.layoutStrategy }
-          }));
-        }
+        });
       });
       return;
     }
