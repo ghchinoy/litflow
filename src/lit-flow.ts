@@ -886,6 +886,14 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         setTimeout(() => this.fitView(), 50);
       }
 
+      // If strategy changed, handles moved. Force re-measurement of all nodes.
+      if (changedProperties.has('layoutStrategy')) {
+        this.shadowRoot?.querySelectorAll('.xyflow__node').forEach((el) => {
+          const id = (el as HTMLElement).dataset.id;
+          if (id) this._updateNodeDimensions(id, el as HTMLElement);
+        });
+      }
+
       this.dispatchEvent(new CustomEvent('layout-complete', {
         detail: { strategy: this.layoutStrategy }
       }));
@@ -1558,7 +1566,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               const heightStyle = height ? `height: ${typeof height === 'number' ? `${height}px` : height};` : '';
               const zIndex = (node as any).zIndex ? `z-index: ${(node as any).zIndex};` : '';
 
-              const autoOrientation = (this.layoutStrategy === 'hierarchical' || this.layoutStrategy === 'tree') ? 'horizontal' : 'vertical';
+              const autoOrientation = (this.layoutStrategy === 'hierarchical' || this.layoutStrategy === 'tree' || this.layoutStrategy === 'organic') ? 'horizontal' : 'vertical';
               const orientation = (node as any).orientation || autoOrientation;
 
               return html`
