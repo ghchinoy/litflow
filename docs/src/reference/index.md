@@ -39,6 +39,24 @@ Technical documentation for the LitFlow API, components, and properties.
 | `zoomOnDoubleClick` | `zoom-on-double-click` | `boolean` | `true` | Enable/disable zoom on double click. |
 | `selectionMode` | `selection-mode` | `'pan' \| 'select'` | `'pan'` | Default interaction mode for background dragging. |
 | `promptOnDrop` | `prompt-on-drop` | `boolean` | `false` | Whether to prompt for a label when a node is dropped. |
+| `layoutEnabled` | `layout-enabled` | `boolean` | `false` | Enable/disable automatic layout engines. |
+| `layoutStrategy` | `layout-strategy` | `'hierarchical' \| 'organic' \| 'tree'` | `'hierarchical'` | The algorithm used for automatic positioning. |
+| `layoutDirection` | `layout-direction` | `'LR' \| 'TB'` | `'LR'` | The primary flow direction for hierarchical/tree layouts. |
+| `layoutPadding` | `layout-padding` | `number` | `40` | Padding between nodes in automatic layout. |
+| `autoFit` | `auto-fit` | `boolean` | `false` | Automatically trigger `fitView` on graph changes. |
+| `focusNode` | `focus-node` | `string` | `null` | Declaratively isolate a subgraph starting from this node ID. |
+| `focusDirection` | `focus-direction` | `'downstream' \| 'upstream' \| 'both'` | `'downstream'` | The direction of traversal for declarative isolation. |
+
+## Methods
+
+The `<lit-flow>` element exposes the following imperative methods:
+
+| Method | Arguments | Description |
+|--------|-----------|-------------|
+| `project` | `(pos: {x, y})` | Translates screen coordinates to canvas coordinates. |
+| `fitView` | `(padding?: number, duration?: number)` | Centers and zooms the viewport to fit all visible nodes. |
+| `isolateSubgraph` | `(id: string, dir?: string)` | Programmatically hide all nodes not connected to the target ID. |
+| `clearIsolation` | - | Restores visibility to all hidden nodes and edges. |
 
 ## Events
 
@@ -49,6 +67,24 @@ Technical documentation for the LitFlow API, components, and properties.
 | `node-drop` | `{ node, event }` | Fired when a node is dropped onto the canvas. |
 | `selection-change` | `{ nodes, edges }` | Fired when the selection changes via marquee. |
 | `group-collapse` | `{ id, collapsed }` | Fired when a group node is collapsed or expanded. |
+| `layout-complete` | `{ strategy }` | Fired after the automatic layout engine finishes repositioning nodes. |
+
+## `<lit-node>` Properties
+
+| Property | Attribute | Type | Default | Description |
+|----------|-----------|------|---------|-------------|
+| `label` | `label` | `string` | `''` | The text label for the node. |
+| `type` | `type` | `string` | `'default'` | The node type (input, output, default). |
+| `selected` | `selected` | `boolean` | `false` | Whether the node is currently selected. |
+| `resizable` | `resizable` | `boolean` | `false` | Whether to show the resize handle. |
+| `orientation` | `orientation` | `'vertical' \| 'horizontal'` | `'vertical'` | Placement of source/target handles. |
+
+## `<lit-node>` Events
+
+| Event | Detail | Description |
+|-------|--------|-------------|
+| `node-resize-start` | `{ nodeId, event }` | Fired when a user starts dragging the resize handle. |
+| `node-resize-end` | `{ nodeId, width, height }` | Fired when resizing is completed. |
 
 ## Edge Properties
 

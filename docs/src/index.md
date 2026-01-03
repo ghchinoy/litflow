@@ -14,6 +14,7 @@ LitFlow is a project dedicated to creating Lit WebComponent examples and a libra
 - **Lit WebComponents**: Built from the ground up with Lit.
 - **Light DOM**: Uses Light DOM for nodes and handles to ensure compatibility with `@xyflow/system`.
 - **Fine-grained Reactivity**: Powered by `@lit-labs/signals`.
+- **Multiple Layout Engines**: Support for Hierarchical, Organic, and Tree layouts out of the box.
 - **Material 3 Design**: Integrated with Material Design principles.
 
 ## Getting Started
