@@ -10,6 +10,12 @@ export class CustomToolbarNode extends LitElement {
   @property({ type: Boolean }) selected = false;
   @property({ type: Boolean }) resizable = false;
 
+  willUpdate(changedProperties: Map<string, any>) {
+    if (this.hasAttribute('selected') !== this.selected) {
+      this.selected = this.hasAttribute('selected');
+    }
+  }
+
   render() {
     const label = this.data ? this.data.label : '';
     return html`
@@ -20,10 +26,14 @@ export class CustomToolbarNode extends LitElement {
         ?resizable="${this.resizable}"
         label="${label}"
       >
-        <lit-node-toolbar slot="toolbar">
-          <button @click="${(e: MouseEvent) => this._duplicate(e)}">Duplicate</button>
-          <button @click="${(e: MouseEvent) => this._delete(e)}" style="color: var(--md-sys-color-error)">Delete</button>
-        </lit-node-toolbar>
+        ${this.selected 
+          ? html`
+            <lit-node-toolbar slot="toolbar">
+              <button @click="${(e: MouseEvent) => this._duplicate(e)}">Duplicate</button>
+              <button @click="${(e: MouseEvent) => this._delete(e)}" style="color: var(--md-sys-color-error)">Delete</button>
+            </lit-node-toolbar>` 
+          : ''
+        }
         <div style="padding: 10px; font-size: 12px; color: #666;">
           Custom content area.
         </div>

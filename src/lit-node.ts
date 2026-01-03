@@ -46,13 +46,12 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
 
   render() {
     return html`
-      ${this.selected 
-        ? html`
-          <div class="node-toolbar-container" style="position: absolute; top: -45px; left: 50%; transform: translateX(-50%); z-index: 100; pointer-events: all;">
-            <slot name="toolbar"></slot>
-          </div>` 
-        : ''
-      }
+      <div 
+        class="node-toolbar-container" 
+        style="position: absolute; top: -45px; left: 50%; transform: translateX(-50%); z-index: 100; pointer-events: all; display: ${this.selected ? 'block' : 'none'};"
+      >
+        <slot name="toolbar"></slot>
+      </div>
       <div class="content-wrapper" style="padding: 12px; display: flex; flex-direction: column; gap: 4px; pointer-events: none;">
         <div class="headline" style="font-size: var(--md-sys-typescale-title-small-size); font-weight: var(--md-sys-typescale-title-small-weight); color: var(--md-sys-color-on-surface); font-family: var(--md-sys-typescale-title-small-font);">
           <slot name="headline">${this.label}</slot>
