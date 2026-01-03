@@ -493,7 +493,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     }
 
     // Hierarchical Layout (Dagre) - Default
-    const g = new dagre.graphlib.Graph();
+    const g = new dagre.graphlib.Graph({ multigraph: true });
     g.setGraph({});
 
     g.graph().rankdir = 'LR';
@@ -504,21 +504,22 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     nodesToLayout.forEach((node) => {
       const width = node.measured?.width || 150;
       const height = node.measured?.height || 50;
-      console.log(`  Node ${node.id} layout dims: ${width}x${height}`);
-      g.setNode(node.id, { label: node.id, width, height });
+      g.setNode(String(node.id), { label: node.id, width, height });
     });
 
     // CRITICAL STABILITY CHECK:
     // Only add edges if all nodes have been added to the graph.
-    // If we are in the middle of a Render-Measure cycle, we skip edges 
-    // to avoid Dagre TypeError: Cannot set properties of undefined (setting 'points')
     const allNodesHaveDimensions = nodesToLayout.every(n => n.measured?.width && n.measured.width > 0);
     
     if (allNodesHaveDimensions && edgesToLayout.length > 0) {
       edgesToLayout.forEach((edge) => {
+        const v = String(edge.source);
+        const w = String(edge.target);
+        const name = String(edge.id);
         // Ensure BOTH nodes exist in Dagre graph before adding edge
-        if (g.hasNode(edge.source) && g.hasNode(edge.target)) {
-          g.setEdge(edge.source, edge.target);
+        if (g.hasNode(v) && g.hasNode(w)) {
+          // Providing {} as the value is required for some dagre versions to avoid 'points' error
+          g.setEdge(v, w, {}, name);
         }
       });
     }
@@ -526,12 +527,12 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     try {
       dagre.layout(g);
     } catch (e) {
-      console.error('Dagre layout failed:', e);
+      console.error('LitFlow: Dagre layout engine failed', e);
       return nodesToLayout as LayoutNode[];
     }
 
     return nodesToLayout.map((node) => {
-      const graphNode = g.node(node.id);
+      const graphNode = g.node(String(node.id));
       // Fallback if dagre didn't position the node
       if (!graphNode || graphNode.x === undefined) {
         return { ...node, position: node.position || { x: 0, y: 0 } } as LayoutNode;

@@ -74,59 +74,7 @@
       default: 'custom-toolbar-node'
     };
 
-    import { LitElement, html } from 'lit';
-
-    class CustomToolbarNode extends LitElement {
-      static properties = {
-        data: { type: Object },
-        nodeId: { type: String },
-        selected: { type: Boolean },
-        resizable: { type: Boolean }
-      };
-
-      createRenderRoot() { return this; }
-      
-      render() {
-        const label = this.data ? this.data.label : '';
-        return html`
-          <lit-node 
-            .data="${this.data}" 
-            .nodeId="${this.nodeId}" 
-            ?selected="${this.selected}"
-            ?resizable="${this.resizable}"
-            label="${label}"
-          >
-            <lit-node-toolbar slot="toolbar">
-              <button @click="${(e) => this._duplicate(e)}">Duplicate</button>
-              <button @click="${(e) => this._delete(e)}" style="color: var(--md-sys-color-error)">Delete</button>
-            </lit-node-toolbar>
-            <div style="padding: 10px; font-size: 12px; color: #666;">
-              Custom content area.
-            </div>
-          </lit-node>
-        `;
-      }
-
-      _duplicate(e) {
-        e.stopPropagation();
-        const node = flow.nodes.find(n => n.id === this.nodeId);
-        if (!node) return;
-        
-        const newNode = JSON.parse(JSON.stringify(node));
-        newNode.id = 'node_' + Date.now();
-        newNode.position.x += 50;
-        newNode.position.y += 50;
-        newNode.selected = false;
-        
-        flow.nodes = [...flow.nodes, newNode];
-      }
-
-      _delete(e) {
-        e.stopPropagation();
-        flow.nodes = flow.nodes.filter(n => n.id !== this.nodeId);
-      }
-    }
-    customElements.define('custom-toolbar-node', CustomToolbarNode);
+    import './custom-toolbar-node.ts';
 
     setTimeout(() => flow.fitView(), 500);
   </script>
