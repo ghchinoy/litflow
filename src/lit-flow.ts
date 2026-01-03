@@ -331,10 +331,11 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   set nodes(nodes: NodeBase[]) {
     if (!Array.isArray(nodes)) return;
 
-    // Ensure all nodes have at least a default position to avoid crashes in @xyflow/system
-    const nodesWithPosition = nodes.map(node => ({
+    // Filter out any null/undefined entries and ensure all nodes have a position
+    const validNodes = nodes.filter(n => n !== null && n !== undefined);
+    const nodesWithPosition = validNodes.map(node => ({
       ...node,
-      position: node?.position || { x: 0, y: 0 }
+      position: node.position || { x: 0, y: 0 }
     }));
 
     // If layout is enabled and any node is missing measurement, enter measuring mode
@@ -446,13 +447,17 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         height: n.measured?.height || 50
       }));
 
-      const links = edgesToLayout.map(e => ({
-        source: e.source,
-        target: e.target
-      }));
+      // Only include links where both source and target exist in the current set
+      const nodeIds = new Set(nodesToLayout.map(n => n.id));
+      const validLinks = edgesToLayout
+        .filter(e => nodeIds.has(e.source) && nodeIds.has(e.target))
+        .map(e => ({
+          source: e.source,
+          target: e.target
+        }));
 
       const simulation = d3.forceSimulation(simulationNodes as any)
-        .force('link', d3.forceLink(links).id((d: any) => d.id).distance(this.layoutPadding * 4))
+        .force('link', d3.forceLink(validLinks).id((d: any) => d.id).distance(this.layoutPadding * 4))
         .force('charge', d3.forceManyBody().strength(-800))
         .force('collide', d3.forceCollide().radius((d: any) => Math.max(d.width, d.height) / 2 + this.layoutPadding))
         .force('center', d3.forceCenter(400, 300))
@@ -495,14 +500,20 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       g.setNode(node.id, { label: node.id, width, height });
     });
 
+    // CRITICAL: Only add edges where both source and target exist in the graph.
+    // Omit edges pointing to missing nodes to prevent Dagre 'points' crash.
     edgesToLayout.forEach((edge) => {
-      g.setEdge(edge.source, edge.target);
+      if (g.hasNode(edge.source) && g.hasNode(edge.target)) {
+        g.setEdge(edge.source, edge.target);
+      }
     });
 
     dagre.layout(g);
 
     return nodesToLayout.map((node) => {
       const graphNode = g.node(node.id);
+      if (!graphNode) return { ...node, position: node.position || { x: 0, y: 0 } } as LayoutNode;
+      
       return {
         ...node,
         position: {
