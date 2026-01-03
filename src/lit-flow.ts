@@ -1558,6 +1558,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               const heightStyle = height ? `height: ${typeof height === 'number' ? `${height}px` : height};` : '';
               const zIndex = (node as any).zIndex ? `z-index: ${(node as any).zIndex};` : '';
 
+              const autoOrientation = (this.layoutStrategy === 'hierarchical' || this.layoutStrategy === 'tree') ? 'horizontal' : 'vertical';
+              const orientation = (node as any).orientation || autoOrientation;
+
               return html`
                 <${tag}
                   class="xyflow__node"
@@ -1570,6 +1573,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
                   .type="${node.type || 'default'}"
                   ?selected="${node.selected}"
                   ?resizable="${(node as any).resizable}"
+                  .orientation="${orientation}"
                 >
                 </${tag}>
               `;

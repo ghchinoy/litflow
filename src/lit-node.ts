@@ -25,6 +25,9 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: Boolean, reflect: true })
   resizable = false;
 
+  @property({ type: String, reflect: true })
+  orientation: 'vertical' | 'horizontal' = 'vertical';
+
   @property({ type: String, attribute: 'data-id', reflect: true })
   nodeId = '';
 
@@ -69,10 +72,10 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
           ></div>` 
         : ''}
       ${this.type === 'input' || this.type === 'default'
-        ? html`<lit-handle type="source" data-handlepos="bottom" data-nodeid="${this.nodeId}"></lit-handle>`
+        ? html`<lit-handle type="source" .position="${this.orientation === 'horizontal' ? 'right' : 'bottom'}" data-handlepos="${this.orientation === 'horizontal' ? 'right' : 'bottom'}" data-nodeid="${this.nodeId}"></lit-handle>`
         : ''}
       ${this.type === 'output' || this.type === 'default'
-        ? html`<lit-handle type="target" data-handlepos="top" data-nodeid="${this.nodeId}"></lit-handle>`
+        ? html`<lit-handle type="target" .position="${this.orientation === 'horizontal' ? 'left' : 'top'}" data-handlepos="${this.orientation === 'horizontal' ? 'left' : 'top'}" data-nodeid="${this.nodeId}"></lit-handle>`
         : ''}
     `;
   }
