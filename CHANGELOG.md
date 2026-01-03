@@ -8,8 +8,6 @@ All notable changes to this project will be documented in this file.
 - Style lit-node with Material 3 (litflow-clx)
 - Example: Static Documentation Display (litflow-l52)
 - Packaging and Distribution (litflow-b9b)
-- Example: Subflows (Parent/Child) (litflow-2lt)
-- Example: Custom Edges (Step/SmoothStep) (litflow-8zz)
 - Implement manual edge connections (litflow-ycn)
 - Establish Material 3 Design System (litflow-m7y)
 - Investigate and fix node jumping on subsequent drags (litflow-v7y)
@@ -35,7 +33,6 @@ All notable changes to this project will be documented in this file.
 - Implement Edge Markers (Arrowheads) (litflow-c56)
 - Configurable Node Naming on Drop (litflow-8ku)
 - Create Drag & Drop Guide (litflow-w6v)
-- Example: Drag & Drop (litflow-lyd)
 - Implement M3-styled Sidebar for Drag & Drop (litflow-kyi)
 - Implement project method in LitFlow (litflow-ypx)
 - Investigate and implement Edge Labels (litflow-1ed)
@@ -46,7 +43,6 @@ All notable changes to this project will be documented in this file.
 - Implement Live Example integration (litflow-46j.3)
 - Migrate and structure docs using Diataxis (litflow-46j.2)
 - Initialize Eleventy project in docs/ (litflow-46j.1)
-- Example: Graphviz to LitFlow (litflow-48p)
 
 ## 2025-12-29
 - Implement Real LitFlowRunner (litflow-wmj)
@@ -56,4 +52,11 @@ All notable changes to this project will be documented in this file.
 - Analysis: Phase 2 - Graph Execution (The Core) (litflow-i81)
 - Designer: Integrate Drag & Drop Palette (litflow-aa8)
 - Example: Inspector Designer with live JSON sync (litflow-0i5)
+
+## 2026-01-03
+- Feature: M3 Standardized Node Slots (litflow-hf4.5)
+- Feature: Sub-Graph Focus/Isolate API (litflow-hf4.2)
+- Feature: Built-in Layout Orchestration (litflow-hf4.1)
+- Fix: TypeScript Type Fidelity (litflow-hf4.3)
+- Docs: Pragmatic Use Findings (litflow-hf4.6)
 
