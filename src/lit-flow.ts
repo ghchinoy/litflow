@@ -113,6 +113,11 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       transition: transform 0.4s ease-out, opacity 0.4s ease-in, box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, border-width 0.1s ease-in-out;
     }
 
+    .xyflow__node:active,
+    .xyflow__node.dragging {
+      transition: none !important;
+    }
+
     .xyflow__node[type="group"] {
       padding: 0;
       background: none;
