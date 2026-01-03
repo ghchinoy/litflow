@@ -33,8 +33,15 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
 
   render() {
     return html`
-      <div class="label" style="font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface); pointer-events: none; font-family: var(--md-sys-typescale-body-medium-font);">${this.label}</div>
-      <slot></slot>
+      <div class="content-wrapper" style="padding: 12px; display: flex; flex-direction: column; gap: 4px; pointer-events: none;">
+        <div class="headline" style="font-size: var(--md-sys-typescale-title-small-size); font-weight: var(--md-sys-typescale-title-small-weight); color: var(--md-sys-color-on-surface); font-family: var(--md-sys-typescale-title-small-font);">
+          <slot name="headline">${this.label}</slot>
+        </div>
+        <div class="supporting-text" style="font-size: var(--md-sys-typescale-body-medium-size); color: var(--md-sys-color-on-surface-variant); font-family: var(--md-sys-typescale-body-medium-font);">
+          <slot name="supporting-text"></slot>
+        </div>
+        <slot></slot>
+      </div>
       ${this.type === 'input' || this.type === 'default'
         ? html`<lit-handle type="source" data-handlepos="bottom" data-nodeid="${this.nodeId}"></lit-handle>`
         : ''}

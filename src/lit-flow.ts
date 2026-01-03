@@ -24,6 +24,7 @@ import { createInitialState, type FlowState } from './store';
 import { m3Tokens } from './theme';
 import './lit-node';
 import './lit-edge';
+import dagre from 'dagre';
 
 type Constructor<T> = new (...args: any[]) => T;
 
@@ -31,6 +32,10 @@ const boolConverter = {
   fromAttribute: (value: string | null) => value !== 'false' && value !== null,
   toAttribute: (value: boolean) => (value ? '' : null),
 };
+
+interface LayoutNode extends NodeBase {
+  position: { x: number; y: number };
+}
 
 @customElement('lit-flow')
 export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement>>(base: T) => T)(LitElement) {
@@ -288,6 +293,12 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: String, attribute: 'selection-mode' })
   selectionMode: 'pan' | 'select' = 'pan';
 
+  @property({ type: Boolean, attribute: 'layout-enabled', reflect: true, converter: boolConverter })
+  layoutEnabled = false;
+
+  @property({ type: Number, attribute: 'layout-padding' })
+  layoutPadding = 40;
+
   @state()
   private _selectionRect: { x: number; y: number; width: number; height: number } | null = null;
 
@@ -301,8 +312,16 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
   @property({ type: Array })
   set nodes(nodes: NodeBase[]) {
-    this._state.nodes.set(nodes);
-    adoptUserNodes(nodes, this._state.nodeLookup, this._state.parentLookup, {
+    // Check if layout is enabled and any node is missing a position
+    const needsLayout = this.layoutEnabled && nodes.some(node => !node.position || (node.position.x === undefined || node.position.y === undefined));
+
+    let nodesToSet = nodes;
+    if (needsLayout) {
+      nodesToSet = this._performLayout(nodes, this.edges);
+    }
+
+    this._state.nodes.set(nodesToSet);
+    adoptUserNodes(nodesToSet, this._state.nodeLookup, this._state.parentLookup, {
       nodeOrigin: this._state.nodeOrigin,
       nodeExtent: this._state.nodeExtent,
     });
@@ -351,6 +370,45 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         el.nodeId = nodes[i].id;
       });
     }
+  }
+
+  private _performLayout(nodesToLayout: NodeBase[], edgesToLayout: any[]): LayoutNode[] {
+    const g = new dagre.graphlib.Graph();
+    g.setGraph({}); // Set graph defaults, e.g., { rankdir: 'LR' } for left-to-right
+
+    // Default to a left-to-right layout for dependency graphs
+    g.graph().rankdir = 'LR';
+    g.graph().nodesep = this.layoutPadding; // Horizontal spacing
+    g.graph().edgesep = this.layoutPadding; // Spacing between parallel edges
+    g.graph().ranksep = this.layoutPadding * 2; // Vertical spacing between ranks/layers
+
+    // Add nodes to the graphlib. Each node must have a width and height for dagre to work.
+    nodesToLayout.forEach((node) => {
+      // Use estimated or default dimensions if not measured yet
+      const width = node.measured?.width || 150; // Default width
+      const height = node.measured?.height || 50; // Default height
+      g.setNode(node.id, { label: node.id, width, height });
+    });
+
+    // Add edges to the graphlib
+    edgesToLayout.forEach((edge) => {
+      g.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(g);
+
+    const newNodes = nodesToLayout.map((node) => {
+      const graphNode = g.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: graphNode.x - graphNode.width / 2,
+          y: graphNode.y - graphNode.height / 2,
+        },
+      } as LayoutNode;
+    });
+
+    return newNodes;
   }
 
   @property({ type: Array })
@@ -521,6 +579,65 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     await this._panZoom.setViewport({ x, y, zoom }, { duration: 400 });
   }
 
+  /**
+   * Isolates a subgraph by hiding all nodes and edges not connected to the specified node.
+   * @param nodeId The ID of the node to focus on.
+   * @param direction The direction of the traversal ('downstream', 'upstream', or 'both').
+   */
+  isolateSubgraph(nodeId: string, direction: 'downstream' | 'upstream' | 'both' = 'downstream') {
+    const allNodes = this._state.nodes.get();
+    const allEdges = this._state.edges.get();
+    const nodesToKeep = new Set<string>();
+    const queue: string[] = [nodeId];
+
+    nodesToKeep.add(nodeId);
+
+    let head = 0;
+    while (head < queue.length) {
+      const currentId = queue[head++];
+
+      if (direction === 'downstream' || direction === 'both') {
+        allEdges.forEach(edge => {
+          if (edge.source === currentId && !nodesToKeep.has(edge.target)) {
+            nodesToKeep.add(edge.target);
+            queue.push(edge.target);
+          }
+        });
+      }
+
+      if (direction === 'upstream' || direction === 'both') {
+        allEdges.forEach(edge => {
+          if (edge.target === currentId && !nodesToKeep.has(edge.source)) {
+            nodesToKeep.add(edge.source);
+            queue.push(edge.source);
+          }
+        });
+      }
+    }
+
+    this.nodes = allNodes.map(node => ({
+      ...node,
+      hidden: !nodesToKeep.has(node.id),
+    }));
+
+    this.edges = allEdges.map(edge => ({
+      ...edge,
+      hidden: !(nodesToKeep.has(edge.source) && nodesToKeep.has(edge.target)),
+    }));
+
+    // Fit view to the isolated subgraph after a short delay to allow for rendering
+    setTimeout(() => this.fitView(), 100);
+  }
+
+  /**
+   * Clears any subgraph isolation, showing all nodes and edges.
+   */
+  clearIsolation() {
+    this.nodes = this.nodes.map(node => ({ ...node, hidden: false }));
+    this.edges = this.edges.map(edge => ({ ...edge, hidden: false }));
+    setTimeout(() => this.fitView(), 100);
+  }
+
   private _updatePanZoom(userSelectionActive = false) {
     if (!this._panZoom) return;
 
@@ -585,6 +702,20 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       changedProperties.has('zoomOnDoubleClick')
     )) {
       this._updatePanZoom();
+    }
+
+    // Trigger layout if layout is enabled and nodes/edges change or layout properties change
+    if (this.layoutEnabled && (
+      changedProperties.has('nodes') ||
+      changedProperties.has('edges') ||
+      changedProperties.has('layoutEnabled') ||
+      changedProperties.has('layoutPadding')
+    )) {
+      const newNodes = this._performLayout(this.nodes, this.edges);
+      if (JSON.stringify(newNodes.map(n => n.position)) !== JSON.stringify(this.nodes.map(n => n.position))) {
+        this._state.nodes.set(newNodes);
+        this._notifyChange();
+      }
     }
   }
 

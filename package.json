@@ -27,6 +27,22 @@
     "./theme": {
       "types": "./dist/theme.d.ts",
       "import": "./dist/theme.js"
+    },
+    "./breadboard/runner": {
+      "types": "./dist/breadboard/runner.d.ts",
+      "import": "./dist/breadboard/runner.js"
+    },
+    "./breadboard/lit-flow-runner": {
+      "types": "./dist/breadboard/lit-flow-runner.d.ts",
+      "import": "./dist/breadboard/lit-flow-runner.js"
+    },
+    "./breadboard/data/*": {
+      "types": "./dist/breadboard/data/*.d.ts",
+      "import": "./dist/breadboard/data/*.js"
+    },
+    "./breadboard/engine/*": {
+      "types": "./dist/breadboard/engine/*.d.ts",
+      "import": "./dist/breadboard/engine/*.js"
     }
   },
   "scripts": {
@@ -50,6 +66,7 @@
     "d3-interpolate": "^3.0.1",
     "d3-selection": "^3.0.0",
     "d3-zoom": "^3.0.0",
+    "dagre": "^0.8.5",
     "idb": "^8.0.3",
     "lit": "^3.3.2",
     "littlezipper": "^0.1.5",
@@ -62,6 +79,7 @@
     "@types/d3-interpolate": "^3.0.4",
     "@types/d3-selection": "^3.0.11",
     "@types/d3-zoom": "^3.0.8",
+    "@types/dagre": "^0.7.53",
     "@vitest/browser": "^4.0.16",
     "@web/test-runner-playwright": "^0.11.1",
     "jsdom": "^27.4.0",

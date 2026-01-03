@@ -48,7 +48,12 @@
         <a href="/examples/index.html" class="back-link">← Back to Examples</a>
       </div>
       <div class="flow-container">
-        <lit-flow id="my-flow"></lit-flow>
+        <lit-flow id="my-flow">
+          <lit-node data-id="5" position-x="250" position-y="300">
+            <div slot="headline">Slotted Content</div>
+            <div slot="supporting-text">This content is projected into the new M3 slots.</div>
+          </lit-node>
+        </lit-flow>
       </div>
     </div>
     <script type="module">
@@ -65,6 +70,7 @@
         { id: 'e1-3', source: '1', target: '3', markerEnd: 'arrowclosed' },
         { id: 'e2-4', source: '2', target: '4', markerEnd: 'arrowclosed' },
         { id: 'e3-4', source: '3', target: '4', markerEnd: 'arrowclosed' },
+        { id: 'e4-5', source: '4', target: '5', markerEnd: 'arrowclosed' },
       ];
     </script>
   </body>
