@@ -60,10 +60,16 @@ This project uses **bd (beads)** for issue tracking.
 - **State Syncing**: Sync `measured` dimensions and `position` data back from internal lookups to user-facing node objects to prevent data loss during `adoptUserNodes` calls.
 - **Non-Destructive Updates**: Use `updateAbsolutePositions` for routine updates (resizing/dragging) instead of `adoptUserNodes` to avoid clearing the internal node lookup.
 - **Event Propagation**: Stop propagation of `mousedown` and `touchstart` in `<lit-handle>` to prevent node dragging during connection attempts.
-- **Render-Measure-Reflow Cycle**: To achieve overlap-free automatic layout, `litflow` uses a two-pass rendering cycle. In pass 1, nodes are rendered at `opacity: 0` so the browser can calculate their real dimensions. Once measured, the layout engine is triggered with actual widths/heights, and nodes are transitioned to their final positions. Use `requestAnimationFrame` (often double) to ensure the browser has finished its layout pass before measuring.
-- **Light DOM Styling Caveats**: Components overriding `createRenderRoot` (Light DOM) ignore `static styles`. For these, either use an inline `<style>` tag in the `render` method or rely on global CSS. Note that inline styles in Light DOM are not scoped and will apply to the entire document.
-- **Dagre Layout Stability**: To avoid `TypeError: Cannot set properties of undefined (setting 'points')` in Dagre, always stringify node and edge IDs and ensure both source and target nodes exist in the graph before adding an edge. Providing an explicit empty object `{}` as the edge value is also recommended.
-- **Dynamic Handle Orientation**: Handles can adapt their placement (Top/Bottom vs Left/Right) using an `orientation` property. `<lit-flow>` automatically propagates this based on the `layout-direction` attribute, but it can be overridden per node for specialized shapes.
+- **Render-Measure-Reflow Cycle**: To achieve overlap-free automatic layout, `litflow` uses a two-pass rendering cycle. In pass 1, nodes are rendered at `opacity: 0` so the browser can calculate their real dimensions. Once measured, the layout engine is triggered with actual widths/heights, and nodes are transitioned to their final positions. Use a double `requestAnimationFrame` loop to ensure the browser has finished its layout pass before measurement.
+- **Interactive Lag Mitigation**: During manual dragging, bypass the reactive cycle by directly updating the node element's `style.transform`. This ensures nodes stay perfectly synchronized with edge rendering.
+- **CSS Transition Conflicts**: When nodes have `transition: transform` for layout reveals, always disable the transition during manual interaction (e.g., using `:active` or a `.dragging` class) to prevent the node from "floating" behind the cursor.
+- **Light DOM Styling & Slots**: `LitNode` uses Light DOM. For visibility toggles (like toolbars), use **Conditional Rendering** (`${this.selected ? html`...` : ''}`) instead of CSS `display: none` to prevent orphaned slotted elements from appearing in the main document tree.
+- **Dagre Layout Stability**: To avoid `TypeError: Cannot set properties of undefined (setting 'points')` in Dagre:
+    1. Always stringify node and edge IDs.
+    2. Initialize Dagre with `{ multigraph: true }`.
+    3. Ensure both source and target nodes exist in the graph before adding an edge.
+    4. Provide an explicit empty object `{}` as the edge value: `g.setEdge(v, w, {}, name)`.
+- **Example Browser Compatibility**: Avoid using TypeScript decorators in raw `<script type="module">` tags within the `examples/` directory. Use standard JavaScript `customElements.define` and `static properties` to ensure compatibility with browser-native ESM.
 - **DX (Developer Experience)**: Use Vite for fast development. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
 ### Feature Implementation Workflow

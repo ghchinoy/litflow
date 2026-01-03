@@ -12,6 +12,15 @@ bd close <id>         # Complete work
 bd sync               # Sync with git
 ```
 
+## Stability & Quality Checklist
+
+Before completing a feature or bug fix, ensure the following:
+
+1. **Build Check:** Always run `pnpm run build` to verify TypeScript types and compilation.
+2. **Auto-Layout Verification:** Check `examples/auto-layout/index.html`. Nodes should not stack at (0,0) and should slide smoothly into position.
+3. **Designer Stability:** Check `examples/designer/resizer.html`. Ensure toolbars are only visible on selection and node resizing works without visual lag.
+4. **Browser Compatibility:** If you created or modified an example in raw HTML, ensure it does not use TypeScript decorators or syntax requiring a build step in the `<script>` tag.
+
 ## Landing the Plane (Session Completion)
 
 **When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.

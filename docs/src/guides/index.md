@@ -15,6 +15,7 @@ Practical solutions to specific problems and recipes for common tasks.
 
 ## Available Guides
 
+- [v0.5 New Features & Migration](/guides/v0.5-features/)
 - [Layouts & Lenses](/guides/layouts/)
 - [Custom Nodes](/guides/custom-nodes/)
 - [Drag & Drop](/guides/drag-and-drop/)
