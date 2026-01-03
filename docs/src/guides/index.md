@@ -15,6 +15,7 @@ Practical solutions to specific problems and recipes for common tasks.
 
 ## Available Guides
 
-- [Creating Custom Nodes](/guides/custom-nodes/)
-- **[Drag & Drop](/guides/drag-and-drop/)**: Implement palette-to-canvas interactions.
-- **[Breadboard Integration (Graph OS)](/guides/breadboard/)**: Transition from static diagrams to executable GenAI flows.
+- [Layouts & Lenses](/guides/layouts/)
+- [Custom Nodes](/guides/custom-nodes/)
+- [Drag & Drop](/guides/drag-and-drop/)
+- [Breadboard Engine](/guides/breadboard/)

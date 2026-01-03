@@ -60,6 +60,10 @@ This project uses **bd (beads)** for issue tracking.
 - **State Syncing**: Sync `measured` dimensions and `position` data back from internal lookups to user-facing node objects to prevent data loss during `adoptUserNodes` calls.
 - **Non-Destructive Updates**: Use `updateAbsolutePositions` for routine updates (resizing/dragging) instead of `adoptUserNodes` to avoid clearing the internal node lookup.
 - **Event Propagation**: Stop propagation of `mousedown` and `touchstart` in `<lit-handle>` to prevent node dragging during connection attempts.
+- **Render-Measure-Reflow Cycle**: To achieve overlap-free automatic layout, `litflow` uses a two-pass rendering cycle. In pass 1, nodes are rendered at `opacity: 0` so the browser can calculate their real dimensions. Once measured, the layout engine is triggered with actual widths/heights, and nodes are transitioned to their final positions. Use `requestAnimationFrame` (often double) to ensure the browser has finished its layout pass before measuring.
+- **Light DOM Styling Caveats**: Components overriding `createRenderRoot` (Light DOM) ignore `static styles`. For these, either use an inline `<style>` tag in the `render` method or rely on global CSS. Note that inline styles in Light DOM are not scoped and will apply to the entire document.
+- **Dagre Layout Stability**: To avoid `TypeError: Cannot set properties of undefined (setting 'points')` in Dagre, always stringify node and edge IDs and ensure both source and target nodes exist in the graph before adding an edge. Providing an explicit empty object `{}` as the edge value is also recommended.
+- **Dynamic Handle Orientation**: Handles can adapt their placement (Top/Bottom vs Left/Right) using an `orientation` property. `<lit-flow>` automatically propagates this based on the `layout-direction` attribute, but it can be overridden per node for specialized shapes.
 - **DX (Developer Experience)**: Use Vite for fast development. Provide a `start-server.sh` (using `pnpm`) for quick access.
 
 ### Feature Implementation Workflow
