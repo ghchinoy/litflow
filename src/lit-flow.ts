@@ -398,6 +398,13 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   }
 
   private _performLayout(nodesToLayout: NodeBase[], edgesToLayout: any[]): LayoutNode[] {
+    if (nodesToLayout.length === 0) return [];
+    console.log(`LitFlow: Performing layout using ${this.layoutStrategy}`, { 
+      nodes: nodesToLayout.length, 
+      edges: edgesToLayout.length,
+      measuring: this._isMeasuring
+    });
+
     if (this.layoutStrategy === 'tree') {
       try {
         const stratifier = d3h.stratify()
@@ -497,6 +504,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     nodesToLayout.forEach((node) => {
       const width = node.measured?.width || 150;
       const height = node.measured?.height || 50;
+      console.log(`  Node ${node.id} layout dims: ${width}x${height}`);
       g.setNode(node.id, { label: node.id, width, height });
     });
 
@@ -523,6 +531,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         return { ...node, position: node.position || { x: 0, y: 0 } } as LayoutNode;
       }
       
+      console.log(`  Node ${node.id} layout pos: ${graphNode.x},${graphNode.y}`);
       return {
         ...node,
         position: {

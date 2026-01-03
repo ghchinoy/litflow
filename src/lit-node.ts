@@ -87,7 +87,10 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
 
   render() {
     return html`
-      <div class="node-toolbar-container">
+      <div 
+        class="node-toolbar-container"
+        style="position: absolute; top: -40px; left: 50%; transform: translateX(-50%); display: ${this.selected ? 'block' : 'none'}; pointer-events: all;"
+      >
         <slot name="toolbar"></slot>
       </div>
       <div class="content-wrapper">
@@ -99,7 +102,13 @@ export class LitNode extends (SignalWatcher as <T extends Constructor<LitElement
         </div>
         <slot></slot>
       </div>
-      ${this.resizable ? html`<div class="resize-handle" @pointerdown="${this._onResizeStart}"></div>` : ''}
+      ${this.resizable 
+        ? html`<div 
+            class="resize-handle" 
+            style="position: absolute; right: 4px; bottom: 4px; width: 8px; height: 8px; border-right: 2px solid var(--md-sys-color-outline); border-bottom: 2px solid var(--md-sys-color-outline); cursor: nwse-resize; opacity: ${this.selected ? '1' : '0'}; pointer-events: all;"
+            @pointerdown="${this._onResizeStart}"
+          ></div>` 
+        : ''}
       ${this.type === 'input' || this.type === 'default'
         ? html`<lit-handle type="source" data-handlepos="bottom" data-nodeid="${this.nodeId}"></lit-handle>`
         : ''}
