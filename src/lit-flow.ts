@@ -309,6 +309,9 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   @property({ type: String, attribute: 'layout-strategy' })
   layoutStrategy: 'hierarchical' | 'organic' | 'tree' = 'hierarchical';
 
+  @property({ type: String, attribute: 'layout-direction' })
+  layoutDirection: 'LR' | 'TB' = 'LR';
+
   @property({ type: Boolean, attribute: 'auto-fit', reflect: true, converter: boolConverter })
   autoFit = false;
 
@@ -421,18 +424,23 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
         const root = stratifier(nodesToLayout);
         
-        // Use nodeSize to maintain consistent spacing regardless of tree size
-        // We swap width and height in nodeSize because we want a horizontal tree
+        const isHorizontal = this.layoutDirection === 'LR';
         const verticalSpacing = this.layoutPadding * 2;
-        const horizontalSpacing = 250; 
-        const treeLayout = d3h.tree().nodeSize([verticalSpacing, horizontalSpacing]);
+        const crossSpacing = 250; 
+        
+        const treeLayout = d3h.tree().nodeSize(
+          isHorizontal ? [verticalSpacing, crossSpacing] : [crossSpacing, verticalSpacing]
+        );
         
         treeLayout(root);
 
         const nodeMap = new Map();
         root.descendants().forEach(d => {
-          // d.x is vertical, d.y is horizontal in d3.tree() when using nodeSize
-          nodeMap.set(d.id, { x: d.y, y: d.x });
+          if (isHorizontal) {
+            nodeMap.set(d.id, { x: d.y, y: d.x });
+          } else {
+            nodeMap.set(d.id, { x: d.x, y: d.y });
+          }
         });
 
         return nodesToLayout.map(node => {
@@ -501,7 +509,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     const g = new dagre.graphlib.Graph({ multigraph: true });
     g.setGraph({});
 
-    g.graph().rankdir = 'LR';
+    g.graph().rankdir = this.layoutDirection;
     g.graph().nodesep = this.layoutPadding;
     g.graph().edgesep = this.layoutPadding;
     g.graph().ranksep = this.layoutPadding * 2;
@@ -877,7 +885,8 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
     if (!this._isMeasuring && this.layoutEnabled && (
       changedProperties.has('layoutEnabled') ||
       changedProperties.has('layoutPadding') ||
-      changedProperties.has('layoutStrategy')
+      changedProperties.has('layoutStrategy') ||
+      changedProperties.has('layoutDirection')
     )) {
       const newNodes = this._performLayout(this.nodes, this.edges);
       this.nodes = newNodes;
@@ -886,8 +895,8 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
         setTimeout(() => this.fitView(), 50);
       }
 
-      // If strategy changed, handles moved. Force re-measurement of all nodes.
-      if (changedProperties.has('layoutStrategy')) {
+      // If strategy or direction changed, handles moved. Force re-measurement of all nodes.
+      if (changedProperties.has('layoutStrategy') || changedProperties.has('layoutDirection')) {
         this.shadowRoot?.querySelectorAll('.xyflow__node').forEach((el) => {
           const id = (el as HTMLElement).dataset.id;
           if (id) this._updateNodeDimensions(id, el as HTMLElement);
@@ -895,7 +904,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       }
 
       this.dispatchEvent(new CustomEvent('layout-complete', {
-        detail: { strategy: this.layoutStrategy }
+        detail: { strategy: this.layoutStrategy, direction: this.layoutDirection }
       }));
     }
 
@@ -1566,7 +1575,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
               const heightStyle = height ? `height: ${typeof height === 'number' ? `${height}px` : height};` : '';
               const zIndex = (node as any).zIndex ? `z-index: ${(node as any).zIndex};` : '';
 
-              const autoOrientation = (this.layoutStrategy === 'hierarchical' || this.layoutStrategy === 'tree' || this.layoutStrategy === 'organic') ? 'horizontal' : 'vertical';
+              const autoOrientation = (this.layoutDirection === 'LR') ? 'horizontal' : 'vertical';
               const orientation = (node as any).orientation || autoOrientation;
 
               return html`
