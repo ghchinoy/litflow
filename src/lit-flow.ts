@@ -329,10 +329,12 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
   @property({ type: Array })
   set nodes(nodes: NodeBase[]) {
+    if (!Array.isArray(nodes)) return;
+
     // Ensure all nodes have at least a default position to avoid crashes in @xyflow/system
     const nodesWithPosition = nodes.map(node => ({
       ...node,
-      position: node.position || { x: 0, y: 0 }
+      position: node?.position || { x: 0, y: 0 }
     }));
 
     // If layout is enabled and any node is missing measurement, enter measuring mode
@@ -355,7 +357,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
   }
 
   get nodes() {
-    return this._state.nodes.get();
+    return this._state.nodes.get() || [];
   }
 
   private _notifyChange() {
@@ -437,6 +439,7 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       // Organic Layout (D3-Force)
       const simulationNodes = nodesToLayout.map(n => ({
         id: n.id,
+        type: n.type,
         x: n.position?.x ?? 0,
         y: n.position?.y ?? 0,
         width: n.measured?.width || 150,
@@ -449,10 +452,17 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
       }));
 
       const simulation = d3.forceSimulation(simulationNodes as any)
-        .force('link', d3.forceLink(links).id((d: any) => d.id).distance(this.layoutPadding * 3))
-        .force('charge', d3.forceManyBody().strength(-500))
+        .force('link', d3.forceLink(links).id((d: any) => d.id).distance(this.layoutPadding * 4))
+        .force('charge', d3.forceManyBody().strength(-800))
         .force('collide', d3.forceCollide().radius((d: any) => Math.max(d.width, d.height) / 2 + this.layoutPadding))
-        .force('center', d3.forceCenter(300, 300)) // Arbitrary center, auto-fit will handle viewport
+        .force('center', d3.forceCenter(400, 300))
+        // Add horizontal bias to prevent tangling: 
+        // pull inputs to the left, outputs to the right, and others to the center
+        .force('x', d3.forceX().x((d: any) => {
+          if (d.type === 'input') return 100;
+          if (d.type === 'output') return 700;
+          return 400;
+        }).strength(0.1))
         .stop();
 
       // Run simulation synchronously
@@ -801,21 +811,23 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
     // Handle Render-Measure-Reflow completion
     if (this._isMeasuring) {
-      const allMeasured = this.nodes.every(n => n.measured && n.measured.width);
-      if (allMeasured) {
-        this._isMeasuring = false;
-        const newNodes = this._performLayout(this.nodes, this.edges);
-        this.nodes = newNodes; // This re-enters setter but won't trigger measuring
-        
-        if (this.autoFit) {
-          setTimeout(() => this.fitView(), 50);
+      requestAnimationFrame(() => {
+        const allMeasured = this.nodes.every(n => n.measured && n.measured.width);
+        if (allMeasured) {
+          this._isMeasuring = false;
+          const newNodes = this._performLayout(this.nodes, this.edges);
+          this.nodes = newNodes; // This re-enters setter but won't trigger measuring
+          
+          if (this.autoFit) {
+            setTimeout(() => this.fitView(), 50);
+          }
+          
+          this.dispatchEvent(new CustomEvent('layout-complete', {
+            detail: { strategy: this.layoutStrategy }
+          }));
         }
-        
-        this.dispatchEvent(new CustomEvent('layout-complete', {
-          detail: { strategy: this.layoutStrategy }
-        }));
-        return;
-      }
+      });
+      return;
     }
 
     // Trigger layout if layout properties change (and we aren't already measuring)
