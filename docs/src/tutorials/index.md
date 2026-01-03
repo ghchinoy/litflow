@@ -15,4 +15,5 @@ Step-by-step guides to help you get started with LitFlow.
 
 ## Available Tutorials
 
+- [Getting Started](/tutorials/getting-started/)
 - [Building Static Documentation](/tutorials/static-docs/)

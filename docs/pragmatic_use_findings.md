@@ -32,18 +32,29 @@ The integration involved using `litflow` to visualize task dependencies (DAGs) i
 2. **Native Sub-Graph Filtering (Medium Priority)**
 3. **M3 Template Compatibility (Low Priority)**
 
-## 4. Implementation & Resolutions
+## 4. Implementation & Resolutions (v0.4.0)
 
-Based on the roadmap adjustments, the following features were implemented to address the friction points:
+Based on the roadmap adjustments, the following features were implemented to address the friction points in the v0.4.0 release:
 
 -   **Automated Layout Engine (`hf4.1`):**
-    -   **Resolution:** A `layout-enabled` boolean attribute was added to the `<lit-flow>` component. When set to `true`, `litflow` now uses the `dagre` library to automatically calculate a hierarchical layout for any nodes provided without explicit `position` properties. This directly fulfills the "Zero-Config" opportunity.
+    -   **Resolution:** A `layout-enabled` boolean attribute was added to the `<lit-flow>` component. When set to `true`, `litflow` now uses the `dagre` library to automatically calculate a hierarchical layout. This directly fulfills the "Zero-Config" opportunity and allowed Tasker to delete its custom layout logic.
 
 -   **Native Sub-Graph Filtering (`hf4.2`):**
-    -   **Resolution:** New `isolateSubgraph(nodeId, direction)` and `clearIsolation()` methods were added to the `<lit-flow>` component. This allows consumers to easily show a subgraph by programmatically hiding all non-connected nodes and edges, removing the need for manual graph traversal.
+    -   **Resolution:** New `isolateSubgraph(nodeId, direction)` and `clearIsolation()` methods were added to the `<lit-flow>` component. This removes the need for manual graph traversal in consuming apps.
 
 -   **M3 Template Compatibility (`hf4.5`):**
-    -   **Resolution:** The default `<lit-node>` component was updated to include named slots: `<slot name="headline">` and `<slot name="supporting-text">`. This makes it trivial to project content that follows Material 3 patterns without creating a custom node component.
+    -   **Resolution:** The default `<lit-node>` component was updated to include named slots: `<slot name="headline">` and `<slot name="supporting-text">`.
 
 -   **TypeScript Integration (`hf4.3`):**
-    -   **Resolution:** The type generation process was audited. The `tsconfig.types.json` was updated to correctly generate declaration files for all modules, including the `breadboard` sub-modules. The `package.json` `exports` field was also updated to correctly expose these type declarations, ensuring clean type resolution for consuming projects.
+    -   **Resolution:** Updated `tsconfig.types.json` and `package.json` exports to ensure clean type resolution.
+
+## 5. Postmortem: Runtime Regression (v0.4.0 Integration)
+
+### Issue: Style Inheritance Crash
+During the integration into Tasker, a runtime crash occurred because the consumer attempted to inherit styles via `static styles = [...LitNode.styles]`.
+
+### Root Cause:
+`LitNode` was implemented without an explicit static `styles` property (using inline styles in `render` instead). This violated standard Lit component inheritance expectations and caused a `TypeError` in the consumer's bundle.
+
+### Lesson Learned:
+Base components in a library should explicitly define a `static styles` property—even if empty—to ensure safe extensibility for consumers who wish to theme or override them. formalizing this property is recommended for the next `litflow` patch.

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subgraph Isolation API - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .toolbar {
+        padding: 10px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .flow-container {
+        flex-grow: 1;
+        position: relative;
+      }
+      .back-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0 10px;
+      }
+      button {
+        padding: 6px 12px;
+        cursor: pointer;
+        background: #eee;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      button:hover {
+        background: #e0e0e0;
+      }
+      button.primary {
+        background: #007bff;
+        color: white;
+        border-color: #0056b3;
+      }
+      button.primary:hover {
+        background: #0069d9;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="toolbar">
+        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+        <button id="isolate-start">Isolate from Start</button>
+        <button id="isolate-process">Isolate from Process B</button>
+        <button id="isolate-end">Isolate Upstream from End</button>
+        <button id="clear" class="primary">Clear Isolation</button>
+      </div>
+      <div class="flow-container">
+        <lit-flow id="my-flow" layout-enabled show-controls></lit-flow>
+      </div>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      const flow = document.getElementById('my-flow');
+      
+      flow.nodes = [
+        { id: 'start', type: 'input', data: { label: 'Start Node' } },
+        { id: 'a', data: { label: 'Process A' } },
+        { id: 'b', data: { label: 'Process B' } },
+        { id: 'c', data: { label: 'Process C' } },
+        { id: 'd', data: { label: 'Process D' } },
+        { id: 'orphan', data: { label: 'Isolated Node' } },
+        { id: 'end', type: 'output', data: { label: 'End Node' } },
+      ];
+
+      flow.edges = [
+        { id: 'e1', source: 'start', target: 'a', markerEnd: 'arrowclosed' },
+        { id: 'e2', source: 'a', target: 'b', markerEnd: 'arrowclosed' },
+        { id: 'e3', source: 'a', target: 'c', markerEnd: 'arrowclosed' },
+        { id: 'e4', source: 'b', target: 'd', markerEnd: 'arrowclosed' },
+        { id: 'e5', source: 'c', target: 'd', markerEnd: 'arrowclosed' },
+        { id: 'e6', source: 'd', target: 'end', markerEnd: 'arrowclosed' },
+      ];
+
+      document.getElementById('isolate-start').onclick = () => {
+        flow.isolateSubgraph('start', 'downstream');
+      };
+
+      document.getElementById('isolate-process').onclick = () => {
+        flow.isolateSubgraph('b', 'both');
+      };
+
+      document.getElementById('isolate-end').onclick = () => {
+        flow.isolateSubgraph('end', 'upstream');
+      };
+
+      document.getElementById('clear').onclick = () => {
+        flow.clearIsolation();
+      };
+
+      setTimeout(() => flow.fitView(), 200);
+    </script>
+  </body>
+</html>

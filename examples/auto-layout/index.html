@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zero-Config Automatic Layout - LitFlow</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .toolbar {
+        padding: 10px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        gap: 10px;
+        z-index: 20;
+        align-items: center;
+      }
+      .flow-container {
+        flex-grow: 1;
+        position: relative;
+      }
+      .back-link {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0 10px;
+      }
+      .info {
+        font-size: 14px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="toolbar">
+        <a href="/examples/index.html" class="back-link">← Back to Examples</a>
+        <div class="info">This example demonstrates automatic layout from topological data (no positions provided).</div>
+      </div>
+      <div class="flow-container">
+        <lit-flow id="my-flow" layout-enabled show-controls></lit-flow>
+      </div>
+    </div>
+    <script type="module">
+      import '../../src/index.ts';
+      const flow = document.getElementById('my-flow');
+      
+      // Nodes are provided WITHOUT positions
+      flow.nodes = [
+        { id: 'start', type: 'input', data: { label: 'Start' } },
+        { id: 'process1', data: { label: 'Process A' } },
+        { id: 'process2', data: { label: 'Process B' } },
+        { id: 'process3', data: { label: 'Process C' } },
+        { id: 'end', type: 'output', data: { label: 'End' } },
+      ];
+
+      flow.edges = [
+        { id: 'e1', source: 'start', target: 'process1', markerEnd: 'arrowclosed' },
+        { id: 'e2', source: 'process1', target: 'process2', markerEnd: 'arrowclosed' },
+        { id: 'e3', source: 'process1', target: 'process3', markerEnd: 'arrowclosed' },
+        { id: 'e4', source: 'process2', target: 'end', markerEnd: 'arrowclosed' },
+        { id: 'e5', source: 'process3', target: 'end', markerEnd: 'arrowclosed' },
+      ];
+
+      // Fit view after a small delay to ensure initial layout is rendered
+      setTimeout(() => flow.fitView(), 200);
+    </script>
+  </body>
+</html>
