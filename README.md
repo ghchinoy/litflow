@@ -39,23 +39,18 @@ import '@ghchinoy/litflow';
 Then use the `<lit-flow>` component in your HTML or framework template:
 
 ```html
-<lit-flow id="my-flow" show-controls show-minimap show-grid="false"></lit-flow>
+<lit-flow id="my-flow" show-controls show-minimap layout-direction="LR"></lit-flow>
 
 <script>
   const flow = document.getElementById('my-flow');
   
-  // Interactivity controls
-  flow.nodesDraggable = false;
-  flow.panOnDrag = false;
-  flow.showGrid = false;
-  
   flow.nodes = [
-    { id: '1', position: { x: 100, y: 100 }, data: { label: 'Hello' } },
+    { id: '1', type: 'input', position: { x: 100, y: 100 }, data: { label: 'Hello' } },
     { id: '2', position: { x: 300, y: 100 }, data: { label: 'World' } }
   ];
   
   flow.edges = [
-    { id: 'e1-2', source: '1', target: '2' }
+    { id: 'e1-2', source: '1', target: '2', markerEnd: 'arrow' }
   ];
 </script>
 ```
@@ -68,10 +63,12 @@ You can control the flow's behavior using attributes or properties:
 | `show-controls` | `showControls` | `false` | Show zoom/fit controls |
 | `show-minimap` | `showMinimap` | `false` | Show the minimap |
 | `show-grid` | `showGrid` | `true` | Show the background grid |
+| `layout-direction` | `layoutDirection` | `'LR'` | Default handle orientation (`'LR'` or `'TB'`) |
+| `layout-strategy` | `layoutStrategy` | `null` | Automatic layout engine (`'hierarchical'`, `'organic'`, `'tree'`) |
+| `selection-mode` | `selectionMode` | `'select'` | Interaction mode (`'select'`, `'marquee'`, `'disabled'`) |
 | `nodes-draggable` | `nodesDraggable` | `true` | Allow dragging nodes |
-| `nodes-connectable` | `nodesConnectable` | `true` | Allow creating new edges |
 | `pan-on-drag` | `panOnDrag` | `true` | Allow panning the canvas |
-| `zoom-on-scroll` | `zoomOnScroll` | `true` | Allow zooming with mouse wheel |
+| `auto-fit` | `autoFit` | `false` | Automatically fit view on graph changes |
 
 ### 4. Custom Nodes
 To create a custom node, define a Lit component using **Light DOM** and register it with the flow:
@@ -84,7 +81,13 @@ import { customElement } from 'lit/decorators.js';
 class MyNode extends LitElement {
   createRenderRoot() { return this; } // Required for xyflow compatibility
   render() {
-    return html`<div>${this.data.label}</div>`;
+    return html`
+      <div class="my-node-content">
+        ${this.data.label}
+        <lit-handle type="target" position="left"></lit-handle>
+        <lit-handle type="source" position="right"></lit-handle>
+      </div>
+    `;
   }
 }
 
@@ -96,46 +99,34 @@ flow.nodeTypes = {
 };
 ```
 
-### 4. Styling (Material 3)
-LitFlow comes with a built-in Material 3 theme. You can import the design tokens and apply them to your flow:
-
-```javascript
-import { m3Tokens } from '@ghchinoy/litflow/theme';
-
-// These tokens are automatically applied to <lit-flow>
-// but you can also use them in your own custom nodes.
-```
-
 ## 🏗️ Architecture
 
 LitFlow leverages `@xyflow/system`, the same headless core that powers React Flow and Svelte Flow.
 
-- **`examples/`**: Contains various implementation examples.
-  - `examples/index.html`: The main entry point to browse examples.
-  - `examples/basic/`: A simple graph implementation.
-  - `examples/multiple-handles/`: Nodes with multiple input/output ports.
-  - `examples/dynamic-interactivity/`: Adding/removing nodes and edges at runtime.
-  - `examples/subflows/`: Nested nodes and parent-child relationships.
-  - `examples/designer/`: A dual-pane authoring tool with live JSON sync.
-- **`<lit-flow>`**: The root component. It initializes the `XYPanZoom` instance for the viewport and manages the collection of nodes and edges.
-- **`<lit-node>`**: A reactive Lit component for individual nodes. Uses **Light DOM** to ensure compatibility with xyflow's system utilities (like hit-testing).
-- **`<lit-handle>`**: A connection port component. Also uses **Light DOM** to ensure discoverability during connection dragging.
-- **`<lit-controls>`**: A UI overlay providing zoom and fit-view controls.
-- **`<lit-minimap>`**: A live overview of the flow with viewport tracking.
-- **`store.ts`**: A state container using `@lit-labs/signals` for fine-grained, high-performance reactivity.
+- **`examples/`**: Comprehensive implementation showcase.
+  - `auto-layout/`: Zero-config topological layout engines.
+  - `designer/`: A dual-pane authoring tool with live JSON sync.
+  - `subgraph-isolation/`: API for focusing on specific graph sections.
+  - `schema-node/`: UI generation from JSON Schema (Breadboard compatible).
+  - `org-chart/`: Specialized tree layouts using D3-Hierarchy.
+  - `subflows/`: Nested nodes and parent-child relationships.
+  - `marquee-selection/`: Bulk selection and viewport interaction patterns.
+- **`<lit-flow>`**: The root component. Manages the `XYPanZoom` instance, layout engines, and graph state.
+- **`<lit-node>`**: Base reactive component for nodes. Uses **Light DOM** for xyflow utility compatibility.
+- **`<lit-handle>`**: Connection port component.
+- **`<lit-minimap>` & `<lit-controls>`**: Built-in utility components for navigation and overview.
+- **`store.ts`**: High-performance state container powered by `@lit-labs/signals`.
 
 ## 🛠️ Key Features
-- **Panning & Zooming**: Full support for viewport manipulation via d3-zoom (via xyflow).
-- **Node Dragging**: Individual nodes can be dragged, with positions synced back to the state.
-- **Live Inspector Designer**: A comprehensive authoring example featuring a drag-and-drop palette and live JSON synchronization.
-- **Global Change Observability**: A robust `change` event that fires on any graph mutation (drag, connect, delete) for external state syncing.
-- **Marquee Selection**: Bulk select nodes and edges by dragging a selection box (Shift + Drag).
-- **Edge Markers**: Support for arrowheads and other markers on edges.
-- **Manual Connections**: Drag-to-connect functionality between handles with a live connection line.
-- **Controls & MiniMap**: Built-in utility components for navigation and overview.
-- **Reactive Updates**: Powered by `@lit-labs/signals` for efficient, targeted re-renders.
-- **Light DOM Architecture**: Optimized for `@xyflow/system` compatibility while maintaining Lit's reactive benefits.
-- **Custom Node Support**: Easily build complex nodes with internal state and custom Lit templates.
+- **Automatic Layout Engines**: Built-in support for Hierarchical (Dagre), Organic (D3-Force), and Tree (D3-Hierarchy) layouts.
+- **Subgraph Isolation**: Focus and isolate specific parts of the graph programmatically.
+- **Reactive UI-from-Schema**: `lit-schema-node` for generating complex node UIs from JSON Schema.
+- **Panning & Zooming**: Full viewport manipulation support via d3-zoom (via xyflow).
+- **Global Change Observability**: A robust `change` event for external state syncing and persistence.
+- **Marquee Selection**: Bulk select nodes and edges (Shift + Drag).
+- **Manual Connections**: Interactive drag-to-connect with live connection lines.
+- **Material 3 Design**: Integrated M3 tokens and styling principles.
+- **Light DOM Architecture**: Optimized for `@xyflow/system` compatibility.
 
 ## 📖 Documentation
 
@@ -148,34 +139,6 @@ Explore our comprehensive documentation following the [Diataxis](https://diataxi
 - **[Examples](./docs/src/examples/index.md)**: Live interactive showcases.
 
 - [GEMINI.md](./GEMINI.md): 🤖 Project conventions and technical insights for AI agents.
-
-## 🛠️ Development & Publishing
-
-### Build
-To build the library and generate type definitions:
-```bash
-pnpm run build
-```
-This will output the compiled files and types to the `dist/` directory.
-
-### Publishing to npm
-The package is published under the `@ghchinoy` scope. To publish a new version:
-
-1. **Update the version**:
-   ```bash
-   pnpm version patch # or minor, major
-   ```
-2. **Build the project**:
-   ```bash
-   pnpm run build
-   ```
-3. **Publish**:
-   ```bash
-   pnpm publish --access public
-   ```
-
-## 🤝 Contributing
-This project is an exploration of xyflow's headless capabilities. Feel free to open issues or submit PRs to improve the Lit integration!
 
 ## License
 
