@@ -15,4 +15,4 @@ High-level conceptual overviews and architectural discussions.
 
 ## Available Topics
 
-- [Lit vs. React Architecture](/explanation/lit-vs-react/)
+- [Lit vs. React Architecture](lit-vs-react/)

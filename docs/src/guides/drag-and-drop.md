@@ -67,4 +67,4 @@ You can enable an automatic prompt for the node label by setting the `prompt-on-
 
 ## 5. Example
 
-Check out the [Drag & Drop Example](/examples/drag-and-drop/) to see this in action.
+Check out the [Drag & Drop Example](../../examples/drag-and-drop/) to see this in action.

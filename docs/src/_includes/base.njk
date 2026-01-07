@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title or "LitFlow" }}</title>
-    <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="/public/style.css">
+    <link rel="icon" href="{{ '/' | url }}public/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ '/' | url }}public/style.css">
     <script type="importmap">
     {
       "imports": {
@@ -14,10 +14,12 @@
         "@lit-labs/signals": "https://esm.sh/@lit-labs/signals",
         "@xyflow/system": "https://esm.sh/@xyflow/system",
         "d3-drag": "https://esm.sh/d3-drag",
+        "d3-force": "https://esm.sh/d3-force",
+        "d3-hierarchy": "https://esm.sh/d3-hierarchy",
         "d3-interpolate": "https://esm.sh/d3-interpolate",
         "d3-selection": "https://esm.sh/d3-selection",
         "d3-zoom": "https://esm.sh/d3-zoom",
-        "@ghchinoy/litflow": "/public/litflow.js"
+        "@ghchinoy/litflow": "{{ '/' | url }}public/litflow.js"
       }
     }
     </script>
@@ -30,12 +32,12 @@
     <header>
         <div class="header-content">
             <nav>
-                <a href="/">Home</a>
-                <a href="/tutorials/">Tutorials</a>
-                <a href="/guides/">Guides</a>
-                <a href="/explanation/">Explanation</a>
-                <a href="/reference/">Reference</a>
-                <a href="/examples/">Examples</a>
+                <a href="{{ '/' | url }}">Home</a>
+                <a href="{{ '/tutorials/' | url }}">Tutorials</a>
+                <a href="{{ '/guides/' | url }}">Guides</a>
+                <a href="{{ '/explanation/' | url }}">Explanation</a>
+                <a href="{{ '/reference/' | url }}">Reference</a>
+                <a href="{{ '/examples/' | url }}">Examples</a>
             </nav>
             <div class="project-meta">
                 <span title="Latest Release">v{{ project.version }}</span>

@@ -71,4 +71,4 @@ LitFlow nodes are designed to be compatible with Material 3. You can use the `he
 
 ## Next Steps
 
-Now that you have your first graph, check out the [Examples](/examples/) to see more advanced features like subgraph isolation, custom nodes, and Breadboard integration.
+Now that you have your first graph, check out the [Examples](../../examples/) to see more advanced features like subgraph isolation, custom nodes, and Breadboard integration.

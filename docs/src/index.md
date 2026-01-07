@@ -19,7 +19,7 @@ LitFlow is a project dedicated to creating Lit WebComponent examples and a libra
 
 ## Getting Started
 
-Check out our [Tutorials](/tutorials/) to start building your first flow.
+Check out our [Tutorials](tutorials/) to start building your first flow.
 
 ## Live Designer
 
