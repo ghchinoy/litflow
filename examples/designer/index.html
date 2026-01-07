@@ -26,11 +26,49 @@
       background-color: var(--md-sys-color-surface);
       border-right: 1px solid #333;
       z-index: 100;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 22px; /* Height of status-bar */
+    }
+
+    .settings-pane {
+      padding: 16px;
+      border-top: 1px solid #333;
+      background-color: var(--md-sys-color-surface-container-low);
+    }
+
+    .settings-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #969696;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--md-sys-color-on-surface);
+      cursor: pointer;
+    }
+
+    .setting-item input {
+      cursor: pointer;
     }
 
     .canvas-pane {
       position: relative;
       background-color: #fff;
+      padding-bottom: 22px; /* Height of status-bar */
     }
 
     .inspector-pane {
@@ -41,6 +79,7 @@
       border-left: 1px solid #333;
       box-shadow: -2px 0 10px rgba(0,0,0,0.2);
       z-index: 100;
+      padding-bottom: 22px; /* Height of status-bar */
     }
 
     .inspector-header {
@@ -149,7 +188,18 @@
 <body>
   <div class="designer-container">
     <div class="palette-pane">
-      <lit-sidebar id="sidebar"></lit-sidebar>
+      <lit-sidebar id="sidebar" style="flex: 1;"></lit-sidebar>
+      <div class="settings-pane">
+        <div class="settings-title">View Settings</div>
+        <div class="settings-group">
+          <label class="setting-item">
+            <input type="checkbox" id="toggle-orientation" checked> Top-Bottom Layout
+          </label>
+          <label class="setting-item">
+            <input type="checkbox" id="toggle-minimap" checked> Show Minimap
+          </label>
+        </div>
+      </div>
     </div>
     <div class="canvas-pane">
       <lit-flow 
@@ -159,6 +209,7 @@
         show-grid
         pan-on-drag
         selection-mode="select"
+        layout-direction="TB"
       ></lit-flow>
     </div>
     
@@ -194,6 +245,24 @@
     const sidebar = document.getElementById('sidebar');
     const editor = document.getElementById('json-editor');
     const nodeCount = document.getElementById('node-count');
+    const edgeCount = document.getElementById('edge-count');
+    const applyBtn = document.getElementById('apply-btn');
+    const formatBtn = document.getElementById('format-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const toast = document.getElementById('toast');
+    const autoApply = document.getElementById('auto-apply');
+    const toggleOrientation = document.getElementById('toggle-orientation');
+    const toggleMinimap = document.getElementById('toggle-minimap');
+
+    // Toggle Orientation
+    toggleOrientation.addEventListener('change', (e) => {
+      flow.layoutDirection = e.target.checked ? 'TB' : 'LR';
+    });
+
+    // Toggle Minimap
+    toggleMinimap.addEventListener('change', (e) => {
+      flow.showMinimap = e.target.checked;
+    });
 
     // Update sidebar with standard types
     sidebar.nodeTypes = [
@@ -201,8 +270,6 @@
       { type: 'default', label: 'Default Node' },
       { type: 'output', label: 'Output Node' },
     ];
-
-    const autoApply = document.getElementById('auto-apply');
 
     const initialNodes = [
       { id: '1', type: 'input', data: { label: 'Input Node' }, position: { x: 50, y: 50 } },

@@ -897,10 +897,18 @@ export class LitFlow extends (SignalWatcher as <T extends Constructor<LitElement
 
       // If strategy or direction changed, handles moved. Force re-measurement of all nodes.
       if (changedProperties.has('layoutStrategy') || changedProperties.has('layoutDirection')) {
-        this.shadowRoot?.querySelectorAll('.xyflow__node').forEach((el) => {
-          const id = (el as HTMLElement).dataset.id;
-          if (id) this._updateNodeDimensions(id, el as HTMLElement);
-        });
+        const nodes = this.shadowRoot?.querySelectorAll('.xyflow__node');
+        if (nodes) {
+          (async () => {
+            const promises = Array.from(nodes).map((el) => {
+              const id = (el as HTMLElement).dataset.id;
+              return id ? this._updateNodeDimensions(id, el as HTMLElement) : Promise.resolve();
+            });
+            await Promise.all(promises);
+            // After all handles are measured, trigger an update to re-render edges with new handle positions
+            this.requestUpdate();
+          })();
+        }
       }
 
       this.dispatchEvent(new CustomEvent('layout-complete', {

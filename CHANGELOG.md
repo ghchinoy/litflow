@@ -13,7 +13,6 @@ All notable changes to this project will be documented in this file.
 - Refactor store.ts to use @lit-labs/signals (litflow-jdv)
 - Migrate from npm to pnpm (litflow-ytd)
 - Example: Multiple Handles/Ports (litflow-e6c)
-- Example: Basic Flow (litflow-xzk)
 - Setup examples/ directory and base runner (litflow-8oj)
 
 ## 2025-12-27
@@ -59,4 +58,7 @@ All notable changes to this project will be documented in this file.
 - Feature: Sub-Graph Focus/Isolate API (litflow-hf4.2)
 - Feature: Built-in Layout Orchestration (litflow-hf4.1)
 - Fix: TypeScript Type Fidelity (litflow-hf4.3)
+
+## 2026-01-07
+- Fix edge re-rendering on orientation change and documentation pathing (litflow-75t)
 
